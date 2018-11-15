@@ -1,0 +1,396 @@
+<!DOCTYPE HTML SYSTEM>
+
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Custom Screens - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+<script>
+//<!--
+var row_index = 0;
+var old_row = 1;
+var screens = new Array();
+var nrg_arr = new Array();
+var max_scr = 10;
+var NO_SCREEN;
+
+function parse_vars(data) {
+	var parsed = data.split( "\n" );
+	var j=0, k=0;
+	var pending_changes = parsed[j++];
+	var t_list;
+	var elem;
+	var m1 = id("meas1");
+	var m2 = id("meas2");
+	var m3 = id("meas3");
+
+	if(parsed[j++]=="1") id("logout").style.display = 'block';
+	NO_SCREEN = parsed[j].split(":")[0];
+	
+	while(parsed[j] != "///") {
+		t_list = parsed[j++].split(":");
+		m1.options[m1.options.length] = new Option(t_list[2], t_list[0]);
+		m2.options[m2.options.length] = new Option(t_list[2], t_list[0]);
+		m3.options[m3.options.length] = new Option(t_list[2], t_list[0]);
+		nrg_arr[t_list[0]] = t_list[1];
+	}
+	j++;
+	while( parsed[j] ) {
+		elem = parsed[j++].split("\r");
+		screens[k] = {};
+		screens[k].alpha  = elem[0];
+		screens[k].m1_val = elem[1];
+		screens[k].m2_val = elem[2];
+		screens[k].m3_val = elem[3];
+		screens[k].m1_txt = m1.options[get_idx(screens[k].m1_val, m1)].text;
+		screens[k].m2_txt = m2.options[get_idx(screens[k].m2_val, m2)].text;
+		screens[k].m3_txt = m3.options[get_idx(screens[k].m3_val, m3)].text;
+		screens[k++].ena  = elem[4];
+	}
+
+	if(screens[0] == null)
+		id("entry").style.display = 'block';
+	else {
+		build_table();
+		id("summary").style.display = 'block';
+	}
+
+    msg_reset_if_pending(pending_changes);
+	
+	id("scrn_tab").rows[0].style.backgroundColor = "#e5e5e5";
+}
+
+function get_idx(value, list) {
+	for(var i=0;i<list.options.length;i++) {
+		if(list.options[i].value == value)
+			return i;
+	}
+	return 0;
+}
+
+function del_row(row_num) {
+	find_selected();
+
+	screens.splice(row_index,1);
+	if(row_index == screens.length) {
+		row_index = screens.length - 1;
+	}
+	build_table();
+}
+
+function add_row() {
+	id("meas1").value = NO_SCREEN;
+	id("meas2").value = NO_SCREEN;
+	id("meas3").value = NO_SCREEN;
+	id("alpha").value = "";
+	
+	old_row = find_selected();
+	row_index = screens.length;
+	id("entry").style.display = 'block';
+	id("summary").style.display = 'none';
+}
+
+function find_selected() {
+	var r = document.getElementsByName("row");
+
+	if(r==null)
+		return -1;
+		
+	for(var i=0;i<r.length; i++) {
+		if(r[i].checked == true) {
+			row_index = i;
+			return i;
+		}
+	}
+	return -1;
+}
+	
+function edit_row() {
+	find_selected();
+	old_row = row_index;
+	
+	id("meas1").value = screens[row_index].m1_val;
+	id("meas2").value = screens[row_index].m2_val;
+    id("meas3").value = screens[row_index].m3_val;
+	id("alpha").value = screens[row_index].alpha;
+
+	id("entry").style.display = 'block';
+	id("summary").style.display = 'none';
+}
+
+function move(direction) {
+	if(screens.length == 0)
+		return;
+	find_selected();
+
+	var t_elem = screens[row_index];
+	
+	if(direction == "up") {
+		if(row_index == 0) {
+			return;
+		}
+	
+		screens.splice(row_index-1,0,t_elem);
+		screens.splice(row_index+1,1);
+		--row_index;
+	}
+	else if(direction == "down") {
+		if(row_index == screens.length-1) {
+			return;
+		}
+	
+		screens.splice(row_index+2,0,t_elem);
+		screens.splice(row_index,1);
+		++row_index;
+	}
+	
+	build_table();
+}
+
+function goto_list() {
+	var m1 = id("meas1");
+	var m2 = id("meas2");
+	var m3 = id("meas3");
+	var t_elem = {};
+	
+	if(m1.value == NO_SCREEN && m2.value == NO_SCREEN && m3.value == NO_SCREEN) {
+		alert("Please select a measurement for at least one display line.");
+		return;
+	}
+	else if(id("alpha").value == "") {
+		alert("Please enter a label for this custom display screen.");
+		return;
+	}
+
+	t_elem.alpha	= id("alpha").value;
+	t_elem.m1_val	= m1.value;
+	t_elem.m2_val	= m2.value;
+	t_elem.m3_val	= m3.value;
+	t_elem.m1_txt	= m1.options[get_idx(t_elem.m1_val, m1)].text;
+	t_elem.m2_txt	= m2.options[get_idx(t_elem.m2_val, m1)].text;
+	t_elem.m3_txt	= m3.options[get_idx(t_elem.m3_val, m1)].text;
+	if(row_index >= screens.length) {
+		t_elem.ena = 1;
+	}
+	else {
+		t_elem.ena = screens[row_index].ena;
+	}
+	screens[row_index] = t_elem;
+
+	build_table();
+	
+	id("entry").style.display = 'none';
+	id("summary").style.display = 'block';
+
+}
+
+function cancel() {
+	if(find_selected() > 0) {
+		row_index = old_row;
+		hilite_row(row_index);
+	}
+	id("entry").style.display = 'none';
+	id("summary").style.display = 'block';
+
+	build_table();
+}
+
+function hilite_row(row_num) {
+	var tbl = id("scrn_tab");
+
+	for(var i=1;i<tbl.rows.length; i++) {
+		tbl.rows[i].style.backgroundColor = "";
+	}
+
+	tbl.rows[row_num+1].style.backgroundColor = "#bbfbfb";
+}
+
+function build_table() {
+	var tbl = id("scrn_tab");
+	var m1 = id("meas1");
+	var newRow;
+	var newCell;
+
+	while(tbl.rows.length > 1) {
+		tbl.deleteRow(1);
+	}
+
+	for(var i=0; i<screens.length; i++) {
+		newRow = tbl.insertRow(tbl.rows.length);
+		newCell = newRow.insertCell(0);
+		newCell.innerHTML = '<input type="radio" name="row" value='+screens.length+' '+((i==row_index)?"checked":" ")+' onclick="hilite_row('+i+')"/>';
+		newCell = newRow.insertCell(1);
+		newCell.innerHTML = tbl.rows.length-1;
+		newCell.className = "label7";
+		newCell.style.color = 'black';
+		newCell = newRow.insertCell(2);
+		newCell.innerHTML = '<input type="hidden" name="a'+i+'" value="' + screens[i].alpha + '"/>' + screens[i].alpha.replace("&","&amp;");
+		newCell.className = "label2";
+		newCell.style.color = 'black';
+		newCell = newRow.insertCell(3);
+		newCell.innerHTML = '<input type="hidden" name="s'+i+'_1" value="' + screens[i].m1_val + '"/>' + screens[i].m1_txt;
+		newCell.className = "label9";
+		newCell = newRow.insertCell(4);
+		newCell.innerHTML = '<input type="hidden" name="s'+i+'_2" value="' + screens[i].m2_val + '"/>' + screens[i].m2_txt;
+		newCell.className = "label9";
+		newCell = newRow.insertCell(5);
+		newCell.innerHTML = '<input type="hidden" name="s'+i+'_3" value="' + screens[i].m3_val + '"/>' + screens[i].m3_txt;
+		newCell.className = "label9";
+		newCell = newRow.insertCell(6);
+		newCell.innerHTML = '<input type="checkbox" name="ena'+i+'" id="ena'+i+'" '+(screens[i].ena=="1"?"checked":"")+' onclick="flip('+i+')"/>';
+		newCell.className = "label6";
+		if(i == row_index) {
+			hilite_row(i);
+		}
+	}
+
+	if(screens.length == 0) {
+		id("del_btn").disabled = true;
+		id("edit_btn").disabled = true;
+	}
+	else if(screens.length == max_scr) {
+		id("add_btn").disabled = true;
+	}
+	else if(screens.length > 0) {
+		id("del_btn").disabled = false;
+		id("edit_btn").disabled = false;
+		id("add_btn").disabled = false;
+	}
+}
+
+function flip(idx) {
+	screens[idx].ena = id("ena"+idx).checked;
+}
+
+function check_nrg(list, next) {
+	var m;
+	for(var i=1;i<4;i++) {
+		m = id("meas"+i);
+		if(m != list && m != next)
+			break;
+	}
+
+	if(nrg_arr[list.value] == "1") {
+		next.value = list.value;
+		if(nrg_arr[m.value] == "1")
+			m.value = NO_SCREEN;
+	}
+	else {
+		if(nrg_arr[next.value] == "1" && (next.value != m.value))
+			next.value = NO_SCREEN;
+		else if(nrg_arr[m.value] == "1" && (next.value != m.value))
+			m.value = NO_SCREEN;
+	}
+}
+
+function insertAtCursor(chr) {
+	var box = id("alpha");
+	if(box.value.length >= 8)
+		return;
+	if (document.selection) {  // IE
+		box.focus();
+		sel = document.selection.createRange();
+		sel.text = chr;
+	}
+	else if (box.selectionStart || box.selectionStart == '0') { // Other
+		var startPos = box.selectionStart;
+		var endPos = box.selectionEnd;
+		box.value = box.value.substring(0, startPos) + chr + box.value.substring(endPos, box.value.length);
+		box.setSelectionRange(endPos+1, endPos+1);
+	} 
+	else {
+		box.value += chr;
+	}
+	box.focus();
+}
+
+function load_once() {
+	populate("settings.html");
+	makeRequest(nc("cscreens.cgi"), null);
+}
+
+window.onload=load_once;
+//-->
+</script>
+	
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="trail"><a href="settings.html">Settings</a> / Custom Display Screens</div>
+<div id="message"></div>
+
+<h2>Custom Display Screen Configuration</h2><br>
+
+<div id="entry" style="display:none;">
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label10">&nbsp;</td>
+		<td class="tb_labelw">Measurement</td>
+	</tr>
+	<tr id="r1">
+		<td class="label10">Line 1.</td>
+		<td class="label4"><select name="meas1" id="meas1" onchange="check_nrg(this, document.getElementById('meas2'));"></select></td>
+	</tr>
+	<tr id="r2">
+		<td class="label10">Line 2.</td>
+		<td class="label4"><select name="meas2" id="meas2" onchange="check_nrg(this, document.getElementById('meas3'));"></select></td>
+	</tr>
+	<tr id="r3">
+		<td class="label10">Line 3.</td>
+		<td class="label4"><select name="meas3" id="meas3" onchange="check_nrg(this, document.getElementById('meas2'));"></select></td>
+	</tr>
+</table><br>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label10">&nbsp;</td>
+		<td class="label2">Label</td>
+		<td class="label5">Special Characters</td>
+	</tr>
+	<tr>
+		<td class="label10">Alphanumeric</td>
+		<td class="label4"><input type="text" name="alpha" id="alpha" size="10" maxlength="8" style="text-align:right;"/></td>
+		<td><input type="button" name="phi_btn" value="&#934;" onclick="insertAtCursor('&#934;');"/>	
+			<input type="button" name="dot_btn" value="&#183;" onclick="insertAtCursor('&#183;');"/>
+			<input type="button" name="up_btn" value="&#x2191;" onclick="insertAtCursor('&#x2191;');"/>
+			<input type="button" name="dn_btn" value="&#x2193;" onclick="insertAtCursor('&#x2193;');"/>
+			<input type="button" name="unit_btn" value="k/M/G" onclick="insertAtCursor('_');"/></td>
+	</tr>
+</table>
+<br><br><input type="button" name="cncl_btn" value="Cancel" onclick="cancel();"/>
+<input type="button" name="nxt_btn" value="Next >" onclick="goto_list();"/><br>
+<a class="elem" style="color:#999;">Note: Settings are saved to IED upon clicking the "Apply" button on next page.</a>
+</div>
+
+<div id="summary" style="display:none;">
+<form action="http:cscreens_submit.cgi" method="POST" name="myform" id="myform">
+<table id="scrn_tab" cellspacing="0" border="0" >
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label7">&nbsp;</td>
+		<td class="label2">Label</td>
+		<td class="tb_labelw">Measurement 1</td>
+		<td class="tb_labelw">Measurement 2</td>
+		<td class="tb_labelw">Measurement 3</td>
+		<td class="label6">Enabled</td>
+	</tr>
+</table>
+<input type="button" onClick="move('up')" value="&#923;" />
+<input type="button" onClick="move('down')" value="V" /><br><br>
+<input type="button" id="edit_btn" name="edit_btn" value="Edit" onclick="edit_row();"/>
+<input type="button" id="add_btn" name="add_btn" value="Add" onclick="add_row();"/>
+<input type="button" id="del_btn" name="del_btn" value="Delete" onclick="del_row();"/>
+
+<p><input class="submit" type="submit" name="Submit" value="Apply"/><br></p>
+</form>
+</div>
+
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>

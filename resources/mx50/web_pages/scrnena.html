@@ -1,0 +1,192 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Screen Enable - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+<script>
+//<!--
+var nscrns;
+var is_triple_display;
+function parse_vars(data) {
+
+	var parsed = data.split("\n" );
+	var e=document.getElementsByName("ena");
+	var h=document.getElementsByName("hom");
+	var j=0, k=0;
+	var table='<table cellspacing="0" border="0" id="scrn_tab">';
+	var t_list;
+	check_pending(parsed[j++]);
+	if(parsed[j++]=="1") {id("logout").style.display = 'block';}
+	var hm_idx = parsed[j++];
+	nscrns = parsed[j++];
+	var dtype = parsed[j++].split(":");
+	is_triple_display = (Number(dtype[0]) == 5);
+	var right_scrn = dtype[2];
+	var left_scrn = dtype[1];
+
+	if(is_triple_display) {
+		id("rh1").style.display = 'block';
+		id("rh1").innerHTML="Left Display";
+		id("rh2").innerHTML="Right Display";
+	}
+	while( parsed[j] ) {
+		t_list = parsed[j++].split(":");
+		table += '<tr><td class="label3">'+t_list[1]+
+		'<\/td><td class="label6"><input type="checkbox" name="ena" value="'+t_list[0]+'" '+
+		(t_list[2]=="1"?"checked":"")+' onmouseover="hilite_row('+ k +')" onmouseout="mouseOut('+ 
+		k +')" \/><\/td>';
+		if(is_triple_display) table += '<td class="label6"><input type="radio" name="lft" '+
+		((left_scrn==k)?"checked":"")+' onmouseover="hilite_row('+ k +')" onmouseout="mouseOut('+ k + ')" \/><\/td>';
+		table += '<td class="label6"><input type="radio" name="hom" '+(hm_idx==t_list[0]?"checked":"")+
+		' onmouseover="hilite_row('+ k +')" onmouseout="mouseOut('+ k + ')" \/><\/td>';
+		if(is_triple_display) table += '<td class="label6"><input type="radio" name="rgt" '+
+			((right_scrn==k)?"checked":"")+' onmouseover="hilite_row('+ k +')" onmouseout="mouseOut('+ k + ')" \/><\/td>';
+
+		k++;
+		table += '<\/tr>';
+	}
+	table = table + "<\/table>";
+	id("fill_in").innerHTML = table;
+}
+
+function validate() {
+	var e=document.getElementsByName("ena");
+	var h=document.getElementsByName("hom");
+
+	for(var i=0;i<h.length; i++) {
+		if(h[i].checked == true) {
+			if(e[i].checked == true) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+function hilite_row(row_num) {
+	id("scrn_tab").rows[row_num].style.backgroundColor = "#bbfbfb";
+}
+
+function mouseOut(row_num) {
+	id("scrn_tab").rows[row_num].style.backgroundColor = "";
+}
+
+function get_input() {
+
+	var e=document.getElementsByName("ena");
+	var h=document.getElementsByName("hom");
+	var l=document.getElementsByName("lft");
+	var r=document.getElementsByName("rgt");
+	var hm_idx = 0;
+	var ena_val = new Array(nscrns);
+	
+	for(var i=0;i<nscrns;i++) {
+		ena_val[i] = 0;
+	}
+	
+	for(i=0;i<e.length;i++) {
+		if(e[i].checked == true) {
+			ena_val[e[i].value] = 1;
+		}
+	}
+
+	ena_val = ena_val.join("");
+
+	for(i=0;i<h.length; i++) {
+		if(h[i].checked == true) {
+			hm_idx = e[i].value;
+			break;
+		}
+	}
+
+	if(is_triple_display) {
+		for(i=0;i<l.length; i++) {
+			if(l[i].checked == true)
+				document.aform.lt.value = i;
+			if(r[i].checked == true)
+				document.aform.rt.value = i;
+		}	
+	}
+
+	if(validate()) {
+		document.aform.en.value = ena_val;
+		document.aform.hm.value = hm_idx;
+		return true;
+	}
+	else {
+		alert('Home screen must be enabled.');
+		return false;
+	}
+}
+
+function clear_all() {
+
+	var x=document.getElementsByName("ena");
+	
+	for(var i=0;i<x.length; i++) {
+		x[i].checked = false;
+	}
+}
+
+function check_all() {
+
+	var x=document.getElementsByName("ena");
+	
+	for(var i=0;i<x.length; i++) {
+		x[i].checked = true;
+	}
+}
+
+function load_once() {
+	populate("settings.html");
+	makeRequest(nc("scrnena.cgi"), null);
+}
+
+window.onload=load_once;
+//-->
+</script>
+	
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox" id="screenEnable">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+
+<div id="trail"><a href="settings.html">Settings</a> / Screen Enable</div>
+<div id="message"></div>
+<form name="myform" id="myform">
+
+<h2>Display Screen Enable</h2>
+
+<br>
+<table cellspacing="0" border="0">
+<tr><td class="label3">&nbsp;</td>
+<td class="label6">Enabled</td>
+<td id="rh1" class="label6" style="display:none;"></td>
+<td class="label6">Home Screen</td><td id="rh2" class="label6"></td></tr></table>
+<div id="fill_in"></div><br>
+<input type="button" name="clr_btn" value="Clear All" onclick="javascript:clear_all();">
+<input type="button" name="chk_btn" value="Check All" onclick="javascript:check_all();">
+<br>
+</form>
+<form action="http:scrnena_submit.cgi" method="POST" name="aform" id="aform" onsubmit="return get_input();">
+<input type="hidden" name="en" id="en" />
+<input type="hidden" name="lt" id="lt" value="0" />
+<input type="hidden" name="hm" id="hm" />
+<input type="hidden" name="rt" id="rt" value="0" />
+<input class="submit" type="submit" name="SaveSettings" value="Apply" /><br>
+</form>
+
+<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return confirm('All settings on this page will be restored to factory defaults and applied. Continue?')">
+<input type="hidden" name="dflt" id="dflt" value="Screens"/>
+<input type="submit" name="restore" value="Restore Defaults" /></form>
+
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>

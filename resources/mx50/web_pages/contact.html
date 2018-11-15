@@ -1,0 +1,42 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Contact - Bitronics Web Configuration</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+<script>
+//<!--
+function parse_vars(data) {
+	var parsed = data.split("\n");
+	check_pending(parsed[0]);
+	var model  = parsed[2];
+	var serial = parsed[4];
+	id("reg").href = "https://www.novatechweb.com/product-registration/?serial=" + serial + "&model=" + model;
+}
+
+function load_once() {
+	populate("contact.html");
+	put_info("contact", pg.contact);
+	makeRequest(nc("index.cgi"), null);
+}
+
+window.onload=load_once;
+//-->
+</script>
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox">
+<div id="message"></div>
+<div id="contact"></div>
+
+<br>
+<h2>Product Registration</h2><br>
+<a>Please register your product by clicking on the link below.</a><br>
+<a id="reg" href="https://www.novatechweb.com/product-registration/" target="_blank">https://www.novatechweb.com/product-registration/</a>&nbsp;
+</div>
+<div class="pagebox"><div id="footer"></div></div>
+</body></html>

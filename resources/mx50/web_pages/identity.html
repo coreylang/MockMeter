@@ -1,0 +1,74 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Identity - Bitronics Web Server</title> 
+    <link rel="stylesheet" type="text/css" href="site.css">
+    <link rel="icon" href="favicon.ico">
+    <script src="request.js"></script>
+	<script src="content.js"></script>
+    <script>
+//<!--
+function parse_vars(data) {
+    var parsed = data.split( "\n" );
+    var k=0;
+	
+    msg_reset_if_pending(parsed[k++]);
+
+    function inner(name, value) {
+        return '<input type="text" name="'
+        + name + '" size="16" maxlength="15" value="'
+        + value + '" onKeyPress="return checkKey(event)"/>';
+        };
+
+    id("uname").innerHTML = inner("name", parsed[k++]);
+    id("descr").innerHTML = inner("descr", parsed[k++]);
+    id("owner").innerHTML = inner("owner", parsed[k++]);
+    id("locat").innerHTML = inner("location", parsed[k++]);
+	if(parsed[k]=="1") {id("logout").style.display = 'block';}
+}
+
+function load_once() {
+	populate("settings.html");
+    makeRequest(nc("identity.cgi"), null);
+}
+
+window.onload=load_once;
+//-->
+</script>
+    
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox" id="page">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+
+<div id="trail"><a href="settings.html">Settings</a> / Identity</div>
+<div id="message"></div>
+<form action="http:identity_submit.cgi" method="POST" name="identity" id="identity">
+<h2>Identity</h2>
+<table cellspacing="0" border="0">
+    <tr>
+        <td class="label2">Name</td>
+        <td class="form"><div id="uname"></div></td>
+    </tr>
+    <tr>
+        <td class="label2">Description</td>
+        <td class="form"><div id="descr"></div></td>
+    </tr>
+    <tr>
+        <td class="label2">Owner</td>
+        <td class="form"><div id="owner"></div></td>
+    </tr>
+    <tr>
+        <td class="label2">Location</td>
+        <td class="form"><div id="locat"></div></td>
+    </tr>
+</table><br>
+<p><input class="submit" type="submit" name="SaveSettings" value="Apply"/></p></form>
+<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return get_resp()">
+<input type="hidden" name="dflt" id="dflt" value="Identity"/>
+<input type="submit" name="restore" value="Restore Defaults" /></form>
+</div>
+<div class="pagebox"><div id="footer"></div></div>
+</body></html>

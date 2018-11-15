@@ -1,0 +1,53 @@
+<!DOCTYPE HTML SYSTEM>
+<html>
+<head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Firmware Upload - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="shortcut icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="load.js"></script>
+	<script src="content.js"></script>
+<script>
+window.onload=load_once;
+
+function parse_vars(data) {
+    var pending = data.split("\n")[0];
+	msg_reset_if_pending(pending);
+	if(data.split("\n")[5]=="1")
+		id("logout").style.display = 'block';
+}
+
+function load_once() {
+	populate("settings.html");
+	get_pending();
+}
+
+</script>
+
+</head>
+<body>
+
+<div id="Content"></div>
+<div id="mncnt" class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="trail"><a href="settings.html">Settings</a> / Firmware Upload</div>
+<div id="message"></div>
+<br><h2>Update Device Firmware</h2>
+<h3>Save to IED</h3>
+<div>Select a firmware image file.</div>
+<div id="upbox" class="fbox">
+	<form method="post" enctype="multipart/form-data" target="upload_target" onsubmit="startUpload();" >
+	 <p id="f1_upload_process">Loading...<br/><img src="loader.gif"/><br/></p>
+	 <p id="f1_upload_form" align="center"><br/>
+		 <label>File:<input name="myfile" id="myfile" type="file" size="30" /></label>
+		 <label><input type="submit" class="sbtn" value="Submit" /></label>
+	 </p>
+	 <iframe id="upload_target" name="upload_target" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe>
+	 </form>
+</div></div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>		
+

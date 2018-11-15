@@ -1,0 +1,104 @@
+<!DOCTYPE HTML SYSTEM>
+<html>
+<head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Home - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="shortcut icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+<script>
+//<!--
+var 	data_value 	= new Array(7);
+
+// page js
+function parse_vars(data) {
+	var parsed = data.split("\n");
+	var j=0;
+
+	check_pending(parsed[j++]);
+
+	id("uname").innerHTML	= parsed[j++];
+	id("model").innerHTML 	= parsed[j++];
+	id("type").innerHTML 	= parsed[j++];
+	id("sernum").innerHTML	= parsed[j++];
+	id("fwver").innerHTML 	= parsed[j++];
+	id("ipaddr").innerHTML 	= parsed[j++];
+	id("macaddr").innerHTML	= parsed[j++];
+	id("dispver").innerHTML	= parsed[j++];
+
+	if(parsed[j++] > 0) {
+		id("dver").style.display = 'block';
+	}
+	if(parsed[j++]=="1")
+		id("logout").style.display = 'block';
+		
+	id("printNice").style.display = 'block';
+	id("printNice").innerHTML = "<a font-size:90%; style='color:#999'>build "+parsed[j++]+"</a>";	
+}
+
+function load_once() {
+	populate("index.html");
+	makeRequest(nc("index.cgi"), null);
+}
+
+window.onload=load_once;
+//-->
+</script>
+
+</head>
+<body>
+
+<div id="Content"></div>
+
+<div id="mncnt" class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="message"></div>
+<h2>Device Summary</h2>
+ 
+<br>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label4">IED Name</td>
+		<td class="elem"><div id="uname"></div></td>
+	</tr>
+	<tr>
+		<td class="label4">IED Model</td>
+		<td class="elem"><div id="model"></div></td>
+	</tr>
+	<tr>
+		<td class="label4">IED Type</td>
+		<td class="elem"><div id="type"></div></td>
+	</tr>
+	<tr>
+		<td class="label4">Serial Number</td>
+		<td class="elem"><div id="sernum"></div></td>
+	</tr>
+	<tr>
+		<td class="label4">Firmware Version</td>
+		<td class="elem"><div id="fwver"></div></td>
+	</tr>
+</table>
+<div id="dver" style="display:none;"><table cellspacing="0" border="0">
+	<tr>
+		<td class="label4">Display Version</td>
+		<td class="elem"><div id="dispver"></div></td>
+	</tr>
+</table></div>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label4">IP Address</td>
+		<td class="elem"><div id="ipaddr"></div></td>
+	</tr>
+	<tr>
+		<td class="label4">MAC Address</td>
+		<td class="elem"><div id="macaddr"></div></td>
+	</tr>
+</table>
+<br>
+
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>		

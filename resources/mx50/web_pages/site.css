@@ -1,0 +1,128 @@
+body{margin:0; padding:0; background-color:#fff; color:#000; font:12px helvetica,verdana,sans; background:url("header_bg.png") repeat-x top left; width:100%; text-align:center}
+
+html{background-color:#fff}
+
+input{width:auto}
+
+h2{margin:15px 10px 0 0; padding:0; color:#aaa; font-weight:normal}
+
+h3{margin:15px 5px 0 0; padding:0; color:#aaa; font: 14px helvetica,verdana,sans; font-weight:normal}
+
+#f1_upload_process{z-index:100; position:absolute; visibility:hidden; text-align:center; width:388px; margin:0px; padding:0px; background-color:#fff; border:1px solid #ccc}
+
+#footer{margin-top:3em; padding-top:0.2em; border-top:1px dotted #999; text-align:center; font-size:90%; color:#999; padding-bottom:30px}
+
+#trail{padding-bottom:8px; color:#555}
+
+#hidden{display:none}
+
+.pagebox{padding-top:10px; width:800px; display:block; margin-left:auto; margin-right:auto; text-align:left; clear:both}
+
+.error{margin-top:2px; margin-bottom:2px; background-color:#fcc; width:600px; border:1px solid #d99; padding:3px; color:#500; font: 14px helvetica,verdana,sans; text-align:left}
+
+.success_msg{margin-top:2px; margin-bottom:2px; width:600px; padding:3px; background-color:#e8fee4; border:1px solid #a6b6a3; color:#223d1d;  text-align:left}
+
+.noscript{background-color:#fcc; color:#500;  text-align:inherit}
+
+.fbox{text-align:center; width:390px; margin:0px; padding:5px; background-color:#fff; border:1px solid #ccc}
+
+.submit{font: bold 14px helvetica,verdana,sans;}
+
+#Content{width:830px; margin:0px auto; text-align:left}
+
+#Header{height:108px; overflow:hidden; margin-bottom:0px; padding-left:15px; padding-right:15px}
+
+#Left{float:left}
+
+#Right{position:relative; float:right; color:#fff; height:108px; width:400px}
+
+#Text{text-align:right; position: absolute; bottom:0; width:400px; padding-bottom:15px; font-size:90%}
+
+#Text A:link{color:#8CD3FF}
+#Text A:visited{color:#FFADE6}
+#Text A:active{color:#FFADE6}
+#Text A:hover{color:#fff}
+
+#Text span{color:#999}
+
+#Navigation{width:auto; padding:0; margin:0}
+
+#mainNav{margin:0px; padding:0px; list-style-image:none; list-style-type:none}
+
+#mainNav li{float:left; margin-top:0px; margin-right:1px; margin-bottom:0px; margin-left:0px; padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px}
+
+#mainNav li a{margin:0px; color:#333; text-decoration:none; height:auto; width:auto; float:left; padding-top:0px; padding-right:10px; padding-bottom:0px; padding-left:0px}
+
+#mainNav li a:hover{text-decoration:none}
+
+#mainNav li a span{display:block; padding-top:6px; padding-right:5px; padding-bottom:0px; padding-left:15px; height:20px; width:auto; float:left; cursor:pointer; margin:0px}
+
+#mainNav li a.active{background-attachment:scroll; background-image:url(tab.png); background-repeat:no-repeat; background-position:right 0px; color:#FFF}
+
+#mainNav li a.active span{background-attachment:scroll; background-image:url(tab.png); background-repeat:no-repeat; background-position:0px 0px}
+
+#mainNav li a.active:hover{background-attachment:scroll; background-image:url(tab.png); background-repeat:no-repeat; background-position:right 0px; color:#FFF; text-decoration:none; cursor:pointer;}
+
+#mainNav li a.active:hover span{background-attachment:scroll; background-image:url(tab.png); background-repeat:no-repeat; background-position:0px 0px}
+
+#mainNav li a:hover{background-attachment:scroll; background-image:url(tabg.png); background-repeat:no-repeat; background-position:right 0px}
+
+#mainNav li a:hover span{background-attachment:scroll; background-image:url(tabg.png); background-repeat:no-repeat; background-position:0px 0px}
+
+.label{width:40px; color:#6b8dd2; font: 14px helvetica,verdana,sans;}
+
+.label2{width:90px; color:#6b8dd2;  font: 14px helvetica,verdana,sans;}
+
+.label3{width:240px; color:#6b8dd2;  font: 12px helvetica,verdana,sans;}
+
+.label4{width:160px; color:#6b8dd2; font: 14px helvetica,verdana,sans;}
+
+.label5{width:200px; color:#6b8dd2; font: 14px helvetica,verdana,sans;}
+
+.label6{width:60px; color:#6b8dd2; font:14px helvetica,verdana,sans; text-align:center;}
+
+.label7{width:20px; color:#6b8dd2; font:14px helvetica,verdana,sans; text-align:center;}
+
+.label8{width:130px; color:#6b8dd2; font: 14px helvetica,verdana,sans; text-align:left;}
+
+.label9{width:190px; font: 14px helvetica,verdana,sans; text-align:left;}
+
+.label10{width:85px; color:#6b8dd2; font: 14px helvetica,verdana,sans; text-align:right;}
+
+.label11{width:90px; font: 12px helvetica,verdana,sans;}
+
+.label12{width:200px; font: 12px helvetica,verdana,sans;}
+
+.label13{width:60px; font: 14px helvetica,verdana,sans; text-align:center;}
+
+.label14{width:100px; font: 12px helvetica,verdana,sans;}
+
+.label15{width:175px; color:#6b8dd2; font: 14px helvetica,verdana,sans; text-align:left; padding-right:8px;}
+
+.label16{width:160px; font: 12px helvetica,verdana,sans;}
+
+.label17{width:120px; color:#6b8dd2; font: 12px helvetica,verdana,sans; padding-bottom:10px; padding-top:10px; text-align:center;}
+
+.label18{font: 14px helvetica,verdana,sans; text-align:right;}
+
+.tb_label{width:60px; color:#6b8dd2; font: 14px helvetica,verdana,sans; text-align:left;}
+
+.tb_labeln{width:60px; color:#6b8dd2; font: 14px helvetica,verdana,sans; text-align:right; padding-right:8px;}
+
+.tb_labelw{width:160px; color:#6b8dd2; font: 14px helvetica,verdana,sans; text-align:left; padding-right:8px;}
+
+.tb_header{width:80px; color:#6b8dd2; font: 14px helvetica,verdana,sans; text-align:center;}
+
+.elem{font: 14px helvetica,verdana,sans;}
+
+.tb_elem{text-align:right; font:14px helvetica,verdana,sans;  border-width:1px 1px 1px 1px; padding:1px 1px 1px 1px; border-style:inset inset inset inset; border-color:gray gray gray gray; background-color:rgb(240,240,240);}
+
+.form{width: 60px}
+
+.err_msg{ padding-left:10px}
+
+.reset{margin-top:2px; margin-bottom:2px; background-color:#fcc; width:600px; border:1px solid #d99; padding:3px; color:#500; height:24;  text-align:left}
+
+.reset_msg{font:12px helvetica,verdana,sans; color:#500; vertical-align:baseline}
+
+.reset_btn{width:250px; text-align:right}

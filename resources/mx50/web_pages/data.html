@@ -1,0 +1,337 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Data - Bitronics Web Server</title> 
+    <link rel="stylesheet" type="text/css" href="site.css">
+    <link rel="stylesheet" type="text/css" href="css_tab.css">
+    <script src="request.js"></script>
+    <script src="data.js"></script>
+	<script src="content.js"></script>
+    <link rel="icon" href="favicon.ico">
+<script>
+//<!--
+var doSend = true;
+var old_time = new Date();
+var new_time = new Date();
+var heartbeat = 0;
+var first_load = true;
+var mset;
+var time;
+var mname = 0;
+var unit = 1;
+//                          B   A   A   A   V   W   W   V       V
+//                          A   D   D   M   L   V   A   A   P   A
+//       sec name   COL_NO  S   V   P   P   T   R   T   R   F   P
+var mset_tab = [
+        ["iv_tab",  1,      1,  1,  1,  1,  0,  0,  0,  0,  0,  0 ],
+        ["iv_tab",  2,      1,  1,  1,  0,  1,  0,  0,  0,  0,  0 ],
+        ["iv_tab",  3,      1,  1,  1,  0,  1,  0,  0,  0,  0,  0 ],
+        ["iv_tab",  4,      1,  1,  1,  0,  1,  0,  0,  0,  0,  0 ],
+        ["i_r",     -1,     1,  1,  1,  0,  0,  0,  0,  0,  0,  0 ],
+        ["pwr",     -1,     1,  1,  1,  0,  0,  0,  0,  0,  0,  0 ],
+        ["vtr",     -1,     1,  1,  1,  0,  1,  0,  0,  0,  0,  0 ],
+        ["ctr",     -1,     1,  1,  1,  1,  0,  0,  0,  0,  0,  0 ],
+        ["frq",     0,      1,  1,  1,  0,  0,  0,  0,  0,  0,  0 ],
+        ["frq",     1,      1,  1,  1,  0,  0,  0,  0,  0,  0,  0 ],
+        ["frq",     2,      1,  1,  1,  0,  0,  0,  0,  0,  0,  0 ] ];
+
+var name_tab = [
+        ["vlt_a",   ""],
+        ["vlt_b",   ""],
+        ["vlt_c",   ""],
+        ["vlt_label", "Volts"],
+        ["amp_a",   ""],
+        ["amp_b",   ""],
+        ["amp_c",   ""],
+        ["amp_r",   ""],
+        ["amp_label", "Amps"],
+        ["vlt_ab", ""],
+        ["vlt_bc", ""],
+        ["vlt_ca", ""],
+        ["vll_label", "Volts"],
+        ["w_a", ""],
+        ["w_b", ""],
+        ["w_c", ""],
+        ["w_t", ""],
+        ["w_label", "Watts"],
+		["wt_lbl", "Watts"],
+        ["var_a", ""],
+        ["var_b", ""],
+        ["var_c", ""],
+        ["var_t", ""],
+        ["var_label", "VARs"],
+		["vart_lbl", "VARs"],
+        ["va_a", ""],
+        ["va_b", ""],
+        ["va_c", ""],
+        ["va_t", ""],
+        ["va_label", "VAs"],
+		["vat_lbl", "VAs"],
+        ["pf_a", ""],
+        ["pf_b", ""],
+        ["pf_c", ""],
+        ["pf_t", ""],
+        ["kwh_pos", ""],
+        ["kwh_neg", ""],
+        ["varh_lag", ""],
+        ["varh_lead", ""],
+        ["vt_scale", ""],
+        ["ct_scale", ""],
+        ["freq", ""],
+        ["health", ""] ];
+
+
+function parse_vars(data) {
+    var j=0;
+    var parsed = data.split( "\n" );
+    var pending_changes =   parsed[j++];
+    mset =                  Number(parsed[j++]) + 2;
+	var elem = parsed[j++];
+    
+    for(; j<parsed.length-1; j++) {
+        id(name_tab[j-3][mname]).innerHTML = parsed[j] + name_tab[j-3][unit];
+    }
+    --j;
+    id(name_tab[j-3][mname]).innerHTML = parsed[j].substring(0,4)+' '+parsed[j].substring(4,8);
+
+    old_time = new_time;
+    id("hbeat").innerHTML = ++heartbeat;
+
+    if(Number(parsed[j]) > 0) {
+        id("health").style.backgroundColor = 'yellow';
+    }
+
+    msg_reset_if_pending(pending_changes);
+
+
+    if(first_load == false)
+        return;
+
+    first_load = false;
+
+    for(var i=0; i<mset_tab.length; i++) {
+        if(mset_tab[i][1] >= 0) {
+            if(mset_tab[i][mset] == 0) {
+                if(mset_tab[i][1] >= 0) {
+                    show_hide_column(mset_tab[i][0], mset_tab[i][1], mset_tab[i][mset]);
+                }
+                else {
+                    id(mset_tab[i][0]).style.display = 'none';
+                }
+            }
+        }
+        else {
+            if(mset_tab[i][mset] == 0) {
+                id(mset_tab[i][0]).style.display = 'none';
+            }
+        }
+    }
+	
+	if(elem == "0") { // if in 2-Element mode...
+		if(mset == 6)
+			show_hide_column("iv_tab",0,0);		
+		id("pwr_tab").style.display = 'none';
+		show_hide_column("iv_tab", 2, 0);
+	}
+	
+    doSend = true;
+    id("mncnt").style.display = 'block';
+}
+
+function loop() {
+
+    if(doSend) {
+        doSend = false;
+        makeRequest(nc("data.cgi"), null);
+    }
+    setTimeout(function(){check_status(http_request, 0);}, 249);
+
+    new_time = new Date();
+    time = ((new_time - old_time)/1000);
+    id("polls").innerHTML = time.toFixed(3);
+
+    setTimeout("loop()", 1000);
+}
+
+function load_once() {
+	populate("data.html");
+	loop();
+}
+
+window.onload=load_once;
+window.onunload=abort;
+//-->
+</script>
+</head>
+<body id="tab1">
+<div id="Content"></div>
+
+<div id="mncnt" class="pagebox" style="display:none;">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="message"></div>
+<h2>Live Data View</h2>
+
+<ul id="tabnav"> 
+    <li class="tab1"><a href="data.html">Instantaneous</a></li> 
+    <li class="tab2"><a href="data2.html">Demands</a></li> 
+</ul>
+
+<table id="iv_tab" cellspacing="0" border="0">
+    <tr>
+        <td class="tb_label"></td>
+        <td class="tb_header"><div id="amp_label" align="center">Amps</div></td>
+        <td class="tb_header"><div id="vlt_label" align="center">Volts</div></td>
+        <td class="tb_labeln"></td>
+        <td class="tb_header"><div id="vll_label" align="center">Volts</div></td>
+    </tr>
+    <tr>
+        <td class="tb_label">Phase A</td>
+        <td class="tb_elem"><div id="amp_a"></div></td>
+        <td class="tb_elem"><div id="vlt_a"></div></td>
+        <td class="tb_labeln">A-B</td>
+        <td class="tb_elem"><div id="vlt_ab"></div></td>
+    </tr>
+    <tr>
+        <td class="tb_label">Phase B</td>
+        <td class="tb_elem"><div id="amp_b"></div></td>
+        <td class="tb_elem"><div id="vlt_b"></div></td>
+        <td class="tb_labeln">B-C</td>
+        <td class="tb_elem"><div id="vlt_bc"></div></td>
+    </tr>
+    <tr>
+        <td class="tb_label">Phase C</td>
+        <td class="tb_elem"><div id="amp_c"></div></td>
+        <td class="tb_elem"><div id="vlt_c"></div></td>
+        <td class="tb_labeln">C-A</td>
+        <td class="tb_elem"><div id="vlt_ca"></div></td>
+    </tr>
+    <tr id="i_r">
+        <td class="tb_label">Residual</td>
+        <td class="tb_elem"><div id="amp_r"></div></td>
+        <td class="tb_elem"></td>
+    </tr>
+</table>
+<br>
+<div id="pwr">
+<table id="pwr_tab" cellspacing="0" border="0">
+    <tr>
+        <td class="tb_label"></td>
+        <td class="tb_header"><div id="w_label" align="center">Watts</div></td>
+        <td class="tb_header"><div id="var_label" align="center">VARs</div></td>
+        <td class="tb_header"><div id="va_label" align="center">VAs</div></td>
+        <td class="tb_header"><div align="center">PF</div></td>
+    </tr>
+    <tr>
+        <td class="tb_label"><div align="left">Phase A</div></td>
+        <td class="tb_elem"><div id="w_a"></div></td>
+        <td class="tb_elem"><div id="var_a"></div></td>
+        <td class="tb_elem"><div id="va_a"></div></td>
+        <td class="tb_elem"><div id="pf_a"></div></td>
+    </tr>
+    <tr>
+        <td class="tb_label"><div align="left">Phase B</div></td>
+        <td class="tb_elem"><div id="w_b"></div></td>
+        <td class="tb_elem"><div id="var_b"></div></td>
+        <td class="tb_elem"><div id="va_b"></div></td>
+        <td class="tb_elem"><div id="pf_b"></div></td>
+    <tr>
+        <td class="tb_label"><div align="left">Phase C</div></td>
+        <td class="tb_elem"><div id="w_c"></div></td>
+        <td class="tb_elem"><div id="var_c"></div></td>
+        <td class="tb_elem"><div id="va_c"></div></td>
+        <td class="tb_elem"><div id="pf_c"></div></td>
+    </tr>
+</table><br>
+<table id="tot_tab" cellspacing="0" border="0">
+    <tr>
+        <td class="tb_label"></td>
+        <td class="tb_header"><div id="wt_lbl" align="center">Watts</div></td>
+        <td class="tb_header"><div id="vart_lbl" align="center">VARs</div></td>
+        <td class="tb_header"><div id="vat_lbl" align="center">VAs</div></td>
+        <td class="tb_header"><div align="center">PF</div></td>
+    </tr>
+    <tr>
+        <td class="tb_label"><div align="left">Total</div></td>
+        <td class="tb_elem"><div id="w_t"></div></td>
+        <td class="tb_elem"><div id="var_t"></div></td>
+        <td class="tb_elem"><div id="va_t"></div></td>
+        <td class="tb_elem"><div id="pf_t"></div></td>
+    </tr>
+</table>
+<br>
+<table id="nrg_tab" cellspacing="0" border="0">
+    <tr>
+        <td class="label15"></td>
+        <td class="tb_header">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="label15">Energy Used (+kWh)</td>
+        <td class="tb_elem"><div id="kwh_pos"></div></td>
+    </tr>
+    <tr>
+        <td class="label15">Energy Produced (-kWh)</td>
+        <td class="tb_elem"><div id="kwh_neg"></div></td>
+    </tr>
+    <tr>
+        <td class="label15">Energy Lag (+kVARh)</td>
+        <td class="tb_elem"><div id="varh_lag"></div></td>
+    </tr>
+    <tr>
+        <td class="label15">Energy Lead (-kVARh)</td>
+        <td class="tb_elem"><div id="varh_lead"></div></td>
+    </tr>
+</table>
+<br>
+</div>
+<table id="ratio_tab" cellspacing="0" border="0">
+    <tr>
+        <td class="label15"></td>
+        <td class="tb_header" width="100">&nbsp;</td>
+    </tr>
+    <tr id="vtr">
+        <td class="label15">VT Scaling</td>
+        <td class="tb_elem" width="100"><div id="vt_scale"></div></td>
+    </tr>
+    <tr id="ctr">
+        <td class="label15">CT Scaling</td>
+        <td class="tb_elem" width="100"><div id="ct_scale"></div></td>
+    </tr>
+</table>
+<br>
+<table id="frq" cellspacing="0" border="0">
+    <tr>
+        <td class="label15"></td>
+        <td class="tb_header">&nbsp;</td>
+        <td class="label2">&nbsp;</td>
+        <td class="label15"></td>
+        <td class="tb_header">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="label15">Frequency</td>
+        <td class="tb_elem"><div id="freq"></div></td>
+        <td class="label2">&nbsp;</td>
+        <td class="label15">Health</td>
+        <td class="tb_elem"><div id="health"></div></td>
+    </tr>
+</table>
+<table cellspacing="0" border="0">
+    <tr>
+        <td class="label15"></td>
+        <td class="tb_header">&nbsp;</td>
+        <td class="label2">&nbsp;</td>
+        <td class="label15"></td>
+        <td class="tb_header">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="label15">Time Between Polls</td>
+        <td class="tb_elem"><div id="polls"></div></td>
+        <td class="label2">&nbsp;sec</td>
+        <td class="label15">Heartbeat</td>
+        <td class="tb_elem"><div id="hbeat"></div></td>
+    </tr>
+</table>
+
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body></html>
