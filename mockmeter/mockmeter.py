@@ -4,7 +4,6 @@ import string
 
 import cherrypy
 from cherrypy._cpdispatch import Dispatcher
-from cherrypy._cpwsgi import CPWSGIApp, ExceptionTrapper
 
 """ Crude attempt at capturing missed URLs using a Tool hook.  This might be workable,
 but it seems like a lot of manual intervention for what might be more straightforward.
@@ -12,9 +11,67 @@ but it seems like a lot of manual intervention for what might be more straightfo
 Better solution might exist with a custom Dispatch(), or
 Cascading WSGI middleware apps.
 
-Also unresolved is the need to serve static files from more than one local dir to /
+Handling the need to serve static files from more than one local dir to /
+by pipelining a second CherryPy app
 """
 
+@cherrypy.tools.register('before_finalize', priority=90)
+def logit():
+    if cherrypy.response.status == 404:
+        print('Whoa -->', cherrypy.response.status, cherrypy.request.path_info)
+        # if 'network.cgi' in cherrypy.request.path_info:
+        #     cherrypy.response.status = None
+        #     cherrypy.response.body = bytes('\n'.join([
+        #         "0",
+        #         "hostname",
+        #         "192.168.0.172",
+        #         "192.168.0.1",
+        #         "255.255.255.0",
+        #         "0",
+        #     ]),'utf-8')
+        #     del cherrypy.response.headers['content-length']
+
+
+
+@cherrypy.tools.logit()
+@cherrypy.tools.staticdir(dir='./cgi', root=Path.cwd()/'resources/mx50')
+class Test1App(object):
+    @cherrypy.expose
+    def test1(self):
+        return """<html>
+          <body>
+          Hello from Test 1
+          </body>
+        </html>"""
+    
+    @cherrypy.expose
+    def network_cgi(self, ms):
+        return bytes('\n'.join([
+            "0",
+            "hostname",
+            "192.168.0.172",
+            "192.168.0.1",
+            "255.255.255.0",
+            "0",
+        ]),'utf-8')
+
+
+class T1Factory(cherrypy.Application):
+    def __init__(self, nextapp):
+        self.nextapp = nextapp
+        super().__init__(Test1App())
+
+    def __call__(self, environ, start_response):
+        # relies on nextapp.default() raising InternalRedirect
+        try:
+            me = self.nextapp(environ, start_response)
+            return me
+        except:
+            me = super().__call__(environ, start_response)
+            print('HANDLING EXCEPTION', cherrypy.request.path_info)
+            return me
+
+@cherrypy.tools.staticdir(dir='./web_pages', root=Path.cwd()/'resources/mx50', index='index.html')
 class StringGenerator(object):
     def __init__(self):
       self.cnt = 0
@@ -52,29 +109,13 @@ class StringGenerator(object):
         self.cnt += 1
         return "0\nMx50_amw\nMx50_desc\nMx50_owner\nct={}\n0".format(self.cnt)
 
-    # @cherrypy.expose
-    # def default(self, attr):
+    @cherrypy.expose
+    def default(self, attr, *args, **kwargs):
     #     # wont trap if url and method param signatures dont match
     #     # e.g. default(self, attr) wont trap input.cgi?ms=1
     #     # and  default(self, attr, ms) won't trap input.cgi
-    #     print('RESOLVED DEFAULT')
-    #     raise cherrypy.HTTPError(404)
+        raise cherrypy.InternalRedirect('./cgi')
 
-@cherrypy.tools.register('before_finalize', priority=90)
-def logit():
-    if cherrypy.response.status == 404:
-        print('Whoa -->', cherrypy.response.status, cherrypy.request.path_info)
-        if 'network.cgi' in cherrypy.request.path_info:
-            cherrypy.response.status = None
-            cherrypy.response.body = bytes('\n'.join([
-                "0",
-                "hostname",
-                "192.168.0.172",
-                "192.168.0.1",
-                "255.255.255.0",
-                "0",
-            ]),'utf-8')
-            del cherrypy.response.headers['content-length']
 
 # class Capture404Dispatcher(Dispatcher):
 #     def __call__(self, path_info):
@@ -89,30 +130,21 @@ if __name__ == '__main__':
     conf = {
         '/': {
             # 'request.dispatch': Capture404Dispatcher(),
-            'tools.logit.on': True,
             'tools.sessions.on': True,
-            'tools.staticdir.root': Path.cwd()/'resources/mx50',
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir': './web_pages',
-            'tools.staticdir.index': 'index.html'
-        # },
-        # '/favicon.ico': {
-        #     'tools.staticfile.on': True,
-        #     'tools.staticfile.root': Path.cwd()/'resources/mx50',
-        #     'tools.staticfile.filename': './web_pages/favicon.ico'
-        # },
-        # '/stylesheet': {
-        #     'tools.staticdir.on': True,
-        #     'tools.staticdir.dir': './web_pages'
+            'wsgi.pipeline': [('cascade', T1Factory)]
+        },
+        '/favicon.ico': {
+            'tools.staticfile.on': True,
+            'tools.staticfile.root': Path.cwd()/'resources/mx50',
+            'tools.staticfile.filename': './web_pages/favicon.ico'
         }
     }
     cherrypy.config.update({
+        'engine.autoreload.on': False,
         'server.socket_host': '127.0.0.1',
         'server.socket_port': 4249
     })
     cherrypy.tree.mount(StringGenerator(), '/', conf)
-    # cherrypy.tree.mount(Test1App())
-    # cherrypy.tree.graft(cherrypy.Application(Test2App()))
 
     cherrypy.engine.start()
     cherrypy.engine.block()
