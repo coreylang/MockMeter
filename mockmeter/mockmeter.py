@@ -32,19 +32,47 @@ def logit():
         #     del cherrypy.response.headers['content-length']
 
 
+def PipelineFactory(pipeline_app):
 
-@cherrypy.tools.logit()
+    class _PipelineFactoryClass(cherrypy.Application):
+        def __init__(self, nextapp):
+            self.nextapp = nextapp
+            super().__init__(pipeline_app())
+
+        def __call__(self, environ, start_response):
+            # relies on nextapp.default() raising InternalRedirect
+            print('Entered pipeline for {}'.format(pipeline_app.__name__))
+            try:
+                me = self.nextapp(environ, start_response)
+                return me
+            except:
+                # try:
+                me = super().__call__(environ, start_response)
+                print(pipeline_app.__name__, 'attempting to handle', cherrypy.request.path_info)
+                return me
+                # except:
+                #     print('darned if i know')
+                #     return
+
+
+    return _PipelineFactoryClass
+
+
+# @cherrypy.tools.logit()
 @cherrypy.tools.staticdir(dir='./cgi', root=Path.cwd()/'resources/mx50')
-class Test1App(object):
+class CGIApp(object):
+    def __init__(self):
+        self.cnt = 0
+
     @cherrypy.expose
-    def test1(self):
+    def testcgi(self):
         return """<html>
           <body>
-          Hello from Test 1
+          Hello from CGI App
           </body>
         </html>"""
     
-    @cherrypy.expose
+    # @cherrypy.expose
     def network_cgi(self, ms):
         return bytes('\n'.join([
             "0",
@@ -55,55 +83,6 @@ class Test1App(object):
             "0",
         ]),'utf-8')
 
-
-class T1Factory(cherrypy.Application):
-    def __init__(self, nextapp):
-        self.nextapp = nextapp
-        super().__init__(Test1App())
-
-    def __call__(self, environ, start_response):
-        # relies on nextapp.default() raising InternalRedirect
-        try:
-            me = self.nextapp(environ, start_response)
-            return me
-        except:
-            me = super().__call__(environ, start_response)
-            print('HANDLING EXCEPTION', cherrypy.request.path_info)
-            return me
-
-@cherrypy.tools.staticdir(dir='./web_pages', root=Path.cwd()/'resources/mx50', index='index.html')
-class StringGenerator(object):
-    def __init__(self):
-      self.cnt = 0
-
-    @cherrypy.expose
-    def demo_index(self):
-        return """<html>
-          <head>
-            <link href="/static/css/style.css" rel="stylesheet">
-          </head>
-          <body>
-            <form method="get" action="generate">
-              <input type="text" value="8" name="length" />
-              <button type="submit">Give it now!</button>
-            </form>
-          </body>
-        </html>"""
-
-    @cherrypy.expose
-    def generate(self, length=8):
-        some_string = ''.join(random.sample(string.hexdigits, int(length)))
-        cherrypy.session['mystring'] = some_string
-        return some_string
-
-    @cherrypy.expose
-    def display(self):
-        return cherrypy.session['mystring']
-
-    @cherrypy.expose
-    def test(self):
-        raise cherrypy.HTTPError(500)
-
     @cherrypy.expose
     def identity_cgi(self, ms):
         self.cnt += 1
@@ -111,10 +90,41 @@ class StringGenerator(object):
 
     @cherrypy.expose
     def default(self, attr, *args, **kwargs):
-    #     # wont trap if url and method param signatures dont match
-    #     # e.g. default(self, attr) wont trap input.cgi?ms=1
-    #     # and  default(self, attr, ms) won't trap input.cgi
-        raise cherrypy.InternalRedirect('./cgi')
+        # wont trap if url and method param signatures dont match
+        # e.g. default(self, attr) wont trap input.cgi?ms=1
+        # and  default(self, attr, ms) won't trap input.cgi
+        # print(self,'raising internal redirect for',attr)
+        # raise cherrypy.InternalRedirect('')
+        print(self,'will serve from live meter for', attr)
+
+# class LiveMeterApp(object):
+#     base = 'http://10.161.129.197'
+#     @cherrypy.expose
+#     def meter(self):
+#         return ('Forwarding app using ', self.base)
+
+@cherrypy.tools.staticdir(dir='./web_pages', root=Path.cwd()/'resources/mx50', index='index.html')
+class StaticsApp(object):
+
+    @cherrypy.expose
+    def teststatics(self):
+        return """<html>
+          <body>
+          Hello from Statics App
+          </body>
+        </html>"""
+
+    @cherrypy.expose
+    def testerror(self):
+        raise cherrypy.HTTPError(500)
+
+    @cherrypy.expose
+    def default(self, attr, *args, **kwargs):
+        # wont trap if url and method param signatures dont match
+        # e.g. default(self, attr) wont trap input.cgi?ms=1
+        # and  default(self, attr, ms) won't trap input.cgi
+        print(self,'raising internal redirect for',attr)
+        raise cherrypy.InternalRedirect('')
 
 
 # class Capture404Dispatcher(Dispatcher):
@@ -130,8 +140,13 @@ if __name__ == '__main__':
     conf = {
         '/': {
             # 'request.dispatch': Capture404Dispatcher(),
-            'tools.sessions.on': True,
-            'wsgi.pipeline': [('cascade', T1Factory)]
+            # 'tools.sessions.on': True,
+            'wsgi.pipeline': [
+                # haven't yet been able to pipeline more than 2 apps
+                # perhaps need to somehow de-assert InternalRedirect?
+                # ('meter', PipelineFactory(LiveMeterApp)),
+                ('cascade', PipelineFactory(CGIApp)),
+            ]
         },
         '/favicon.ico': {
             'tools.staticfile.on': True,
@@ -144,7 +159,8 @@ if __name__ == '__main__':
         'server.socket_host': '127.0.0.1',
         'server.socket_port': 4249
     })
-    cherrypy.tree.mount(StringGenerator(), '/', conf)
+    cherrypy.tree.mount(StaticsApp(), '/', conf)
+    # cherrypy.tree.mount(LiveMeterApp(), '/live', conf)
 
     cherrypy.engine.start()
     cherrypy.engine.block()
