@@ -1,9 +1,9 @@
 from pathlib import Path
-import random
-import string
+from urllib.parse import urljoin, urlencode
 
 import cherrypy
-from cherrypy._cpdispatch import Dispatcher
+# from cherrypy._cpdispatch import Dispatcher
+import requests
 
 """ Crude attempt at capturing missed URLs using a Tool hook.  This might be workable,
 but it seems like a lot of manual intervention for what might be more straightforward.
@@ -60,8 +60,11 @@ def PipelineFactory(pipeline_app):
 
 # @cherrypy.tools.logit()
 @cherrypy.tools.staticdir(dir='./cgi', root=Path.cwd()/'resources/mx50')
+@cherrypy.tools.response_headers(headers=[('Content-Type','text/plain')])
+# appears to serve from statics before methods, change priority?
 class CGIApp(object):
     def __init__(self):
+        self.base = 'http://10.161.129.197'
         self.cnt = 0
 
     @cherrypy.expose
@@ -72,8 +75,8 @@ class CGIApp(object):
           </body>
         </html>"""
     
-    # @cherrypy.expose
-    def network_cgi(self, ms):
+    @cherrypy.expose
+    def example_cgi(self, ms):
         return bytes('\n'.join([
             "0",
             "hostname",
@@ -84,9 +87,14 @@ class CGIApp(object):
         ]),'utf-8')
 
     @cherrypy.expose
-    def identity_cgi(self, ms):
+    def ex2_cgi(self, ms):
         self.cnt += 1
         return "0\nMx50_amw\nMx50_desc\nMx50_owner\nct={}\n0".format(self.cnt)
+
+    @cherrypy.expose
+    def protocol_cgi(self, **kwargs):
+        print('hi')
+
 
     @cherrypy.expose
     def default(self, attr, *args, **kwargs):
@@ -96,6 +104,18 @@ class CGIApp(object):
         # print(self,'raising internal redirect for',attr)
         # raise cherrypy.InternalRedirect('')
         print(self,'will serve from live meter for', attr)
+        r = requests.get(urljoin(self.base,attr), params=kwargs)
+        target = self._cp_config['tools.staticdir.root']/self._cp_config['tools.staticdir.dir']/attr
+
+        try:
+            r.raise_for_status()
+        except requests.exceptions.HTTPError:
+            raise cherrypy.HTTPError(r.status_code)
+        else:
+            with open(target, 'w+b') as fp:
+                fp.write(r.content)
+                fp.flush()
+            return r.content
 
 # class LiveMeterApp(object):
 #     base = 'http://10.161.129.197'
@@ -105,6 +125,10 @@ class CGIApp(object):
 
 @cherrypy.tools.staticdir(dir='./web_pages', root=Path.cwd()/'resources/mx50', index='index.html')
 class StaticsApp(object):
+
+    @cherrypy.expose
+    def prot_cgi(self, **kwargs):
+        print('hi')
 
     @cherrypy.expose
     def teststatics(self):
@@ -124,7 +148,7 @@ class StaticsApp(object):
         # e.g. default(self, attr) wont trap input.cgi?ms=1
         # and  default(self, attr, ms) won't trap input.cgi
         print(self,'raising internal redirect for',attr)
-        raise cherrypy.InternalRedirect('')
+        raise cherrypy.InternalRedirect('', query_string=urlencode(kwargs))
 
 
 # class Capture404Dispatcher(Dispatcher):
@@ -164,3 +188,22 @@ if __name__ == '__main__':
 
     cherrypy.engine.start()
     cherrypy.engine.block()
+
+"""
+Response header differences on cgi, fix with
+@cherrypy.tools.response_headers(headers=[('Content-Type','text/plain')])
+
+Meter:
+   Connection: Keep-Alive
+   Content-Type: text/plain
+   Transfer-Encoding: chunked
+
+CherryPy:
+   Accept-Ranges: bytes
+   Content-Length: 64
+   Content-Type: text/html
+   Date: Wed, 28 Nov 2018 15:08:13 GMT
+   Last-Modified: Wed, 28 Nov 2018 14:43:06 GMT
+   Server: CherryPy/18.0.1
+
+"""
