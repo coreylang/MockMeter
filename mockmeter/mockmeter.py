@@ -68,7 +68,8 @@ class CGIApp(object):
         self.cnt = 0
 
     @cherrypy.expose
-    def testcgi(self):
+    @cherrypy.tools.response_headers(on=False)
+    def appid(self):
         return """<html>
           <body>
           Hello from CGI App
@@ -76,7 +77,7 @@ class CGIApp(object):
         </html>"""
     
     @cherrypy.expose
-    def example_cgi(self, ms):
+    def example_cgi(self):
         return bytes('\n'.join([
             "0",
             "hostname",
@@ -112,9 +113,9 @@ class CGIApp(object):
         except requests.exceptions.HTTPError:
             raise cherrypy.HTTPError(r.status_code)
         else:
-            with open(target, 'w+b') as fp:
-                fp.write(r.content)
-                fp.flush()
+            # with open(target, 'w+b') as fp:
+            #     fp.write(r.content)
+            #     fp.flush()
             return r.content
 
 # class LiveMeterApp(object):
@@ -125,30 +126,78 @@ class CGIApp(object):
 
 @cherrypy.tools.staticdir(dir='./web_pages', root=Path.cwd()/'resources/mx50', index='index.html')
 class StaticsApp(object):
+    def __init__(self):
+    #     self.appid = self._appid()
+    #     self.default = self._default()
+        self.base = 'http://10.161.129.197'
+        self.originatingmethod = None
+
+
+    # @cherrypy.expose
+    # class _appid(object):
+    #     # @staticmethod
+    #     def GET(self):
+    #         return """<html><body>
+    #         Hello from Statics App GET
+    #         </body></html>"""
+    #     # @staticmethod
+    #     def PUT(self, **kwargs):
+    #         return """<html><body>
+    #         Hello from Statics App PUT {}
+    #         </body></html>""".format(kwargs)
 
     @cherrypy.expose
-    def prot_cgi(self, **kwargs):
-        print('hi')
+    @cherrypy.tools.allow(methods=['GET','PUT'])
+    def appid(self, **kwargs):
+        # wont trap if url and method param signatures dont match
+        # e.g. appid(self, attr) wont trap input.cgi?ms=1
+        # and  appid(self, attr, ms) won't trap input.cgi
+        return """<html><body>
+        Hello from Statics App via {} with {}
+        </body></html>""".format(cherrypy.request.method, kwargs)
 
-    @cherrypy.expose
-    def teststatics(self):
-        return """<html>
-          <body>
-          Hello from Statics App
-          </body>
-        </html>"""
 
     @cherrypy.expose
     def testerror(self):
         raise cherrypy.HTTPError(500)
 
+    # @cherrypy.expose
+    def network_cgi(self):
+        raise cherrypy.InternalRedirect('/cgi/network.cgi')
+
     @cherrypy.expose
+    @cherrypy.tools.allow(methods=['GET','POST'], debug=True)
     def default(self, attr, *args, **kwargs):
-        # wont trap if url and method param signatures dont match
-        # e.g. default(self, attr) wont trap input.cgi?ms=1
-        # and  default(self, attr, ms) won't trap input.cgi
-        print(self,'raising internal redirect for',attr)
-        raise cherrypy.InternalRedirect('', query_string=urlencode(kwargs))
+        print(self,'default() entered with', 
+            cherrypy.request.method, attr, kwargs)
+
+        if attr.startswith('cgi'):
+            # we've already attempted a redirect into the CGI folder
+            # get data from meter instead
+            # raise cherrypy.HTTPError(404)
+            print(self,'will serve from live meter for', args[0])
+            r = requests.request(self.originatingmethod, 
+                urljoin(self.base,args[0]), params=kwargs)
+            target = (self._cp_config['tools.staticdir.root'] / 
+                self._cp_config['tools.staticdir.dir'] / args[0])
+            try:
+                r.raise_for_status()
+            except requests.exceptions.HTTPError:
+                raise cherrypy.HTTPError(r.status_code)
+            else:
+                # with open(target, 'w+b') as fp:
+                #     fp.write(r.content)
+                #     fp.flush()
+                return r.content
+
+        else:
+            # redirect to CGI folder
+            print(self,'raising internal redirect for',attr)
+            target_prm = urljoin('cgi/', attr)
+            # InternalRedirect converts to GETs, so capture originating method
+            self.originatingmethod = cherrypy.request.method
+            raise cherrypy.InternalRedirect(target_prm, query_string=urlencode(kwargs))
+            # raise cherrypy.HTTPRedirect(target_prm)
 
 
 # class Capture404Dispatcher(Dispatcher):
@@ -163,14 +212,19 @@ class StaticsApp(object):
 if __name__ == '__main__':
     conf = {
         '/': {
-            # 'request.dispatch': Capture404Dispatcher(),
-            # 'tools.sessions.on': True,
-            'wsgi.pipeline': [
+            # 'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+            'tools.sessions.on': True
+            # 'wsgi.pipeline': [
                 # haven't yet been able to pipeline more than 2 apps
                 # perhaps need to somehow de-assert InternalRedirect?
                 # ('meter', PipelineFactory(LiveMeterApp)),
-                ('cascade', PipelineFactory(CGIApp)),
-            ]
+                # ('cascade', PipelineFactory(CGIApp)),
+            # ]
+        },
+        '/cgi': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.root': Path.cwd()/'resources/mx50',
+            'tools.staticdir.dir': './cgi'
         },
         '/favicon.ico': {
             'tools.staticfile.on': True,
@@ -183,7 +237,8 @@ if __name__ == '__main__':
         'server.socket_host': '127.0.0.1',
         'server.socket_port': 4249
     })
-    cherrypy.tree.mount(StaticsApp(), '/', conf)
+    cherrypy.tree.mount(StaticsApp(), '', conf)
+    # cherrypy.tree.mount(CGIApp(), '/cgi')
     # cherrypy.tree.mount(LiveMeterApp(), '/live', conf)
 
     cherrypy.engine.start()
