@@ -1,0 +1,61 @@
+0
+0
+0
+65
+01:0:2
+0:Amps A, B, C:1
+1:Amps Residual:0
+2:Volts AN, BN, CN:1
+3:Volts AB, BC, CA:1
+4:Watts A, B, C:0
+5:VARs A, B, C:0
+6:Total Watts &#183; Total VARs:1
+7:VAs A, B, C:0
+8:Power Factor A, B, C:0
+9:Total VAs &#183; 3&Phi; Power Factor:1
+10:Frequency:1
+11:kWatt-Hours Normal(+):0
+12:kWatt-Hours Reverse(-):0
+13:kVAR-Hours Lagging(+):0
+14:kVAR-Hours Leading(-):0
+15:kVA-Hours:0
+16:kWatt-Hours Net:0
+17:Total Watts &#183; 3&Phi; PF &#183; Frequency:0
+18:Demand Amps A,B,C:1
+19:Max Demand Amps A,B,C:0
+20:Demand Amps Residual:0
+21:Average Volts AN, BN, CN:0
+22:Max Average Volts AN, BN, CN:0
+23:Min Average Volts AN, BN, CN:0
+24:Average Volts AB, BC, CA:0
+25:Max Average Volts AB, BC, CA:0
+26:Min Average Volts AB, BC, CA:0
+27:Total Watts Max &#183; Avg &#183; Min:0
+28:Total VARs Max &#183; Avg &#183; Min:0
+29:Total VAs Max &#183; Avg &#183; Min:0
+30:Fund Amps A, B, C:0
+31:Fund Amps Residual:0
+32:Fund Volts AN, BN, CN:0
+33:Fund Volts AB, BC, CA:0
+34:TDD Amps A,B,C:0
+35:THD Volts AN, BN, CN:0
+36:THD Volts AB, BC, CA:0
+37:K-Factor Amps A,B,C:0
+38:Displacement Power Factor A,B,C:0
+39:Displacement Power Factor Total:0
+40:Fund Demand Amps A,B,C:0
+41:Max Fund Demand Amps A,B,C:0
+42:Fund Demand Amps Residual:0
+43:Average Watts A, B, C:0
+44:Max Average Watts A, B, C:0
+45:Min Average Watts A, B, C:0
+46:Average VARs A. B, C:0
+47:Max Average VARs A. B, C:0
+48:Min Average VARs A. B, C:0
+49:Average VAs A, B, C:0
+50:Max Average VAs A, B, C:0
+51:Min Average VAs A, B, C:0
+52:Secondary Volts AN, BN, CN:0
+53:Secondary Volts AB, BC, CA:0
+54:Volts Aux:0
+55:Custom Screen 1 [ a ]:0

@@ -1,0 +1,4 @@
+<script>
+setTimeout(function() {
+window.location="identity.html"; }, 0);
+</script>
