@@ -81,6 +81,15 @@ class StaticsApp(object):
 
     @cherrypy.expose
     @cherrypy.tools.allow(methods=['GET', 'POST'])
+    def protocol1_html(self, *args, **kwargs):
+        """ Handle protocol1.html POSTs - could possibly be moved to default()"""
+        # 'GET' is served by web_pages/protocol1.html
+        # 'POST' is served here
+        print("Received upload for {}".format([x for x in kwargs]))
+        return self._fetch_cgi_resource(kwargs, append_params=False)
+
+    @cherrypy.expose
+    @cherrypy.tools.allow(methods=['GET', 'POST'])
     def default(self, attr, *args, **kwargs):
         """ Default behaviour for emulating CGI requests is to fetch a resource
         identified without including any parameters for it's name.  Specifically,
@@ -118,22 +127,3 @@ if __name__ == '__main__':
     cherrypy.tree.mount(StaticsApp(cgi_path), '', conf)
     cherrypy.engine.start()
     cherrypy.engine.block()
-
-"""
-Response header differences on cgi, fix with
-@cherrypy.tools.response_headers(headers=[('Content-Type','text/plain')])
-
-Meter:
-   Connection: Keep-Alive
-   Content-Type: text/plain
-   Transfer-Encoding: chunked
-
-CherryPy:
-   Accept-Ranges: bytes
-   Content-Length: 64
-   Content-Type: text/html
-   Date: Wed, 28 Nov 2018 15:08:13 GMT
-   Last-Modified: Wed, 28 Nov 2018 14:43:06 GMT
-   Server: CherryPy/18.0.1
-
-"""
