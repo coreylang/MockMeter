@@ -32,7 +32,10 @@ class StaticsApp(object):
         `append_params` bool to optionally use parameters in resolving file name
         """
 
-        fn = self.cgi_path/slugify(cherrypy.request.path_info+str(fn_append))
+        fn = self.cgi_path / slugify(
+            cherrypy.request.method +
+            cherrypy.request.path_info + 
+            str(fn_append))
         if fn.exists():
             return fn.open(mode='rb')
         else:

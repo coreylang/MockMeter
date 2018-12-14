@@ -1,0 +1,6 @@
+<h3>Custom Display Screens response</h3>
+<br><br>
+<script>
+setTimeout(function() {
+window.location="cscreens.html"; }, 0);
+</script>

@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Serial Diagnostics</title>
+  <link rel="stylesheet" type="text/css" href="site.css">
+  <link rel="icon" href="favicon.ico">
+</head>
+<body>
+<div id="Content">
+  <div id="Header">
+    <div id="Left">
+      <img src="header_logo.png">
+    </div>
+    <div id="Right"></div>
+  </div>
+  <div id="Navigation">
+    <ul id="mainNav">
+      <li><a href="index.html"><span>Home</span></a></li>
+      <li><a href="data.html"><span>Data</span></a></li>
+      <li><a href="resets.html"><span>Resets</span></a></li>
+      <li><a class="active" href="settings.html"><span>Settings</span></a></li>
+      <li><a href="contact.html"><span>Contact</span></a></li>
+    </ul>
+    <div id="logout" style="display:none; text-align:right">
+<a href="/logout.cgi">Log Out</a>
+    </div>
+  </div>
+</div>
+<div class="pagebox">
+<h2 class='topheader'>Serial Analyzer Status</h2><h3 class='topheader'>Uart Counters</h3>interrupts: 0<br>rx chars: 0<br>tx chars: 0<br><br>break: 0<br>parity: 0<br>framing: 0<br>overrun: 0<br><h3 class='topheader'>Capture Status</h3>capture: inactive - oldest<br>capt id: 0<br>n_rcv: 0<br>n xmit: 0<br>n ctrl: 0<br>n err: 0<br>n used: 0<br>n max: 2048<br><h3 class='topheader'>Serial Analyzer Options:</h3><a href="lrsa_stats.cgi">Refresh</a><br><a href="lrsa_capture.cgi">Start Capture</a><br><a href="lrsa_capture_new.cgi">Start Rolling Capture</a><br><a href="lrsa_dump.cgi">Dump Capture</a><br><a href="serport.html">Serial Port Settings</a><br>
+<br>
+<br>
+<div class="pagebox">
+  <div id="footer">Copyright &copy; 2011 Bitronics LLC. All rights reserved.  </div>
+</div>
+</div></body></html>
