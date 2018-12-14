@@ -31,6 +31,12 @@ class StaticsApp(object):
         `params`    a dict of request parameters
         `append_params` bool to optionally use parameters in resolving file name
         """
+        def _request_is_post_file():
+            try:
+                return 'boundary' in cherrypy.request.headers['Content-Type']
+            except KeyError:
+                return False
+
         params_for_fn = params if append_params else ''
         fn = self.cgi_path/slugify(cherrypy.request.path_info+str(params_for_fn))
         if fn.exists():
@@ -39,7 +45,12 @@ class StaticsApp(object):
             print(self,'will serve from live meter for', fn)
             source = urlunsplit((cherrypy.request.scheme, self.ip,
                 cherrypy.request.path_info, cherrypy.request.query_string,''))
-            r = requests.request(cherrypy.request.method, source, data=params)
+            # TODO: can/should this be done at caller?
+            if _request_is_post_file():
+                payload = {'files': params.items()}
+            else:
+                payload = {'data': params}
+            r = requests.request(cherrypy.request.method, source, **payload)
             try:
                 r.raise_for_status()
             except requests.exceptions.HTTPError:

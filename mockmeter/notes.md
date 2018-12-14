@@ -40,7 +40,12 @@ params = {'serCollection':
 }
 ```
 
+### 002
+
+File uploads to the webserver are not properly forwarded to the meter.
+
 ## Todos
 
 * [X] ~~*Resolve Issue 001*~~ [2018-12-13]
+* [X] ~~*Resolve Issue 002*~~ [2018-12-14]
 * [ ] Add support for folder specification
