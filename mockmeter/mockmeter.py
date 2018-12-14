@@ -22,7 +22,7 @@ class StaticsApp(object):
         self.ip = '10.161.129.197'
         self.cgi_path = cgi_path
 
-    def _fetch_cgi_resource(self, params: dict, append_params: bool = True):
+    def _fetch_cgi_resource(self, payload: dict, fn_append: str = ''):
         """ Return resource from disk if it exists, otherwise forward the request 
         to a physical meter.  Responses to forwarded requests are then captured
         as a local file for future use.  File names are resolved with the request
@@ -31,25 +31,14 @@ class StaticsApp(object):
         `params`    a dict of request parameters
         `append_params` bool to optionally use parameters in resolving file name
         """
-        def _request_is_post_file():
-            try:
-                return 'boundary' in cherrypy.request.headers['Content-Type']
-            except KeyError:
-                return False
 
-        params_for_fn = params if append_params else ''
-        fn = self.cgi_path/slugify(cherrypy.request.path_info+str(params_for_fn))
+        fn = self.cgi_path/slugify(cherrypy.request.path_info+str(fn_append))
         if fn.exists():
             return fn.open(mode='rb')
         else:
             print(self,'will serve from live meter for', fn)
             source = urlunsplit((cherrypy.request.scheme, self.ip,
                 cherrypy.request.path_info, cherrypy.request.query_string,''))
-            # TODO: can/should this be done at caller?
-            if _request_is_post_file():
-                payload = {'files': params.items()}
-            else:
-                payload = {'data': params}
             r = requests.request(cherrypy.request.method, source, **payload)
             try:
                 r.raise_for_status()
@@ -81,23 +70,23 @@ class StaticsApp(object):
     @cherrypy.tools.allow(methods=['GET'])
     def m650_cfg(self, *args, **kwargs):
         """ Handle m650.cfg with a Content-Type header """
-        return self._fetch_cgi_resource(kwargs)
+        return self._fetch_cgi_resource({'data':kwargs})
 
     @cherrypy.expose(['modbus.cgi', 'dnp.cgi'])
     @cherrypy.tools.response_headers(headers=[('Content-Type','text/plain')])
     @cherrypy.tools.allow(methods=['GET','POST'])
     def protocol_cgi(self, ms, *args, **kwargs):
         """ Handle protocol.cgi, modbus.cgi, dnp.cgi POSTs by including session """
-        return self._fetch_cgi_resource(kwargs)
+        return self._fetch_cgi_resource({'data':kwargs}, kwargs)
 
     @cherrypy.expose
     @cherrypy.tools.allow(methods=['GET', 'POST'])
     def protocol1_html(self, *args, **kwargs):
-        """ Handle protocol1.html POSTs - could possibly be moved to default()"""
+        """ Handle protocol1.html file POSTs """
         # 'GET' is served by web_pages/protocol1.html
-        # 'POST' is served here
+        # 'POST' is served here by using 'files' parameter
         print("Received upload for {}".format([x for x in kwargs]))
-        return self._fetch_cgi_resource(kwargs, append_params=False)
+        return self._fetch_cgi_resource({'files':kwargs.items()})
 
     @cherrypy.expose
     @cherrypy.tools.allow(methods=['GET', 'POST'])
@@ -107,7 +96,7 @@ class StaticsApp(object):
         most GETs need the 'ms' removed from the query string.  Most POST are
         submits and need the data from the body removed.
         """
-        return self._fetch_cgi_resource(kwargs, append_params=False)
+        return self._fetch_cgi_resource({'data':kwargs})
 
 
 if __name__ == '__main__':
