@@ -82,7 +82,7 @@ class StaticsApp(object):
         """ Handle protocol.cgi, modbus.cgi, dnp.cgi POSTs by including session """
         return self._fetch_cgi_resource({'data':kwargs}, kwargs)
 
-    @cherrypy.expose
+    @cherrypy.expose(['config.html', 'upload.html'])
     @cherrypy.tools.allow(methods=['GET', 'POST'])
     def protocol1_html(self, *args, **kwargs):
         """ Handle protocol1.html file POSTs """
