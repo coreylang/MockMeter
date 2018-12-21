@@ -26,6 +26,12 @@ CherryPy:
 Response header differences can be reconciled with:
 `@cherrypy.tools.response_headers(headers=[('Content-Type','text/plain')])`
 
+### install command
+
+```shell
+pip install -e git+https://github.com/bitronics-llc/MockMeter#egg=mockmeter
+```
+
 ## Issues
 
 ### 001
@@ -53,3 +59,4 @@ File uploads to the webserver are not properly forwarded to the meter.
 * [ ] Convert prints to log
 * [ ] Create distribution method
   * consider [vcs distribution](https://pip.pypa.io/en/latest/reference/pip_install/#vcs-support)
+* [ ] Add [signal handler](http://docs.cherrypy.org/en/latest/pkg/cherrypy.process.html#cherrypy.process.plugins.SignalHandler) for shutdown
