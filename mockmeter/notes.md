@@ -49,3 +49,7 @@ File uploads to the webserver are not properly forwarded to the meter.
 * [X] ~~*Resolve Issue 001*~~ [2018-12-13]
 * [X] ~~*Resolve Issue 002*~~ [2018-12-14]
 * [ ] Add support for folder specification
+* [ ] Cleanup log formats
+* [ ] Convert prints to log
+* [ ] Create distribution method
+  * consider [vcs distribution](https://pip.pypa.io/en/latest/reference/pip_install/#vcs-support)
