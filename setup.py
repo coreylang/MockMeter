@@ -32,7 +32,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'mkmx50 = mockmeter.mockmeter',
+            'mkmx50 = mockmeter.mockmeter:__main__',
         ],
     }
 )

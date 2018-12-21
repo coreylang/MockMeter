@@ -30,6 +30,8 @@ Response header differences can be reconciled with:
 
 ```shell
 pip install -e git+https://github.com/bitronics-llc/MockMeter#egg=mockmeter
+
+pip install -e git+file:\\c:\dev\wkone\mockmeter\mockmeter#egg=mockmeter --src .
 ```
 
 ## Issues
