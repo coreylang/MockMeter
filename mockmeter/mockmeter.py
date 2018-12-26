@@ -101,19 +101,52 @@ class StaticsApp(object):
 
 
 if __name__ == '__main__':
-    # TODO: should these be resolved differently?
-    config_file = Path.cwd()/'resources/app.conf'
-    resource_path = Path.cwd()/'resources/mx50'
+    config_file = Path.cwd()/'mockmeter/resources/app.conf'
 
-    config_dict = {
+    # load global defaults
+    cherrypy.config.update({
         'global': {
             'engine.autoreload.on': True,
             'server.socket_host': '127.0.0.1',
             'server.socket_port': 4249
-        },
+            }
+    })
+    # load global overrides from user file
+    cherrypy.config.update(config_file.open())
+
+    # load device defaults
+    app = cherrypy.tree.mount(StaticsApp(), '', {
         'device': {
+            'source': 'mx50',
             'ipaddress': None,
             'model': 'M650M3P511'
+        }
+    })
+    # load device overrides from user file
+    app.merge(config_file.open())
+
+    # check user settings and create application configuration
+    if not app.config['device']['ipaddress']:
+        cherrypy.log('No live meter specified.  Emulation only.')
+    else:
+        cherrypy.log('Using live meter at {} for missing cgi'.format(
+            app.config['device']['ipaddress']))
+
+    resource_path = config_file.absolute().parent/app.config['device']['source']
+    if resource_path.exists():
+        cherrypy.log('Serving WEB from {}'.format(resource_path.as_posix()))
+    else:
+        raise NotADirectoryError
+
+    cgi_path = resource_path/'cgi'/app.config['device']['model']
+    if cgi_path.exists():
+        cherrypy.log('Serving CGI from {}'.format(cgi_path.as_posix()))
+    else:
+        raise NotADirectoryError
+
+    config_dict = {
+        'cgi': {
+            'path': cgi_path
         },
         '/': {
             'tools.sessions.on': True,
@@ -126,7 +159,7 @@ if __name__ == '__main__':
         },
         '/stub.html': {
             'tools.staticfile.on': True,
-            'tools.staticfile.root': resource_path,
+            'tools.staticfile.root': cgi_path,
             'tools.staticfile.filename': 'stub.html'
         },
         '/favicon.ico': {
@@ -135,30 +168,8 @@ if __name__ == '__main__':
             'tools.staticfile.filename': './web_pages/favicon.ico'
         }
     }
-
-    cherrypy.config.update(config_dict)
-    cherrypy.config.update(config_file.open())
-
-    app = cherrypy.tree.mount(StaticsApp(), '', config_dict)
-    app.merge(config_file.open())
-
-    # validate resulting configuration
-    if not app.config['device']['ipaddress']:
-        cherrypy.log('No live meter specified.  Emulation only.')
-    else:
-        cherrypy.log('Using live meter at {} for missing cgi'.format(
-            app.config['device']['ipaddress']))
-
-    cgi_path = resource_path/'cgi'/app.config['device']['model']
-    if cgi_path.exists():
-        cherrypy.log('Serving CGI from {}'.format(cgi_path.as_posix()))
-        app.merge({
-            'cgi': {'path': cgi_path},
-            '/stub.html': {'tools.staticfile.root': cgi_path}
-            # TODO: meh, crude patch
-            })
-    else:
-        raise NotADirectoryError
+    # load application configuration
+    app.merge(config_dict)
 
     cherrypy.engine.signals.subscribe()
     cherrypy.engine.start()
