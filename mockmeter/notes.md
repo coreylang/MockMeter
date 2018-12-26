@@ -59,6 +59,7 @@ File uploads to the webserver are not properly forwarded to the meter.
 * [ ] Add support for folder specification
 * [ ] Cleanup log formats
 * [ ] Convert prints to log
-* [ ] Create distribution method
+* [X] ~~*Create distribution method*~~ [2018-12-26]
   * consider [vcs distribution](https://pip.pypa.io/en/latest/reference/pip_install/#vcs-support)
-* [ ] Add [signal handler](http://docs.cherrypy.org/en/latest/pkg/cherrypy.process.html#cherrypy.process.plugins.SignalHandler) for shutdown
+* [X] ~~*Add [signal handler](http://docs.cherrypy.org/en/latest/pkg/cherrypy.process.html#cherrypy.process.plugins.SignalHandler) for shutdown*~~ [2018-12-26]
+* [ ] Add cli() entry point.
