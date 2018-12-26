@@ -35,7 +35,7 @@ class StaticsApp(object):
         if fn.exists():
             return fn.open(mode='rb')
         elif ip:
-            print(self,'will serve from live meter for', fn)
+            cherrypy.log(self,'will serve from live meter for', fn)
             source = urlunsplit((cherrypy.request.scheme, ip,
                 cherrypy.request.path_info, cherrypy.request.query_string,''))
             r = requests.request(cherrypy.request.method, source, **payload)
@@ -86,7 +86,7 @@ class StaticsApp(object):
         """ Handle protocol1.html file POSTs """
         # 'GET' is served by web_pages/protocol1.html
         # 'POST' is served here by using 'files' parameter
-        print("Received upload for {}".format([x for x in kwargs]))
+        cherrypy.log("Received upload for {}".format([x for x in kwargs]))
         return self._fetch_cgi_resource({'files':kwargs.items()})
 
     @cherrypy.expose
@@ -144,14 +144,14 @@ if __name__ == '__main__':
 
     # validate resulting configuration
     if not app.config['device']['ipaddress']:
-        print('No live meter specified.  Emulation only.')
+        cherrypy.log('No live meter specified.  Emulation only.')
     else:
-        print('Using live meter at {} for missing cgi'.format(
+        cherrypy.log('Using live meter at {} for missing cgi'.format(
             app.config['device']['ipaddress']))
 
     cgi_path = resource_path/'cgi'/app.config['device']['model']
     if cgi_path.exists():
-        print('Serving CGI from {}'.format(cgi_path.as_posix()))
+        cherrypy.log('Serving CGI from {}'.format(cgi_path.as_posix()))
         app.merge({
             'cgi': {'path': cgi_path},
             '/stub.html': {'tools.staticfile.root': cgi_path}
