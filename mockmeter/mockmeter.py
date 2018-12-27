@@ -35,7 +35,7 @@ class StaticsApp(object):
         if fn.exists():
             return fn.open(mode='rb')
         elif ip:
-            cherrypy.log(self,'will serve from live meter for', fn)
+            cherrypy.log('Will serve from live meter for {}'.format(fn))
             source = urlunsplit((cherrypy.request.scheme, ip,
                 cherrypy.request.path_info, cherrypy.request.query_string,''))
             r = requests.request(cherrypy.request.method, source, **payload)
@@ -99,9 +99,7 @@ class StaticsApp(object):
         """
         return self._fetch_cgi_resource({'data':kwargs})
 
-
-if __name__ == '__main__':
-    config_file = Path.cwd()/'mockmeter/resources/app.conf'
+def main(config_file: Path):
 
     # load global defaults
     cherrypy.config.update({
@@ -142,7 +140,8 @@ if __name__ == '__main__':
     if cgi_path.exists():
         cherrypy.log('Serving CGI from {}'.format(cgi_path.as_posix()))
     else:
-        raise NotADirectoryError
+        raise NotADirectoryError(cgi_path.as_posix()+
+            "\nIf attempting to capture new cgi data, directory must already exist")
 
     config_dict = {
         'cgi': {
@@ -174,3 +173,36 @@ if __name__ == '__main__':
     cherrypy.engine.signals.subscribe()
     cherrypy.engine.start()
     cherrypy.engine.block()
+
+def cli():
+    """ Command line interface """
+    import os
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Launch mock web server using \
+        specified configuration file, 'conf'")
+    parser.add_argument('conf', help='Name of configuration file', 
+        nargs='?', default='app.conf')
+    args = parser.parse_args()
+
+    conf = Path(args.conf)
+    if not conf.exists():
+        if len(conf.parts) > 1:
+            # user provided path in addition to file, so don't search
+            raise FileNotFoundError(conf)
+        else:
+            # search for file relative to virtual environment
+            try:
+                env = Path(os.environ['VIRTUAL_ENV']).parent
+                conf = env/'mockmeter/resources'/conf.name
+            except KeyError:
+                # no virtual env defined, out of search locations
+                pass
+            if not conf.exists():
+                raise FileNotFoundError(conf)
+
+    main(config_file=conf)
+
+if __name__ == '__main__':
+    cli()
+    # main(config_file = Path.cwd()/'mockmeter/resources/app.conf')

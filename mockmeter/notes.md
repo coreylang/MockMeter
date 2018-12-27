@@ -26,12 +26,24 @@ CherryPy:
 Response header differences can be reconciled with:
 `@cherrypy.tools.response_headers(headers=[('Content-Type','text/plain')])`
 
-### install command
+### install commands
+
+#### from github commit
 
 ```shell
 pip install -e git+https://github.com/bitronics-llc/MockMeter#egg=mockmeter
+```
 
+#### from local commit
+
+```shell
 pip install -e git+file:\\c:\dev\wkone\mockmeter\mockmeter#egg=mockmeter --src .
+```
+
+#### from local working without source copy
+
+```shell
+pip install -e file:\\c:\dev\wkone\mockmeter\mockmeter
 ```
 
 ## Issues

@@ -1,0 +1,1 @@
+from .mockmeter import cli

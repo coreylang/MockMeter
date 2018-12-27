@@ -31,8 +31,8 @@ setup(
     install_requires=['CherryPy>=3', 'requests>=2', 'python-slugify'],
 
     entry_points={
-        # 'console_scripts': [
-        #     'mkmx50 = mockmeter.mockmeter:cli',
-        # ],
+        'console_scripts': [
+            'mock = mockmeter.mockmeter:cli',
+        ],
     }
 )
