@@ -68,10 +68,12 @@ File uploads to the webserver are not properly forwarded to the meter.
 
 * [X] ~~*Resolve Issue 001*~~ [2018-12-13]
 * [X] ~~*Resolve Issue 002*~~ [2018-12-14]
-* [ ] Add support for folder specification
+* [X] ~~*Add support for folder specification*~~ [2018-12-27]
 * [X] ~~*Cleanup log formats*~~ [2018-12-26]
 * [X] ~~*Convert prints to log*~~ [2018-12-26]
 * [X] ~~*Create distribution method*~~ [2018-12-26]
   * consider [vcs distribution](https://pip.pypa.io/en/latest/reference/pip_install/#vcs-support)
 * [X] ~~*Add [signal handler](http://docs.cherrypy.org/en/latest/pkg/cherrypy.process.html#cherrypy.process.plugins.SignalHandler) for shutdown*~~ [2018-12-26]
-* [ ] Add cli() entry point.
+* [X] ~~*Add cli() entry point.*~~ [2018-12-27]
+* [ ] Make README.md example more interesting
+  * once we have more than the default cgi
