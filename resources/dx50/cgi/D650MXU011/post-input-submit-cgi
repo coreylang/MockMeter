@@ -1,0 +1,11 @@
+<h3>Input Configuration Settings response</h3>
+<script>
+setTimeout(function() {
+window.location="input.html"; }, 0);
+</script>
+HTTP/1.1 200 OK
+Transfer-Encoding: chunked
+Content-Type: text/html
+Connection: Keep-Alive
+
+Input Configuration Settings response</h3>

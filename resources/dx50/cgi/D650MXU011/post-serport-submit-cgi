@@ -1,0 +1,6 @@
+<h3>Serial Port Settings response</h3>
+<br><br>
+<script>
+setTimeout(function() {
+window.location="serport.html"; }, 0);
+</script>

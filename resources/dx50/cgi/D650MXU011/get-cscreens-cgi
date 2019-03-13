@@ -1,0 +1,152 @@
+0
+0
+0
+3
+169:0:NONE
+0:0:RMS Volts Aux
+1:0:RMS Volts A
+2:0:RMS Volts B
+3:0:RMS Volts C
+5:0:RMS Amps A
+6:0:RMS Amps B
+7:0:RMS Amps C
+8:0:RMS Amps Residual
+9:0:RMS Volts AB
+10:0:RMS Volts BC
+11:0:RMS Volts CA
+12:0:RMS Watts A
+13:0:RMS Watts B
+14:0:RMS Watts C
+15:0:RMS Watts Total
+16:0:RMS VARs A
+17:0:RMS VARs B
+18:0:RMS VARs C
+19:0:RMS VARs Total
+20:0:RMS VAs A
+21:0:RMS VAs B
+22:0:RMS VAs C
+23:0:RMS VAs Tot. Geom
+24:0:Power Factor A
+25:0:Power Factor B
+26:0:Power Factor C
+27:0:Power Factor Tot. Geom
+28:0:Fund. Volts A
+29:0:Fund. Volts B
+30:0:Fund. Volts C
+31:0:Fund. Amps A
+32:0:Fund. Amps B
+33:0:Fund. Amps C
+34:0:Fund. Amps Residual
+35:0:Fund. Volts AB
+36:0:Fund. Volts BC
+37:0:Fund. Volts CA
+38:0:System Frequency
+39:0:Displ. Power Factor A
+40:0:Displ. Power Factor B
+41:0:Displ. Power Factor C
+42:0:Displ. Power Factor Total
+43:0:THD Volts A
+44:0:THD Volts B
+45:0:THD Volts C
+46:0:TDD Amps A
+47:0:TDD Amps B
+48:0:TDD Amps C
+49:0:TDD Amps Residual
+50:0:THD Volts AB
+51:0:THD Volts BC
+52:0:THD Volts CA
+53:0:K-factor Amps A
+54:0:K-factor Amps B
+55:0:K-factor Amps C
+56:0:K-factor Amps Residual
+57:1:kWatt-Hours Net
+58:1:kWatt-Hours Normal
+59:1:kWatt-Hours Reverse
+60:1:kVAR-Hours Lag
+61:1:kVAR-Hours Lead
+62:1:kVA-Hours
+63:0:Demand RMS Amps A
+64:0:Demand RMS Amps B
+65:0:Demand RMS Amps C
+66:0:Demand RMS Amps Residual
+67:0:Demand Fund. Amps A
+68:0:Demand Fund. Amps B
+69:0:Demand Fund. Amps C
+70:0:Demand Fund. Amps Residual
+71:0:Demand RMS Volts A
+72:0:Demand RMS Volts B
+73:0:Demand RMS Volts C
+74:0:Demand RMS Volts AB
+75:0:Demand RMS Volts BC
+76:0:Demand RMS Volts CA
+77:0:Demand RMS Watts A
+78:0:Demand RMS Watts B
+79:0:Demand RMS Watts C
+80:0:Demand RMS Watts Total
+81:0:Demand RMS VARs A
+82:0:Demand RMS VARs B
+83:0:Demand RMS VARs C
+84:0:Demand RMS VARs Total
+85:0:Demand RMS VAs A
+86:0:Demand RMS VAs B
+87:0:Demand RMS VAs C
+88:0:Demand RMS VAs Total
+89:0:Max Demand RMS Amps A
+90:0:Max Demand RMS Amps B
+91:0:Max Demand RMS Amps C
+92:0:Max Demand RMS Amps Residual
+93:0:Max Demand Fund. Amps A
+94:0:Max Demand Fund. Amps B
+95:0:Max Demand Fund. Amps C
+96:0:Max Demand Fund. Amps Residual
+97:0:Max Demand RMS Volts A
+98:0:Max Demand RMS Volts B
+99:0:Max Demand RMS Volts C
+100:0:Max Demand RMS Volts AB
+101:0:Max Demand RMS Volts BC
+102:0:Max Demand RMS Volts CA
+103:0:Max Demand RMS Watts A
+104:0:Max Demand RMS Watts B
+105:0:Max Demand RMS Watts C
+106:0:Max Demand RMS Watts Total
+107:0:Max Demand RMS VARs A
+108:0:Max Demand RMS VARs B
+109:0:Max Demand RMS VARs C
+110:0:Max Demand RMS VARs Total
+111:0:Max Demand RMS VAs A
+112:0:Max Demand RMS VAs B
+113:0:Max Demand RMS VAs C
+114:0:Max Demand RMS VAs Total
+115:0:Min Demand RMS Volts A
+116:0:Min Demand RMS Volts B
+117:0:Min Demand RMS Volts C
+118:0:Min Demand RMS Volts AB
+119:0:Min Demand RMS Volts BC
+120:0:Min Demand RMS Volts CA
+121:0:Min Demand RMS Watts A
+122:0:Min Demand RMS Watts B
+123:0:Min Demand RMS Watts C
+124:0:Min Demand RMS Watts Total
+125:0:Min Demand RMS VARs A
+126:0:Min Demand RMS VARs B
+127:0:Min Demand RMS VARs C
+128:0:Min Demand RMS VARs Total
+129:0:Min Demand RMS VAs A
+130:0:Min Demand RMS VAs B
+131:0:Min Demand RMS VAs C
+132:0:Min Demand RMS VAs Total
+147:0:Phase Angle Volts A
+148:0:Phase Angle Volts B
+149:0:Phase Angle Volts C
+150:0:Phase Angle Amps A
+151:0:Phase Angle Amps B
+152:0:Phase Angle Amps C
+153:0:Phase Angle Volts AB
+154:0:Phase Angle Volts BC
+155:0:Phase Angle Volts CA
+159:0:Uncompensated RMS Watts Total
+160:0:Uncompensated RMS VARs Total
+166:0:Avg. Volts
+167:0:Avg. Amps
+168:0:Avg. Phs-Phs Volt
+///

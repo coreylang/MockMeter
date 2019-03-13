@@ -1,0 +1,6 @@
+<h3>Network Settings response</h3>
+<br><br>
+<script>
+setTimeout(function() {
+window.location="network.html"; }, 0);
+</script>

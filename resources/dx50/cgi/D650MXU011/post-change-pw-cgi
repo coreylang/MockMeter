@@ -1,0 +1,6 @@
+<script>alert('Password changed successfully!');</script>
+
+<script>
+setTimeout(function() {
+window.location="auth.html"; }, 0);
+</script>

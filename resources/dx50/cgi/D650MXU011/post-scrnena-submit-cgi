@@ -1,0 +1,6 @@
+<script>alert('Screen settings saved!');</script>
+
+<script>
+setTimeout(function() {
+window.location="scrnena.html"; }, 0);
+</script>

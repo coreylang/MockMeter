@@ -1,0 +1,6 @@
+<h3>Security Configuration Settings response</h3>
+<br><br>
+<script>
+setTimeout(function() {
+window.location="auth.html"; }, 0);
+</script>

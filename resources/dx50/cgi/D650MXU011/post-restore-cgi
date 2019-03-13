@@ -1,0 +1,4 @@
+<script>
+setTimeout(function() {
+window.location="input.html"; }, 0);
+</script>
