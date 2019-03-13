@@ -1,0 +1,344 @@
+<!DOCTYPE HTML SYSTEM>
+
+<html><head> 
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Input - Bitronics Web Server</title> 
+    <link rel="stylesheet" type="text/css" href="site.css">
+    <link rel="icon" href="favicon.ico">
+    <script src="request.js"></script>
+    <script src="content.js"></script>
+    <script src="data.js"></script>
+<script>
+//<!--
+var valid_value = new Array(8);
+//                                          txtbox  chars   valid   valid
+//               name   type         value  len     mxlen   min_idx max_idx     
+var set_arr = [ ["dtyp", "dropdown",        ,   ,       ,       ,       ],
+                ["inp",  "dropdown",        ,   ,       ,       ,       ],
+                ["ctp", "text",             ,   6,      6,      ,       ],
+                ["cts", "dropdown",         ,   ,       ,       ,       ],
+                ["vtp", "text",             ,   6,      6,      ,       ],
+                ["vts",  "dropdown",        ,   ,       ,       ,       ],
+                ["did",  "text",            ,   4,      2,      4,     5] ];
+
+//                                  B   A   A   A   V   W   W   V       V
+//                                  A   D   D   M   L   V   A   A   P   A
+//                       sec name   S   V   P   P   T   R   T   R   F   P
+var     mset_tab =  [   ["inp_cfg", 1,  1,  1,  0,  1,  0,  0,  0,  0,  0 ],
+                        ["vtr",     1,  1,  1,  0,  1,  0,  0,  0,  0,  0 ],
+                        ["ctr",     1,  1,  1,  1,  0,  0,  0,  0,  0,  0 ]];
+
+var looptimer;
+var doSend = true;
+var getUpdate = true;
+var saved_input;
+var first_load = true;
+var DSPL_ID_MIN;
+var DSPL_ID_MAX;
+
+function parse_vars(data) {
+    var parsed = data.split( "\n" );
+    var k = 0;
+
+    check_pending(parsed[k++]);
+    if(parsed[k++]=="1") {id("logout").style.display = 'block';}
+    
+    var mset = Number(parsed[k++]) + 1;
+    var mp = Number(parsed[k++]);
+    
+    if(!mp)
+    {
+    id("typ_opt").style.display = 'none';
+    id("disp_cfg").style.display = 'block';
+    }
+        
+    for(var i=0;i<set_arr.length;i++, k++) {
+        if(first_load == false)
+            continue;
+        var f = id(set_arr[i][0]);
+        set_arr[i][2] = parsed[k];
+        if(set_arr[i][1] == "dropdown") {
+            f.value = parsed[k];
+        }
+        else if(set_arr[i][1] == "text") {
+            f.innerHTML = '<input type="text" name="'+set_arr[i][0]+'" size="'+set_arr[i][3]+'" maxlength="'+set_arr[i][4]+'" value="'+set_arr[i][2]+'" onKeyPress="return checkKey(event)"/>';
+            f.className = "";
+        }
+        else if(set_arr[i][1] == "checkbox") {
+            f.innerHTML = '<input type="checkbox" name="'+set_arr[i][0]+'" '+((set_arr[i][2]>0)?"checked":" ")+'/>';
+        }
+        
+    }
+    
+    var ct_scale = parsed[k++];
+    var vt_scale = parsed[k++];
+    var iOverride = parsed[k++];
+    var vOverride = parsed[k++];
+    var prot = (parsed[k++] == "1")?"DNP":"Modbus";
+    
+    for(i=0;i<valid_value.length;i++) {
+        valid_value[i] = parsed[k++];
+    }
+    
+    DSPL_ID_MIN = parsed[k++];
+    DSPL_ID_MAX = parsed[k++];  
+
+    for(i=0; i<mset_tab.length; i++) {
+        if(mset_tab[i][mset] == 1) {
+            id(mset_tab[i][0]).style.display = 'block';
+        }
+    }
+    
+    if(iOverride == "0")
+        id("cim").innerHTML = "&nbsp; <b class='yelbox'>Manual Set<b>";
+    else
+    {
+        
+        id("acp").innerHTML = ct_scale;
+        id("cp").style.display = 'none';
+        id("cs").style.display = 'none';
+        id("tctp").style.display = 'block';
+        id("tcts").style.display = 'block';
+        if(iOverride == "1")
+          id("cim").innerHTML = "&nbsp; <b class='grnbox'>From " + prot + "<b>";
+        else
+          id("cim").innerHTML = "&nbsp; <b class='redbox'>From " + prot + "<b>";
+    }
+    
+    if(vOverride == "0")
+        id("vim").innerHTML = "&nbsp; <b class='yelbox'>Manual Set<b>";
+    else
+    {
+        id("avp").innerHTML = vt_scale;
+        id("vp").style.display = 'none';
+        id("vs").style.display = 'none';
+        id("tvtp").style.display = 'block';
+        id("tvts").style.display = 'block';
+        if(vOverride == "1")
+          id("vim").innerHTML = "&nbsp; <b class='grnbox'>From " + prot + "<b>";
+        else
+          id("vim").innerHTML = "&nbsp; <b class='redbox'>From " + prot + "<b>";
+    }
+    
+    if(id("dtyp").value == '0')
+        {
+        hide_ratios(true);
+        id("disp_cfg").style.display = 'block';
+        id("n_elem").style.display = 'none';
+        }
+    else
+        hide_ratios(false);
+        
+    saved_input = id("dtyp").value;
+        
+    looptimer = setTimeout("loop()", 5000);
+    
+    if(first_load == false)
+        return;
+
+    first_load = false; 
+}
+
+function loop() {
+    if(getUpdate && doSend && http_request.readyState == 4) {
+        doSend = false;
+        makeRequest(nc("input.cgi"), null);
+        setTimeout(function(){check_status(http_request, 0);}, 249);
+    }
+}
+
+function hide_ratios(choice)
+{
+    var hidden;
+    
+    if(choice == true)
+        hidden = 'none';
+    else
+        hidden = 'block';
+        
+    id("vtr").style.display = hidden;
+    id("ctr").style.display = hidden;
+}
+
+function validate(f) {
+    var invalid = false;
+    
+    for(var i=0; i<f.elements.length; i++) {
+        var k = f.elements[i];
+        if(k.name=="ctp") 
+            continue;
+        else if(k.name=="vtp")
+            continue;
+        else if(k.name=="cts")
+            continue;
+        else if(k.name=="vts")
+            continue;
+        
+        for(var j=5; j<set_arr.length; j++) {
+            if(k.name == set_arr[j][0]) {
+                var g = id(set_arr[j][0]);
+                if(set_arr[j][1] == "text") {
+                    var min_idx = set_arr[j][5]; var max_idx = set_arr[j][6];
+                    if(k.value >= Number(valid_value[min_idx]) && k.value <= Number(valid_value[max_idx])) {
+                        g.innerHTML = '<input type="text" name="'+set_arr[j][0]+'" size="'+set_arr[j][3]+'" maxlength="'+set_arr[j][4]+'" value="'+k.value+'"\/>';
+                        g.className = "success_msg";
+                        continue;
+                    }
+                    else {
+                        g.innerHTML = '<input type="text" name="'+set_arr[j][0]+'" size="'+set_arr[j][3]+'" maxlength="'+set_arr[j][4]+'" value="'+k.value+'"\/><b><a class="err_msg">Value must be within the range of '+valid_value[min_idx]+' to '+valid_value[max_idx]+'<\/a><\/b>';
+                        g.className = "error";
+                        invalid = true;
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
+    if(invalid) {
+        alert("Please correct the red highlighted fields and resubmit.");
+        return false;
+    }
+    else {
+        return true;
+    }
+
+}
+
+function dtyp_change(isMP)
+{
+    hide_ratios(!Number(isMP));
+    clearTimeout(looptimer);
+    if(isMP == "0")
+    {
+        getUpdate = false;
+        id("disp_cfg").style.display = "block";
+        id("n_elem").style.display = "none";
+    }
+    else
+    {
+        getUpdate = true;
+        id("disp_cfg").style.display = "none";
+        id("n_elem").style.display = "block";
+        if(saved_input == '1')
+            loop();
+    }
+        
+}
+
+function load_once() {
+    populate("settings.html");
+    makeRequest(nc("input.cgi"), null);
+}
+
+window.onload=load_once;
+//-->
+</script>
+    
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="trail"><a href="settings.html">Settings</a> / Input</div>
+<div id="message"></div>
+<form action="http:input_submit.cgi" method="POST" name="myform" id="myform" onSubmit="return validate(this);" >
+
+<h2>Display Input Configuration</h2><br>
+<div id="inp_cfg" style="display:none;">
+<table cellspacing="0" border="0">
+    <tr id="typ_opt">
+    <td class="label4">Display Input</td>
+        <td class="form">
+          <select name="dtyp" id="dtyp" onchange="dtyp_change(this.value);">
+              <option value='0'>Serial display protocol</option>
+              <option value='1'>Modbus/DNP</option>
+          </select>
+        </td>
+    </tr>
+</table>
+<div id="n_elem">
+<table cellspacing="0" border="0">
+    <tr>
+        <td class="label4">Input Configuration</td>
+        <td class="form">
+          <select name="inp" id="inp">
+              <option value='0'>2 Element</option>
+              <option value='1'>2.5 Element A</option>
+              <option value='2'>2.5 Element B</option>
+              <option value='3'>2.5 Element C</option>
+              <option value='4'>3 Element</option>
+          </select>
+        </td>
+    </tr>
+</table>
+</div>
+</div>
+
+<div id="vtr" style="display:none;">
+<h3 class='topheader'>VT Ratio</h3>
+<table cellspacing="0" border="0">
+    <tr>
+        <td class="label4">Primary</td>
+        <td class="form" id="vp"><div id="vtp"></div></td>
+        <td class="tb_elem" id="tvtp" style="display:none; width:63px; text-align:left"><div id="avp"></div></td>
+        <td><div id="vim"></div></td>
+    </tr>
+    <tr>
+        <td class="label4">Secondary</td>
+        <td class="form" id="vs">
+            <select name="vts" id="vts">
+                <option value='0'>1</option>
+                <option value='1'>110</option>
+                <option value='2'>115</option>
+                <option value='3'>120</option>
+            </select>
+        </td>
+        <td class="tb_elem" id="tvts" style="display:none; width:63px; text-align:left">1</td>
+    </tr>
+</table>
+</div>
+
+<div id="ctr" style="display:none;">
+<h3 class='topheader'>CT Ratio</h3>
+<table cellspacing="0" border="0">
+    <tr>
+        <td class="label4">Primary</td>
+        <td class="form" id="cp"><div id="ctp"></div></td>
+        <td class="tb_elem" id="tctp" style="display:none; width:63px; text-align:left"><div id="acp"></div></td>
+        <td><div id="cim"></div></td>
+    </tr>
+    <tr>
+        <td class="label4">Secondary</td>
+        <td class="form" id="cs">
+            <select name="cts" id="cts">
+                <option value='0'>1</option>
+                <option value='1'>5</option>
+            </select>
+        </td>
+        <td class="tb_elem" id="tcts" style="display:none; width:63px; text-align:left">1</td>
+    </tr>
+</table>
+<a style="color:#999;">Note: Ratios sent over protocols override manually set ratios.</a>
+</div>
+<div id="disp_cfg" style="display:none;">
+<table cellspacing="0" border="0" id="txt">
+    <tr>
+        <td class="label4">Display ID</td>
+        <td class="form"><div id="did"></div></td>
+    </tr>
+</table>
+</div>
+<br>
+<p><input class="submit" type="submit" name="Submit" value="Apply"/><br></p>
+</form>
+<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return get_resp()">
+<input type="hidden" name="dflt" id="dflt" value="Input"/>
+<input type="submit" name="restore" value="Restore Defaults" /></form>
+
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>

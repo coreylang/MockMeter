@@ -1,0 +1,119 @@
+<!DOCTYPE HTML SYSTEM>
+<html>
+<head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Security - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="shortcut icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="md5.js"></script>
+	<script src="content.js"></script>
+<script>
+//<!--
+var sn;
+
+function parse_vars(data) {
+	var parsed = data.split("\n");
+	check_pending(parsed[0]);
+	sn = parsed[1];
+	document.getElementsByName("fpl")[parsed[2]].checked = true;
+	if(parsed[3]=="1") {id("logout").style.display = 'block';}
+}
+
+function load_once() {
+	populate("settings.html");
+	makeRequest(nc("password.cgi"), null);
+}
+
+function validate() {
+	var is_valid = false;
+
+	if(id("npw").value != id("rpw").value) {
+		id("rpw").className = "err";
+		alert("Passwords do not match!");
+	} else {
+		id("rpw").className = "";
+		is_valid = true;
+	}
+	return is_valid;
+ }
+ 
+ function get_input() {
+	var psw = id("npw").value;
+	var rh = hex_md5(String(Math.floor(Math.random()*Math.pow(10,12))));
+	var dh = hex_md5(sn + rh);
+	var pw_arr = [];
+	pw_arr = id("npw").value.split("");
+	document.aform.np.value = rh + " ";
+	document.aform.np.value += hex_md5(psw + dh) + " ";
+	if(!validate()) return false;
+	
+	for(var i=0; i<pw_arr.length; ++i) {
+		if(document.aform.n0.value != null)
+			document.aform.n0.value += (hex_md5(String(i) + hex_md5(pw_arr[i] + dh)) + " ");
+		else
+			document.aform.n0.value = (hex_md5(String(i) + hex_md5(dh+pw_arr[i])) + " ");	
+	}
+	return true;
+}
+ 
+window.onload=load_once;
+//-->
+</script>
+</head>
+<body>
+
+<div id="Content"></div>
+
+<div id="mncnt" class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="trail"><a href="settings.html">Settings</a> / Password Security</div>
+<div id="message"></div>
+
+<br>
+<h2>Change Password</h2><br>
+<div class="fbox"><br>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="tb_labelw">New Password</td>
+		<td class="form"><input type="password" id="npw" size="32" maxlength="20"></td>
+	</tr>
+	<tr>
+		<td class="tb_labelw">Retype New Password</td>
+		<td class="form"><input type="password" id="rpw" size="32" maxlength="20"></td>
+	</tr>
+</table><br>
+<form action="http:change_pw.cgi" method="POST" name="aform" id="aform" onsubmit="return get_input();">
+<input type="hidden" name="np" id="np" />
+<input type="hidden" name="n0" id="n0" />
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="tb_labelw"><input type="submit" name="SaveSettings" value="Change Password" /></td>
+	</tr>
+</table>
+<a style="color:#999;">Note: Submit a blank password to disable password protection.</a>
+</form></div><br>
+<form action="http:fp_lock.cgi" method="POST" name="myform" id="myform">
+<h2>Front Panel Configuration Lock</h2><br>
+<div class="fbox"><br>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="tb_labelw">Unlocked</td>
+		<td class="form"><input type="radio" name="fpl" value="unlock"></td>
+	</tr>
+	<tr>
+		<td class="tb_labelw">Lock Menu</td>
+		<td class="form"><input type="radio" name="fpl" value="lock2"></td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr>
+		<td class="tb_labelw"><input type="submit" name="SaveSettings" value="Apply" /></td>
+	</tr>
+</table>
+</form></div>
+<br>
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>		

@@ -1,0 +1,335 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Screen Enable - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+	<script src="tuc.js"></script>
+	<script src="cregs.js"></script>
+	<script src="mbModelMode.js"></script>
+	<script src="dnpModelMode.js"></script>
+	<script src="load.js"></script>
+<style>#fill_in table tr:hover {background-color:#bbfbfb;}</style>
+<script>
+//<!--
+var parsed;
+var nscrns;
+var is_triple_display;
+var j=0;
+var MODBUS = 0;
+var DNP = 1;
+var right_scrn;
+var left_scrn;
+var hm_idx;
+
+function populate_table()
+{
+	var t_list;
+	var idx_list = [];
+	var idx = 0;
+	var k = 0;
+	var table='<table cellspacing="0" border="0" id="scrn_tab">';
+	
+	function is_in_list(list, val) {
+		for(var i=0; i<list.length; i++) {
+			if(list[i] == val)
+				return true;
+		}
+		return false;
+	}
+	
+	function is_populated(vals)
+	{
+		var screens = vals.split(" ");
+		
+		for(var i=0; i<screens.length; i++)
+		{
+			if(screens[i] == "169")
+				continue;
+			if(!is_in_list(idx_list, screens[i]))
+				return false;
+		}
+		return true;
+	}	
+	
+	for(var type=0; type<ord.lists.length; type++)
+		{
+		for(var i=0; i<ord.lists[type].vec.length; i++) 
+			{
+			if(ord.lists[type].vec[i].dbIdx != 144)
+				idx_list.splice(idx++, 0, ord.lists[type].vec[i].dbIdx);
+			}
+		}
+
+	while( parsed[j] ) {
+		t_list = parsed[j++].split(":");
+		table += '<tr><td class="label3">'+t_list[1]+
+		'<\/td><td class="label6"><input type="checkbox" name="ena" value="'+t_list[0]+'" '+
+		(t_list[2]=="1"?"checked":"")+' onclick="mouseOut('+ k +')" \/><\/td>';
+		if(is_triple_display) table += '<td class="label6"><input type="radio" name="lft" '+
+		((left_scrn==k)?"checked":"")+' onclick="mouseOut('+ k + ')" \/><\/td>';
+		table += '<td class="label6"><input type="radio" name="hom" '+(hm_idx==t_list[0]?"checked":"")+
+		'  onclick="mouseOut('+ k + ')" \/><\/td>';
+		if(is_triple_display) table += '<td class="label6"><input type="radio" name="rgt" '+
+			((right_scrn==k)?"checked":"")+' onclick="mouseOut('+ k + ')" \/><\/td>';
+		table += '<td class="label6" id="p' + k + '">'+(is_populated(t_list[3])?"✓":"")+'<\/td>';
+			
+		k++;
+		table += '<\/tr>';
+	}
+	table = table + "<\/table>";
+	id("fill_in").innerHTML = table;
+
+	var pId;
+	var r = id("scrn_tab").rows;
+	
+	for(i=0;i<r.length;i++)
+	{
+		pId = "p" + i;
+		if(document.getElementsByName("ena")[i].checked == true && id(pId).innerHTML == "")
+			r[i].style.backgroundColor = "#e5cf1d";
+	}
+	
+	pop_warning();
+}
+
+
+function pop_warning()
+{
+	if(unpopulated())
+		{
+		id("msg").text = " Warning: There are enabled screens with no data to populate them.";
+		id("upbox").className = "warning";
+		}
+	else
+		{
+		id("msg").text = "";
+		id("upbox").className = "";
+		}
+}
+
+function parse_vars(data) {
+	parsed = data.split("\n" );
+	var h=document.getElementsByName("hom");
+	
+	check_pending(parsed[j++]);
+	if(parsed[j++]=="1") {id("logout").style.display = 'block';}
+	hm_idx = parsed[j++];
+	nscrns = parsed[j++];
+	var dtype = parsed[j++].split(":");
+	is_triple_display = (Number(dtype[0]) == 5);
+	var right_scrn = dtype[2];
+	var left_scrn = dtype[1];
+	var protocol = parsed[j++];
+	var ptype = parsed[j++];
+	var idx_list=[];
+	
+	if(is_triple_display) {
+		id("rh1").style.display = 'block';
+		id("rh2").style.display = 'block';
+		id("rh1").innerHTML="Left Display";
+		id("rh2").innerHTML="Right Display";
+	}
+	
+	getDbList(protocol, 0, ptype);
+}
+
+
+function unpopulated()
+{
+	var pID = "";
+	var e=document.getElementsByName("ena");
+	
+	for(var i=0; i<e.length; i++)
+		{
+		pId = "p" + i;
+		if(e[i].checked == true && id(pId).innerHTML == "")
+			return true;
+		}
+	return false;
+}
+
+
+function validate_home() {
+	var e=document.getElementsByName("ena");
+	var h=document.getElementsByName("hom");
+
+	for(var i=0;i<h.length; i++) {
+		if(h[i].checked == true) {
+			if(e[i].checked == true) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+function mouseOut(row_num) {
+	var pId = "p" + row_num;
+	var color = "";
+	
+	if(document.getElementsByName("ena")[row_num].checked == true && id(pId).innerHTML == "")
+		color = "#e5cf1d";		
+	id("scrn_tab").rows[row_num].style.backgroundColor = color;
+	
+	pop_warning();
+}
+
+
+function get_input() {
+
+	var e=document.getElementsByName("ena");
+	var h=document.getElementsByName("hom");
+	var l=document.getElementsByName("lft");
+	var r=document.getElementsByName("rgt");
+	var hm_idx = 0;
+	var ena_val = new Array(nscrns);
+		
+	for(var i=0;i<nscrns;i++) {
+		ena_val[i] = 0;
+	}
+	
+	for(i=0;i<e.length;i++) {
+		if(e[i].checked == true) {
+			ena_val[e[i].value] = 1;
+		}
+	}
+
+	ena_val = ena_val.join("");
+
+	for(i=0;i<h.length; i++) {
+		if(h[i].checked == true) {
+			hm_idx = e[i].value;
+			break;
+		}
+	}
+
+	if(is_triple_display) {
+		for(i=0;i<l.length; i++) {
+			if(l[i].checked == true)
+				document.aform.lt.value = i;
+			if(r[i].checked == true)
+				document.aform.rt.value = i;
+		}	
+	}
+
+	if(validate_home()) {
+		document.aform.en.value = ena_val;
+		document.aform.hm.value = hm_idx;
+		return true;
+	}
+	else {
+	//	alert('Home screen must be enabled.');
+		id("msg").text = "Error: Home screen must be enabled.";
+		id("upbox").className = "error";
+		return false;
+	}
+}
+
+function clear_all() {
+	var x=document.getElementsByName("ena");
+	
+	for(var i=0;i<x.length; i++) {
+		x[i].checked = false;
+		id("scrn_tab").rows[i].style.backgroundColor = "";
+	}
+	
+	id("msg").text = "";
+	id("upbox").className = "";
+}
+
+function check_all() {
+	var pId;
+	var color;
+	var x=document.getElementsByName("ena");
+	
+	for(var i=0;i<x.length; i++) {
+		x[i].checked = true;
+		pId = "p" + i;
+		if(id(pId).innerHTML == "")
+			color = "#e5cf1d";
+		else
+			color = "";
+		id("scrn_tab").rows[i].style.backgroundColor = color;
+	}
+	pop_warning();
+}
+
+function check_pop() {
+	var pId;
+	var x=document.getElementsByName("ena");
+	
+	for(var i=0;i<x.length; i++) {
+		pId = "p" + i;
+		if(id(pId).innerHTML == "")
+			x[i].checked = false;
+		else
+			x[i].checked = true;
+		id("scrn_tab").rows[i].style.backgroundColor = "";
+	}
+	
+	id("msg").text = "";
+	id("upbox").className = "";
+}
+
+function load_once() {
+	populate("settings.html");
+	makeRequest(nc("scrnena.cgi"), null);
+}
+
+window.onload=load_once;
+//-->
+</script>
+	
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox" id="screenEnable">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+
+<div id="trail"><a href="settings.html">Settings</a> / Screen Enable</div>
+<div id="message"></div>
+<div id="warning"></div>
+<form name="myform" id="myform">
+
+<h2>Display Screen Enable</h2>
+
+<br>
+<table id="scrn_tbl" cellspacing="0" border="0">
+
+<tr><td class="label3">&nbsp;</td>
+<th class="label6">Enabled</th>
+<th id="rh1" class="label6" style="display:none;"></th>
+<th class="label6">Home Screen</th>
+<th id="rh2" class="label6" style="display:none;"></th>
+<th class="label6">Populated</th>
+</tr>
+</table>
+<div id="fill_in"></div><br>
+<input type="button" name="clr_btn" value="Clear All" onclick="javascript:clear_all();">
+<input type="button" name="chp_btn" value="Check Populated" onclick="javascript:check_pop();">
+<input type="button" name="chk_btn" value="Check All" onclick="javascript:check_all();">
+<br>
+</form>
+<form action="http:scrnena_submit.cgi" method="POST" name="aform" id="aform" onsubmit="return get_input();">
+<input type="hidden" name="en" id="en" />
+<input type="hidden" name="lt" id="lt" value="0" />
+<input type="hidden" name="hm" id="hm" />
+<input type="hidden" name="rt" id="rt" value="0" />
+<div id="upbox" class="ubox"><input class="submit" type="submit" name="SaveSettings" value="Apply" />
+&nbsp;<b><a id="msg"></a></b></div><br>
+</form>
+
+<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return confirm('All settings on this page will be restored to factory defaults and applied. Continue?')">
+<input type="hidden" name="dflt" id="dflt" value="Screens"/>
+<input type="submit" name="restore" value="Restore Defaults" /></form>
+
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>

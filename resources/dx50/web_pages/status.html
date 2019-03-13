@@ -1,0 +1,161 @@
+<!DOCTYPE HTML SYSTEM>
+<html>
+<head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Device Status - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="shortcut icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="load.js"></script>
+	<script src="content.js"></script>
+	<script src="data.js"></script>
+<script>
+window.onload=load_once;
+
+var doSend = true;
+var conTimer = 0;
+var THRESHOLD = 3;
+
+function show(f) {id(f).style.display="block";}
+
+function load_once() {
+	populate("status.html");
+	makeRequest(nc("status.cgi"), null);
+	checkConnection();
+}
+
+function loop() {
+
+    if(doSend) {
+        doSend = false;
+        makeRequest(nc("status.cgi"), null);
+    }
+    setTimeout(function(){check_status(http_request, 0);}, 249);
+}
+
+function checkConnection()
+{
+	if(++conTimer > THRESHOLD)
+	{
+		id("LostCon").style.visibility = 'visible';
+		id("led").className = "dot dot-red";
+	}
+	else
+		id("LostCon").style.visibility = 'hidden';	
+		
+	setTimeout("checkConnection();", 5000);
+}
+
+function parse_vars(data) {
+	var parsed = data.split("\n");
+	var j=0;
+    var pending = parsed[j++];
+
+	conTimer = 0;
+	id("LostCon").style.visibility = 'hidden';
+	
+	if(parsed[j++]=="1")
+		show("logout");
+    msg_reset_if_pending (pending);
+	
+	set_health(id("health"),  parsed[j++]);
+	
+	set_comm_status(parsed[j++]);
+	
+	status_window.innerHTML = parsed[j];
+	if(status_window.innerHTML != "")
+		status_msg.style.display = 'block';
+	
+	setTimeout("loop()", 5000);
+}
+
+function set_comm_status(sval)
+{
+	if(sval == "0")
+		id("led").className = "dot dot-green";
+	else if(sval == "1")
+		id("led").className = "dot dot-yellow";
+	else
+		id("led").className = "dot dot-red";
+}
+
+function set_health(hObj, hlth_word)
+{
+	var ERR_TAB = [
+				[0, "Analog output calibration error"],
+				[2, "Gain calibration error"],
+				[4, "Phase calibration error"],
+				[12, "Firmware upgrade in progress"],
+				[13, "Measurements offline"],
+				[15, "Protocol configuration error"] ];
+
+	hObj.innerHTML = hlth_word.substring(0,4)+' '+hlth_word.substring(4,8);
+				
+    if(hlth_word > 0) {
+		var newRow;
+		var newCell;
+		var msg = "";
+		var erno = 0;
+        hObj.style.backgroundColor = 'yellow';
+		while(ht.rows.length > 2)
+			ht.deleteRow(2);
+		id("err_box").innerHTML = '';
+
+		for(i=0; i<ERR_TAB.length; ++i) {
+			if(parseInt(hlth_word,16) & 1<<ERR_TAB[i][0]) {
+				msg = ERR_TAB[i][1];
+				++erno;
+				if(erno > 1)
+				{
+					newRow = ht.insertRow(ht.rows.length);
+					newCell = newRow.insertCell(0);
+					newCell = newRow.insertCell(1);
+					newCell.style.color = 'white';
+					newCell.style.border = '0';
+					newCell = newRow.insertCell(2);
+				}
+				else
+					newCell = id("err_box");
+				newCell.innerHTML = '<b><a class="err_msg">'+msg+'<\/a><\/b>';
+				newCell.className = "error";
+				newCell.style.width = '400';
+			}
+		}
+    }	
+
+}
+
+</script>
+
+</head>
+<body>
+
+<div id="Content"></div>
+
+<div id="mncnt" class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="message"></div>
+<div id="LostCon" class="fbox" style="visibility:hidden;background-color:#fcc;"><a><b>Network Connection Lost!</b></a></div>
+<h2>Device Status</h2>
+<br>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label19">Connection Status</td>
+		<td><span id="led" class="dot"><span class="dot-inner"></span></span></td>
+	</tr>
+</table>
+<div id="status_msg" style="display:none;"><br><a class="label4">Status Message</a>
+<div id="status_window" name="status_window" style="width:400px;height:150px;overflow:scroll;border:1px solid #ccc;white-space:pre-wrap;"></div></div>
+<br>
+<table id="ht" cellspacing="0" border="0">
+	<tr>
+		<td class="label19">Health Status</td>
+        <td class="tb_elem"><div id="health"></div></td>
+		<td id="err_box"></td>
+    </tr>
+</table>
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>

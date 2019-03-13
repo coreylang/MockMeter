@@ -1,0 +1,105 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Settings - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+	<script src="data.js"></script>
+<script>
+//<!--
+function parse_vars(data) {
+	function show(f) {id(f).style.display="block";}
+	var parsed = data.split( "\n" );
+	var pending_changes = parsed[0];
+	var mtype = parsed[1];
+	var serial = parsed[2];
+	var prot = parsed[3];
+	var disp_type = parsed[4];
+	if(parsed[5]=="1")
+		show("logout");
+	if(parsed[6]=="0") {
+		id("plm1").style.display="inline";
+		id("plm2").style.display="inline";
+		id("pld1").style.display="inline";
+		id("pld2").style.display="inline";		
+	}
+	if(parsed[7]=="1")
+		show("mp");
+	else
+		show("dp");
+
+	check_pending(pending_changes);
+}
+
+function load_once() {
+	populate("settings.html");
+	get_pending();
+}
+
+window.onload=load_once;
+//-->
+</script>
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="message"></div><br>
+<table cellspacing="0" border="0">
+<tr>
+	<td class="label8">INPUT</td>
+	<td class="label8">OUTPUT</td>
+	<td class="label4">UTILITIES</td>
+</tr>
+<tr>
+	<td class="label8"><img src="meterback.png"></td>
+	<td class="label8"><img src="meterface.png"></td>
+	<td class="label4"><img src="toolbox.png"></td>
+</tr>
+</table>
+<table cellspacing="0" border="0" id="mp" style="display:none;">
+<tr>
+	<td class="label8"><a href="input.html">Input</a></td>
+	<td class="label8"><a href="scrnena.html">Screen Enable</a></td>
+	<td class="label4"><a href="config.html">Load/Store Settings</a></td>
+</tr>
+<tr>
+	<td class="label8"><a href="protocol.html">Protocol</a></td>
+	<td class="label8"><a href="cscreens.html">Custom Screens</a></td>
+	<td class="label4"><a href="auth.html">Password Security</a><div id="plm1" style="display:none;">&nbsp;<img src="padlock.gif"></div></td>
+</tr>
+<tr>
+	<td class="label8"><a href="network.html">Network</a></td>
+	<td class="label8"><a href="identity.html">Identity</a></td>
+	<td class="label4"><a href="upload.html">Firmware Upload</a><div id="plm2" style="display:none;">&nbsp;<img src="padlock.gif"></div></td>
+</tr>
+<tr>
+	<td class="label8"><a href="serport.html">Serial Port</a></td>
+	<td class="label8">&nbsp;</td>
+	<td class="label4">&nbsp;</td>
+</tr>
+</table>
+<table cellspacing="0" border="0" id="dp" style="display:none;">
+<tr>
+	<td class="label8"><a href="input.html">Input</a></td>
+	<td class="label8"><a href="identity.html">Identity</a></td>
+	<td class="label4"><a href="config.html">Load/Store Settings</a></td>
+</tr>
+<tr>
+	<td class="label8"><a href="network.html">Network</a></td>
+	<td class="label8"></td>
+	<td class="label4"><a href="auth.html">Password Security</a><div id="pld1" style="display:none;">&nbsp;<img src="padlock.gif"></div></td>
+</tr>
+<tr>
+	<td class="label8"><a href="serport.html">Serial Port</a></td>
+	<td class="label8"></td>
+	<td class="label4"><a href="upload.html">Firmware Upload</a><div id="pld2" style="display:none;">&nbsp;<img src="padlock.gif"></div></td>
+	
+</tr>
+</table>
+</div>
+<div class="pagebox"><div id="footer"></div></div>
+</body></html>

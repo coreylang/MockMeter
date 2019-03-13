@@ -1,0 +1,31 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Preloading Bitronics Web Screen Enable page</title> 
+    <script>
+    function syncLoad(url) {
+        if (window.XMLHttpRequest === undefined)
+            return;
+
+        // synchronous load to serialize server access
+        var request = new XMLHttpRequest();
+        request.open("Get", url, false);    // sync file fetch
+        request.send(null);
+        }
+
+    window.onload = function() {
+        syncLoad("header_logo.png");
+        syncLoad("site.css");
+        syncLoad("favicon.ico");
+        syncLoad("tuc.js");
+        syncLoad("request.js");
+        syncLoad("cregs.js");
+        syncLoad("load.js");
+		syncLoad("content.js");
+
+        location.replace("scrnena1.html");
+        }
+    </script>
+</head>
+<body>
+</body></html>
