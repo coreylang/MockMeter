@@ -9,6 +9,50 @@ from slugify import slugify
 exposed handlers.
 """
 
+sample_scalings = [
+    {"nm":"test1"   , "dec":3,"sgn":False,"slp":1,"off":0,"min":3,"max":4},
+    {"nm":"test2"   , "dec":3,"sgn":False,"slp":1,"off":0,"min":3,"max":4},
+    {"nm":"test3"   , "dec":3,"sgn":False,"slp":1,"off":0,"min":3,"max":4},
+]
+
+@cherrypy.expose
+class MeasurementsUrl(object):
+    def GET(self):
+        return """<html><body>measurements tbd</body></html>"""
+
+@cherrypy.expose
+class ScalingsUrl(object):
+    """ API for custom scalings """
+    def __init__(self, *args, **kwargs):
+        self.scalings = sample_scalings
+
+    @cherrypy.tools.json_out()
+    def GET(self, *args, **kwargs):
+        """ emulation for development """
+        return self.scalings
+
+    @cherrypy.tools.json_in()
+    @cherrypy.tools.json_out()
+    def PUT(self, *args, **kwargs):
+        """ emulation for development """
+        self.scalings = cherrypy.request.json
+        # [print(x) for x in self.scalings]
+        return {
+            'message': 'Scalings have been updated',
+            'pending': True
+        }
+
+@cherrypy.expose
+class FlexApp(object):
+    """ Add responses for the FlexScaling feature """
+    scalings = ScalingsUrl()
+    measurements = MeasurementsUrl()
+
+    def GET(self, **kwargs):
+        return """<html><body>
+        Hello from Flex App via {} with {}
+        </body></html>""".format(cherrypy.request.method, kwargs)
+
 
 class StaticsApp(object):
     """ Serve the meter's static files from a directory, and handle CGI requests via
@@ -169,6 +213,10 @@ def main(config_file: Path):
     }
     # load application configuration
     app.merge(config_dict)
+
+    cherrypy.tree.mount(FlexApp(), '/flex', 
+        {'/': {'request.dispatch': cherrypy.dispatch.MethodDispatcher()}}
+    )
 
     cherrypy.engine.signals.subscribe()
     cherrypy.engine.start()

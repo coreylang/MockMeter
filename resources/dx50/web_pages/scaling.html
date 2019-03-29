@@ -1,0 +1,118 @@
+<!DOCTYPE HTML>
+<html><head> 
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Scaling - Bitronics Web Server</title> 
+    <link rel="stylesheet" type="text/css" href="site.css">
+    <link rel="icon" href="favicon.ico">
+    <script src="request.js"></script>
+    <script src="content.js"></script>
+    <script src="scaling.js"></script>
+    <script>
+//<!--
+
+function update_scaling_onblur(scl) {
+    function inner_handler(evt) {
+        scl.flexscaling[evt.target.name] = evt.target.value;
+    }
+    return inner_handler
+}
+
+function parse_vars(data) {
+    // console.log("cgi response", data);
+    
+    // Create a table row with scaling object attached
+    function createScalingRow(pts) {
+        function inner(scl, item, length) {
+            td = document.createElement('td');
+            ti = document.createElement('input');
+            ti.setAttribute('name', item);
+            ti.setAttribute('maxlength', length);
+            ti.value = scl.flexscaling[item];
+            ti.onblur = update_scaling_onblur(sr);
+            td.appendChild(ti);
+            return td;
+        }
+        var sr = document.createElement('tr');
+        sr.setAttribute('flexscaling', true);   // for queryselect
+        sr.flexscaling = pts;
+        sr.appendChild(inner(sr, "nm", 16));
+        sr.appendChild(inner(sr, "x1", 6));
+        sr.appendChild(inner(sr, "y1", 6));
+        sr.appendChild(inner(sr, "x2", 6));
+        sr.appendChild(inner(sr, "y2", 6));
+        return sr;
+    }
+    
+    // Locate the table and append reach scaling as a row
+    var scaling_tbl = id('scaling_tbl');
+    var scaling_lst = JSON.parse(data);
+    for (scl of scaling_lst) {
+        scaling_tbl.appendChild(createScalingRow(points_from_slpoff(scl)));
+    }
+}
+
+function serialize() {
+
+    // Build a list of each scaling row in the table
+    var scaling_tbl = id('scaling_tbl');
+    var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
+
+    // Convert the format of each scaling and serialize the list of scalings
+    scl = [];
+    for (scr of scaling_lst) {
+        scl.push(slpoff_from_points(scr.flexscaling));
+    }
+    var payload = JSON.stringify(scl);
+
+    // browser compat?
+    var xhr = new XMLHttpRequest();
+    xhr.open("PUT", "flex/scalings", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            console.log(xhr.response);
+        }
+    };
+    xhr.send(payload);
+}
+
+function load_once() {
+    populate("settings.html");
+    makeRequest(nc("flex/scalings"), null);
+}
+
+window.onload=load_once;
+//-->
+</script>
+    
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox" id="page">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+
+<div id="trail"><a href="settings.html">Settings</a> / Scaling</div>
+<div id="message"></div>
+
+<h2>Scalings</h2>
+<table id="scaling_tbl" cellspacing="0" border="0">
+<tr>
+    <td class="label2">Name</td>
+    <td class="label2">P1 Poll</td>
+    <td class="label2">P1 Show</td>
+    <td class="label2">P2 Poll</td>
+    <td class="label2">P2 Show</td>
+</tr>
+</table><br>
+
+<p>
+<button onclick="serialize();">Apply</button>
+</p>
+
+<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return get_resp()">
+<input type="hidden" name="dflt" id="dflt" value="scaling"/>
+<input type="submit" name="restore" value="Restore Defaults" /></form>
+</div>
+<div class="pagebox"><div id="footer"></div></div>
+</body></html>
