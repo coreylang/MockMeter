@@ -1,6 +1,7 @@
 # **mockmeter**
 
-[![The MIT License](https://img.shields.io/badge/license-MIT-orange.svg?style=flat-square)](http://opensource.org/licenses/MIT)
+![GitHub](https://img.shields.io/github/license/bitronics-llc/MockMeter.svg)
+![GitHub last commit](https://img.shields.io/github/last-commit/bitronics-llc/MockMeter.svg)
 
 > Simulate Mx50 embedded webserver.
 
