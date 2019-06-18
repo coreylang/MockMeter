@@ -1,0 +1,11 @@
+{
+    "$schema": "./FlexScale.schema.json",
+    "scalings": {
+        "test1": [[0, "0.00"],[1000,"100.0"]],
+        "test2": [[-32767, "-150.0"],[32767,"150.0"]]
+    },
+    "measurements": {
+        "meas1": ["test1", "A", null],
+        "meas2": ["test1", null, "max"]
+    }
+}

@@ -36,7 +36,7 @@ class ScalingsUrl(object):
     def PUT(self, *args, **kwargs):
         """ emulation for development """
         self.scalings = cherrypy.request.json
-        # [print(x) for x in self.scalings]
+        [print(x) for x in self.scalings]
         return {
             'message': 'Scalings have been updated',
             'pending': True

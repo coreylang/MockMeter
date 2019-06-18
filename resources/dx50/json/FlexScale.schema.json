@@ -1,0 +1,43 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "$id": "file:///scaling.schema.json",
+    "description": "Value scalings",
+    "title": "prototype schema for hand written json",
+
+    "definitions": {
+        "point_arrays": {
+            "type": "object",
+            "additionalProperties": {
+                "type":"array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 2,
+                        "items": [
+                        {"type": "number"},
+                        {"type": "string", "maxLength": 6}
+                    ]
+                }
+            }
+        },
+        "measurement_tuples": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": [
+                    {"type": "string"},
+                    {"enum": ["A", "B", "C", "AB", "BC", "CA", null]},
+                    {"enum": ["min", "max", "avg", null]}
+                ]
+            }
+        }
+    },
+
+    "type": "object",
+    "properties": {
+        "scalings": {"$ref": "#/definitions/point_arrays"},
+        "measurements": {"$ref": "#/definitions/measurement_tuples"}
+    }
+}
