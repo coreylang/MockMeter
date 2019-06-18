@@ -4,11 +4,120 @@
     <title>Scaling - Bitronics Web Server</title> 
     <link rel="stylesheet" type="text/css" href="site.css">
     <link rel="icon" href="favicon.ico">
+    
+    <style type="text/css"> 
+    
+    html {
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+    
+ 
+.fixed_header{
+/*    width: 100%;*/
+/*    table-layout: fixed;*/
+    border-collapse: collapse;
+}
+
+.fixed_header tbody{
+  overflow: auto;
+  height: 170px;
+  display: block;
+}
+
+.fixed_header thead {
+  display: block;
+}
+
+input{
+	width: 145px !important;
+}
+
+.fixed_header th, .fixed_header td {
+	width: 149px !important;
+  padding: 3px;
+  text-align: left;
+/*  width: 200px;*/
+}
+    </style>
+    
     <script src="request.js"></script>
     <script src="content.js"></script>
     <script src="scaling.js"></script>
     <script>
 //<!--
+
+
+window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
+     var p=o.parentNode.parentNode;
+     p.parentNode.removeChild(p);
+}
+
+
+ function addField (argument) {
+            var myTable = document.getElementById("tablebody");
+            var currentIndex = myTable.rows.length;
+            var currentRow = myTable.insertRow(-1);
+
+            var name = document.createElement("input");
+            name.setAttribute("name", "nm");
+            name.setAttribute('maxlength', 16);
+            
+            var p1poll = document.createElement("input");
+            p1poll.setAttribute("name", "x1");
+            p1poll.setAttribute('maxlength', 6);          
+
+            var p1show = document.createElement("input");
+            p1show.setAttribute("name", "y1");
+            p1show.setAttribute('maxlength', 6);
+             
+            var p2poll = document.createElement("input");
+            p2poll.setAttribute("name", "x2");
+            p2poll.setAttribute('maxlength', 6);
+            
+            var p2show = document.createElement("input");
+            p2show.setAttribute("name", "y2");
+            p2show.setAttribute('maxlength', 6);
+      
+            /*var keywordsBox = document.createElement("input");
+            keywordsBox.setAttribute("name", "keywords" + currentIndex);*/
+
+            var deleteRowBox = document.createElement("input");
+            deleteRowBox.setAttribute("type", "button");
+            deleteRowBox.setAttribute("value", "Delete Row");
+            deleteRowBox.setAttribute("onclick", "SomeDeleteRowFunction(this);");
+            deleteRowBox.setAttribute("class", "button");
+            deleteRowBox.setAttribute("style", "width: 85px !important;");
+            
+
+            currentRow.setAttribute("flexscaling", true);
+            currentRow.flexscaling = new Scaling('', [[0, 0], [0, 0]]);
+            
+            var currentCell = currentRow.insertCell(-1);
+            name.onblur = update_scaling_onblur(currentRow);
+            currentCell.appendChild(name);
+
+            currentCell = currentRow.insertCell(-1);
+            p1poll.onblur = update_scaling_onblur(currentRow);
+            currentCell.appendChild(p1poll);
+
+            currentCell = currentRow.insertCell(-1);
+            p1show.onblur = update_scaling_onblur(currentRow);
+            currentCell.appendChild(p1show);
+            
+            currentCell = currentRow.insertCell(-1);
+            p2poll.onblur = update_scaling_onblur(currentRow);
+            currentCell.appendChild(p2poll);
+
+            currentCell = currentRow.insertCell(-1);
+            p2show.onblur = update_scaling_onblur(currentRow);
+            currentCell.appendChild(p2show);
+
+            currentCell = currentRow.insertCell(-1);
+            currentCell.appendChild(deleteRowBox);
+        }
+
+
+
 
 function update_scaling_onblur(scl) {
     function inner_handler(evt) {
@@ -40,15 +149,43 @@ function parse_vars(data) {
         sr.appendChild(inner(sr, "y1", 6));
         sr.appendChild(inner(sr, "x2", 6));
         sr.appendChild(inner(sr, "y2", 6));
+        
+        
+        //Delete button
+                	
+        	var deleteButton = document.createElement("input");
+            deleteButton.setAttribute("type", "button");
+            deleteButton.setAttribute("value", "Delete Row");
+            deleteButton.setAttribute("onclick", "SomeDeleteRowFunction(this);");
+            deleteButton.setAttribute("class", "button");
+            deleteButton.setAttribute("style", "width: 85px !important; padding.right: 10px;");
+            
+	        var deleteButtonTd = document.createElement('td');
+	        deleteButtonTd.appendChild(deleteButton);
+	        
+
+	        sr.appendChild(deleteButtonTd);
+        	
+        
+        
+        
+        
+        
         return sr;
+        
     }
     
     // Locate the table and append reach scaling as a row
     var scaling_tbl = id('scaling_tbl');
+    var tb = document.createElement('tbody');
+    tb.setAttribute('id', 'tablebody');
     var scaling_lst = JSON.parse(data);
     for (scl of scaling_lst) {
-        scaling_tbl.appendChild(createScalingRow(points_from_slpoff(scl)));
+        tb.appendChild(createScalingRow(points_from_slpoff(scl)));
     }
+    
+    scaling_tbl.appendChild(tb);
+    
 }
 
 function serialize() {
@@ -60,6 +197,7 @@ function serialize() {
     // Convert the format of each scaling and serialize the list of scalings
     scl = [];
     for (scr of scaling_lst) {
+    	//console.log(scr.flexscaling);
         scl.push(slpoff_from_points(scr.flexscaling));
     }
     var payload = JSON.stringify(scl);
@@ -96,17 +234,29 @@ window.onload=load_once;
 <div id="message"></div>
 
 <h2>Scalings</h2>
-<table id="scaling_tbl" cellspacing="0" border="0">
-<tr>
-    <td class="label2">Name</td>
-    <td class="label2">P1 Poll</td>
-    <td class="label2">P1 Show</td>
-    <td class="label2">P2 Poll</td>
-    <td class="label2">P2 Show</td>
-</tr>
-</table><br>
 
-<p>
+<table class="fixed_header" id="scaling_tbl" cellspacing="0" border="0">
+	<thead>
+		<tr>
+		    <th class="label2">Name</th>
+		    <th class="label2">P1 Poll</th>
+		    <th class="label2">P1 Show</th>
+		    <th class="label2">P2 Poll</th>
+		    <th class="label2">P2 Show</th>
+		    <!--<td class="label2"></td>-->
+		</tr>
+	</thead>
+</table>
+
+
+<p style="text-align: center; margin-bottom: 0px;">
+<button onclick="addField();">Insert row</button>
+</p>
+
+
+<br>
+
+<p style="margin-top: 0px;" >
 <button onclick="serialize();">Apply</button>
 </p>
 
