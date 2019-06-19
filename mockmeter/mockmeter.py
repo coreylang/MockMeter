@@ -151,7 +151,10 @@ class StaticsApp(object):
         """
         # TODO: is this sufficiently accurate emulation?
         if cherrypy.request.method == 'POST':
-            states['pending_changes'] = True
+            if 'Reset' in kwargs:
+                states['pending_changes'] = False
+            else:
+                states['pending_changes'] = True
         return self._fetch_cgi_resource({'data':kwargs})
 
     # runtime emulated CGI reponses

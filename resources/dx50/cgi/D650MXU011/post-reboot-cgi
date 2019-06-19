@@ -1,0 +1,5 @@
+Rebooting...<script>
+setTimeout(function() {
+window.location="index.html"; }, 6000);
+</script>
+</BODY></HTML>
