@@ -29,8 +29,9 @@ class MeasurementsUrl(object):
 @cherrypy.expose
 class ScalingsUrl(object):
     """ API for custom scalings """
-    def __init__(self, *args, **kwargs):
-        self.scalings = sample_scalings
+
+    def _lazy_init(self):
+        self.fn = cherrypy.request.app.config['path']['json']/"flexbackend.json"
 
     def restore_defaults(self):
         self.scalings = sample_scalings
@@ -38,7 +39,19 @@ class ScalingsUrl(object):
     @cherrypy.tools.json_out()
     def GET(self, *args, **kwargs):
         """ emulation for development """
-        return self.scalings
+        try:
+            return self.scalings
+        except AttributeError:
+            # lazy init of scalings from storage
+            self._lazy_init()
+            if self.fn.exists():
+                with self.fn.open(mode='r') as fp:
+                    self.scalings = json.load(fp)
+                cherrypy.log('Using scaling data at {}'.format(self.fn.as_posix()))
+            else:
+                self.scalings = sample_scalings
+                cherrypy.log('Using scaling data defaults')
+            return self.scalings
 
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
@@ -46,7 +59,13 @@ class ScalingsUrl(object):
         """ emulation for development """
         self.scalings = cherrypy.request.json
         # [print(x) for x in self.scalings]
-        print(json.dumps(self.scalings))
+        try:
+            self.fn.exists()
+        except AttributeError:
+            self._lazy_init()
+        with self.fn.open(mode='w') as fp:
+            json.dump(self.scalings, fp, indent=4)
+            fp.flush()
         states['pending_changes'] = True
         return {
             'message': 'Scalings have been updated',
@@ -86,7 +105,7 @@ class StaticsApp(object):
         `fn_append` optionally use parameters in resolving file name
         """
 
-        fn = cherrypy.request.app.config['cgi']['path'] / slugify(
+        fn = cherrypy.request.app.config['path']['cgi'] / slugify(
             cherrypy.request.method +
             cherrypy.request.path_info + 
             str(fn_append))
@@ -238,8 +257,9 @@ def main(config_file: Path):
             "\nIf attempting to capture new cgi data, directory must already exist")
 
     config_dict = {
-        'cgi': {
-            'path': cgi_path
+        'path': {
+            'cgi': cgi_path,
+            'json': resource_path/'json'
         },
         '/': {
             'tools.sessions.on': True,
@@ -264,8 +284,10 @@ def main(config_file: Path):
     # load application configuration
     app.merge(config_dict)
 
-    cherrypy.tree.mount(FlexApp(), '/flex', 
-        {'/': {'request.dispatch': cherrypy.dispatch.MethodDispatcher()}}
+    cherrypy.tree.mount(FlexApp(), '/flex', {
+        '/': {'request.dispatch': cherrypy.dispatch.MethodDispatcher()},
+        'path': {'json': resource_path/'json'}
+        }
     )
 
     cherrypy.engine.signals.subscribe()
