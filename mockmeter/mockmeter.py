@@ -1,5 +1,6 @@
 from pathlib import Path
 from urllib.parse import urlunsplit
+import json
 
 import cherrypy
 import requests
@@ -14,6 +15,11 @@ sample_scalings = [
     {"nm":"test2"   , "dec":3,"sgn":False,"slp":1,"off":0,"min":3,"max":4},
     {"nm":"test3"   , "dec":3,"sgn":False,"slp":1,"off":0,"min":3,"max":4},
 ]
+
+# Move to cherrypy.config if more than one server needed
+states = {
+    'pending_changes': False
+}
 
 @cherrypy.expose
 class MeasurementsUrl(object):
@@ -36,7 +42,9 @@ class ScalingsUrl(object):
     def PUT(self, *args, **kwargs):
         """ emulation for development """
         self.scalings = cherrypy.request.json
-        [print(x) for x in self.scalings]
+        # [print(x) for x in self.scalings]
+        print(json.dumps(self.scalings))
+        states['pending_changes'] = True
         return {
             'message': 'Scalings have been updated',
             'pending': True
@@ -67,8 +75,8 @@ class StaticsApp(object):
         as a local file for future use.  File names are resolved with the request
         path_info and optionally request parameters.
 
-        `params`    a dict of request parameters
-        `append_params` bool to optionally use parameters in resolving file name
+        `payload`    a dict of request parameters
+        `fn_append` optionally use parameters in resolving file name
         """
 
         fn = cherrypy.request.app.config['cgi']['path'] / slugify(
@@ -141,7 +149,30 @@ class StaticsApp(object):
         most GETs need the 'ms' removed from the query string.  Most POST are
         submits and need the data from the body removed.
         """
+        # TODO: is this sufficiently accurate emulation?
+        if cherrypy.request.method == 'POST':
+            states['pending_changes'] = True
         return self._fetch_cgi_resource({'data':kwargs})
+
+    # runtime emulated CGI reponses
+    @cherrypy.expose
+    @cherrypy.tools.allow(methods=['GET'])
+    def pending_cgi(self, *args, **kwargs):
+        static_cgi = self._fetch_cgi_resource({'data':kwargs})
+        # static cgi won't be large so read the entire file in
+        try:
+            cgi = static_cgi.read()
+            static_cgi.close()
+        except AttributeError:
+            # was a device response, return unmolested
+            return static_cgi
+        else:
+            cgi = cgi.splitlines()
+            cgi[0] = b'1' if states['pending_changes'] else b'0'
+            cgi = b'\n'.join(cgi)
+            return(cgi)
+
+
 
 def main(config_file: Path):
 
