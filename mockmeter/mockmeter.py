@@ -11,9 +11,9 @@ exposed handlers.
 """
 
 sample_scalings = [
-    {"nm":"test1"   , "dec":3,"sgn":False,"slp":1,"off":0,"min":3,"max":4},
-    {"nm":"test2"   , "dec":3,"sgn":False,"slp":1,"off":0,"min":3,"max":4},
-    {"nm":"test3"   , "dec":3,"sgn":False,"slp":1,"off":0,"min":3,"max":4},
+    {"nm": "default1", "dec": 3, "sgn": False, "slp": 0.001, "off": 60, "min": -1000, "max": 1000}, 
+    {"nm": "default2", "dec": 2, "sgn": False, "slp": 0.00043946653645435957, "off": 0, "min": 0, "max": 32767}, 
+    {"nm": "default3", "dec": 2, "sgn": False, "slp": 0.0010285714285714286, "off": 0, "min": 0, "max": 14000}
 ]
 
 # Move to cherrypy.config if more than one server needed
@@ -30,6 +30,9 @@ class MeasurementsUrl(object):
 class ScalingsUrl(object):
     """ API for custom scalings """
     def __init__(self, *args, **kwargs):
+        self.scalings = sample_scalings
+
+    def restore_defaults(self):
         self.scalings = sample_scalings
 
     @cherrypy.tools.json_out()
@@ -55,6 +58,10 @@ class FlexApp(object):
     """ Add responses for the FlexScaling feature """
     scalings = ScalingsUrl()
     measurements = MeasurementsUrl()
+
+    @classmethod
+    def restore_defaults(cls):
+        cls.scalings.restore_defaults()
 
     def GET(self, **kwargs):
         return """<html><body>
@@ -175,6 +182,15 @@ class StaticsApp(object):
             cgi = b'\n'.join(cgi)
             return(cgi)
 
+    @cherrypy.expose
+    @cherrypy.tools.allow(methods=['POST'])
+    def restore_cgi(self, *args, dflt, **kwargs):
+        # only providing emulation for flex feature
+        if dflt.lower() == 'scaling':
+            FlexApp.restore_defaults()
+            return b"""<script>setTimeout(function() {window.location="scaling.html"; }, 0);</script>"""
+        else:
+            return self._fetch_cgi_resource({'data':kwargs})
 
 
 def main(config_file: Path):
