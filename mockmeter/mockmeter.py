@@ -1,5 +1,6 @@
 from pathlib import Path
 from urllib.parse import urlunsplit
+import json
 
 import cherrypy
 import requests
@@ -10,10 +11,15 @@ exposed handlers.
 """
 
 sample_scalings = [
-    {"nm":"test1"   , "dec":3,"sgn":False,"slp":1,"off":0,"min":3,"max":4},
-    {"nm":"test2"   , "dec":3,"sgn":False,"slp":1,"off":0,"min":3,"max":4},
-    {"nm":"test3"   , "dec":3,"sgn":False,"slp":1,"off":0,"min":3,"max":4},
+    {"nm": "default1", "dec": 3, "sgn": False, "slp": 0.001, "off": 60, "min": -1000, "max": 1000}, 
+    {"nm": "default2", "dec": 2, "sgn": False, "slp": 0.00043946653645435957, "off": 0, "min": 0, "max": 32767}, 
+    {"nm": "default3", "dec": 2, "sgn": False, "slp": 0.0010285714285714286, "off": 0, "min": 0, "max": 14000}
 ]
+
+# Move to cherrypy.config if more than one server needed
+states = {
+    'pending_changes': False
+}
 
 @cherrypy.expose
 class MeasurementsUrl(object):
@@ -23,20 +29,44 @@ class MeasurementsUrl(object):
 @cherrypy.expose
 class ScalingsUrl(object):
     """ API for custom scalings """
-    def __init__(self, *args, **kwargs):
+
+    def _lazy_init(self):
+        self.fn = cherrypy.request.app.config['path']['json']/"flexbackend.json"
+
+    def restore_defaults(self):
         self.scalings = sample_scalings
 
     @cherrypy.tools.json_out()
     def GET(self, *args, **kwargs):
         """ emulation for development """
-        return self.scalings
+        try:
+            return self.scalings
+        except AttributeError:
+            # lazy init of scalings from storage
+            self._lazy_init()
+            if self.fn.exists():
+                with self.fn.open(mode='r') as fp:
+                    self.scalings = json.load(fp)
+                cherrypy.log('Using scaling data at {}'.format(self.fn.as_posix()))
+            else:
+                self.scalings = sample_scalings
+                cherrypy.log('Using scaling data defaults')
+            return self.scalings
 
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
     def PUT(self, *args, **kwargs):
         """ emulation for development """
         self.scalings = cherrypy.request.json
-        [print(x) for x in self.scalings]
+        # [print(x) for x in self.scalings]
+        try:
+            self.fn.exists()
+        except AttributeError:
+            self._lazy_init()
+        with self.fn.open(mode='w') as fp:
+            json.dump(self.scalings, fp, indent=4)
+            fp.flush()
+        states['pending_changes'] = True
         return {
             'message': 'Scalings have been updated',
             'pending': True
@@ -47,6 +77,10 @@ class FlexApp(object):
     """ Add responses for the FlexScaling feature """
     scalings = ScalingsUrl()
     measurements = MeasurementsUrl()
+
+    @classmethod
+    def restore_defaults(cls):
+        cls.scalings.restore_defaults()
 
     def GET(self, **kwargs):
         return """<html><body>
@@ -67,11 +101,11 @@ class StaticsApp(object):
         as a local file for future use.  File names are resolved with the request
         path_info and optionally request parameters.
 
-        `params`    a dict of request parameters
-        `append_params` bool to optionally use parameters in resolving file name
+        `payload`    a dict of request parameters
+        `fn_append` optionally use parameters in resolving file name
         """
 
-        fn = cherrypy.request.app.config['cgi']['path'] / slugify(
+        fn = cherrypy.request.app.config['path']['cgi'] / slugify(
             cherrypy.request.method +
             cherrypy.request.path_info + 
             str(fn_append))
@@ -141,7 +175,42 @@ class StaticsApp(object):
         most GETs need the 'ms' removed from the query string.  Most POST are
         submits and need the data from the body removed.
         """
+        # TODO: is this sufficiently accurate emulation?
+        if cherrypy.request.method == 'POST':
+            if 'Reset' in kwargs:
+                states['pending_changes'] = False
+            else:
+                states['pending_changes'] = True
         return self._fetch_cgi_resource({'data':kwargs})
+
+    # runtime emulated CGI reponses
+    @cherrypy.expose
+    @cherrypy.tools.allow(methods=['GET'])
+    def pending_cgi(self, *args, **kwargs):
+        static_cgi = self._fetch_cgi_resource({'data':kwargs})
+        # static cgi won't be large so read the entire file in
+        try:
+            cgi = static_cgi.read()
+            static_cgi.close()
+        except AttributeError:
+            # was a device response, return unmolested
+            return static_cgi
+        else:
+            cgi = cgi.splitlines()
+            cgi[0] = b'1' if states['pending_changes'] else b'0'
+            cgi = b'\n'.join(cgi)
+            return(cgi)
+
+    @cherrypy.expose
+    @cherrypy.tools.allow(methods=['POST'])
+    def restore_cgi(self, *args, dflt, **kwargs):
+        # only providing emulation for flex feature
+        if dflt.lower() == 'scaling':
+            FlexApp.restore_defaults()
+            return b"""<script>setTimeout(function() {window.location="scaling.html"; }, 0);</script>"""
+        else:
+            return self._fetch_cgi_resource({'data':kwargs})
+
 
 def main(config_file: Path):
 
@@ -188,8 +257,9 @@ def main(config_file: Path):
             "\nIf attempting to capture new cgi data, directory must already exist")
 
     config_dict = {
-        'cgi': {
-            'path': cgi_path
+        'path': {
+            'cgi': cgi_path,
+            'json': resource_path/'json'
         },
         '/': {
             'tools.sessions.on': True,
@@ -214,8 +284,10 @@ def main(config_file: Path):
     # load application configuration
     app.merge(config_dict)
 
-    cherrypy.tree.mount(FlexApp(), '/flex', 
-        {'/': {'request.dispatch': cherrypy.dispatch.MethodDispatcher()}}
+    cherrypy.tree.mount(FlexApp(), '/flex', {
+        '/': {'request.dispatch': cherrypy.dispatch.MethodDispatcher()},
+        'path': {'json': resource_path/'json'}
+        }
     )
 
     cherrypy.engine.signals.subscribe()

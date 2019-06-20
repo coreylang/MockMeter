@@ -1,0 +1,29 @@
+[
+    {
+        "nm": "save1",
+        "dec": 2,
+        "sgn": false,
+        "slp": 1,
+        "off": 0,
+        "min": 0,
+        "max": 100
+    },
+    {
+        "nm": "save2",
+        "dec": 2,
+        "sgn": false,
+        "slp": 1,
+        "off": 0,
+        "min": 0,
+        "max": 100
+    },
+    {
+        "nm": "save3",
+        "dec": 2,
+        "sgn": false,
+        "slp": 1,
+        "off": 0,
+        "min": 0,
+        "max": 100
+    }
+]
