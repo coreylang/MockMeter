@@ -7,6 +7,26 @@
     
     <style type="text/css"> 
     
+    
+input[type="file"] {
+    display: none;
+}
+.custom-file-upload {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 3px 7px;
+    cursor: pointer;
+    font-size: 13px;
+    background: #dddddd;
+    border-top: 1px solid #CCCCCC;
+    border-right: 1px solid #333333;
+    border-bottom: 1px solid #333333;
+    border-left: 1px solid #CCCCCC;
+}
+    
+    
+    
+    
     html {
   -ms-overflow-style: -ms-autohiding-scrollbar;
 }
@@ -43,9 +63,183 @@ input{
     <script src="request.js"></script>
     <script src="content.js"></script>
     <script src="scaling.js"></script>
-    <script src="jquery.min.js"></script>
+    <script src="djv.js"></script>
+
+    
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox" id="page">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+
+<div id="trail"><a href="settings.html">Settings</a> / Scaling</div>
+<div id="message"></div>
+
+<h2>Scalings</h2>
+
+<table class="fixed_header" id="scaling_tbl" cellspacing="0" border="0">
+	<thead>
+		<tr>
+		    <th class="label2">Name</th>
+		    <th class="label2">P1 Poll</th>
+		    <th class="label2">P1 Show</th>
+		    <th class="label2">P2 Poll</th>
+		    <th class="label2">P2 Show</th>
+		    <!--<td class="label2"></td>-->
+		</tr>
+	</thead>
+</table>
+
+<hr style="width: 110.5%;">
+
+<p style=" width:100%; text-align: left; margin-bottom: 0px; display:inline-block;">
+<label style="margin-right: 37%;" for="jsonFile" class="custom-file-upload">Open Scaling File</label>
+<input style="" id="jsonFile" type="file" />
+<button onclick="addField();">Insert row</button>
+</p>
+<br/><button onclick="saveFile();">Save Scaling File</button>
+
+<br><br/>
+
+<p style="margin-top: 0px;" >
+<button onclick="serialize();">Apply</button>
+</p>
+
+<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return get_resp()">
+<input type="hidden" name="dflt" id="dflt" value="scaling"/>
+<input type="submit" name="restore" value="Restore Defaults" />
+</form>
+</div>
+<div class="pagebox"><div id="footer"></div></div>
     <script>
 //<!--
+//Load scaling from a Json file
+document.getElementById('jsonFile').addEventListener('change', onChange);
+
+
+function onChange(event) {
+	
+		 var ext = this.value.match(/\.([^\.]+)$/)[1];
+		 if(ext == 'json'){
+		 	var reader = new FileReader();
+	        reader.readAsText(event.target.files[0]);
+	        reader.onload = onReaderLoad;
+		 }else{
+		 	alert('Only Json files are allowed');
+		 	this.value = '';
+		 }        
+    }
+
+    function onReaderLoad(event){
+    	
+    	//async json schema fetch
+    	fetch('FlexScale.schema.json')
+    	.then(function(resp){
+    		return resp.json();
+    	})
+    	.then(function(data){
+    		
+    		jsonSchema = {};
+    		jsonSchema = data;
+    		
+    		//getting json from file, parsing and validating it
+    		var obj = JSON.parse(event.target.result);
+	        validation = validateJson(obj, jsonSchema);
+	        
+	        if(validation == undefined){ // file is valid
+	        
+	        	//convert to scaling objects 
+				scalingNames = Object.getOwnPropertyNames(obj.scalings);
+				//console.log(scalingNames[0]);
+				
+				slpoff = [];
+				for (scl of scalingNames) {
+			        slpoff.push(slpoff_from_points(new Scaling(scl, [[obj.scalings[scl][0][0], obj.scalings[scl][0][1]], [obj.scalings[scl][1][0], obj.scalings[scl][1][1]]])));
+			        //console.log(obj.scalings[scl][0][0]);
+			    }
+				
+				payload = JSON.stringify(slpoff);
+				
+				//remove tbody
+				var table = document.getElementById('scaling_tbl');
+				var row = document.getElementsByTagName('tbody')[0];
+				    row.parentNode.removeChild(row);
+
+				//create tbody
+				parse_vars(payload);
+				
+				
+			} else{
+				alert("Invalid Json file");
+			}
+	        		
+			//Unload file input
+			document.getElementById('jsonFile').value = "";
+    		
+    	})
+    		
+    }
+
+
+//Validate json against json schema
+function validateJson(json, schema){
+	const env = new djv();
+
+	env.addSchema('test', schema);
+	errors = env.validate('test#/scalings', json);
+	
+	return errors;
+}
+
+
+
+
+
+//Save scalings to a Json file
+function saveFile() {
+
+    // Build a list of each scaling row in the table
+    var scaling_tbl = id('scaling_tbl');
+    var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
+
+    // keep the scaling data in an object and then jsonify it.
+    var obj = {};
+    var scalings = {};
+    for (scr of scaling_lst) {
+    	scalings[scr.flexscaling.nm] = [];
+		scalings[scr.flexscaling.nm].push([parseInt(scr.flexscaling.x1), scr.flexscaling.y1]);
+		scalings[scr.flexscaling.nm].push([parseInt(scr.flexscaling.x2), scr.flexscaling.y2]);
+    }
+    obj.scalings = scalings;
+    
+    var payload = JSON.stringify(obj);
+    
+    //console.log(payload);
+
+	download(payload, 'scalings.json','application/json');
+
+}
+
+
+function download(text, name, type)
+    {
+        var file = new Blob([text], {type: type});
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+        if (isIE)
+        {
+            window.navigator.msSaveOrOpenBlob(file, name);
+        }
+        else
+        {
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(file);
+            a.download = name;
+            a.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));
+        }
+     }
+
+
 
 
 window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
@@ -118,8 +312,6 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
         }
 
 
-
-
 function update_scaling_onblur(scl) {
     function inner_handler(evt) {
         scl.flexscaling[evt.target.name] = evt.target.value;
@@ -132,6 +324,7 @@ function parse_vars(data) {
     
     // Create a table row with scaling object attached
     function createScalingRow(pts) {
+    	
         function inner(scl, item, length) {
             td = document.createElement('td');
             ti = document.createElement('input');
@@ -142,6 +335,7 @@ function parse_vars(data) {
             td.appendChild(ti);
             return td;
         }
+        
         var sr = document.createElement('tr');
         sr.setAttribute('flexscaling', true);   // for queryselect
         sr.flexscaling = pts;
@@ -164,14 +358,8 @@ function parse_vars(data) {
 	        var deleteButtonTd = document.createElement('td');
 	        deleteButtonTd.appendChild(deleteButton);
 	        
-
 	        sr.appendChild(deleteButtonTd);
         	
-        
-        
-        
-        
-        
         return sr;
         
     }
@@ -182,7 +370,8 @@ function parse_vars(data) {
     tb.setAttribute('id', 'tablebody');
     var scaling_lst = JSON.parse(data);
     for (scl of scaling_lst) {
-        tb.appendChild(createScalingRow(points_from_slpoff(scl)));
+			//console.log(points_from_slpoff(scl));
+			tb.appendChild(createScalingRow(points_from_slpoff(scl)));	
     }
     
     scaling_tbl.appendChild(tb);
@@ -198,7 +387,7 @@ function serialize() {
     // Convert the format of each scaling and serialize the list of scalings
     scl = [];
     for (scr of scaling_lst) {
-    	//console.log(scr.flexscaling);
+    	//console.log(slpoff_from_points(scr.flexscaling));
         scl.push(slpoff_from_points(scr.flexscaling));
     }
     var payload = JSON.stringify(scl);
@@ -223,47 +412,4 @@ function load_once() {
 window.onload=load_once;
 //-->
 </script>
-    
-</head>
-<body>
-<div id="Content"></div>
-
-<div class="pagebox" id="page">
-<noscript><a class="noscript">This page requires Javascript.</a></noscript>
-
-<div id="trail"><a href="settings.html">Settings</a> / Scaling</div>
-<div id="message"></div>
-
-<h2>Scalings</h2>
-
-<table class="fixed_header" id="scaling_tbl" cellspacing="0" border="0">
-	<thead>
-		<tr>
-		    <th class="label2">Name</th>
-		    <th class="label2">P1 Poll</th>
-		    <th class="label2">P1 Show</th>
-		    <th class="label2">P2 Poll</th>
-		    <th class="label2">P2 Show</th>
-		    <!--<td class="label2"></td>-->
-		</tr>
-	</thead>
-</table>
-
-
-<p style="text-align: center; margin-bottom: 0px;">
-<button onclick="addField();">Insert row</button>
-</p>
-
-
-<br>
-
-<p style="margin-top: 0px;" >
-<button onclick="serialize();">Apply</button>
-</p>
-
-<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return get_resp()">
-<input type="hidden" name="dflt" id="dflt" value="scaling"/>
-<input type="submit" name="restore" value="Restore Defaults" /></form>
-</div>
-<div class="pagebox"><div id="footer"></div></div>
 </body></html>
