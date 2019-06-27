@@ -320,7 +320,7 @@ function update_scaling_onblur(scl) {
 }
 
 function parse_vars(data) {
-    // console.log("cgi response", data);
+    console.log("cgi response", data);
     
     // Create a table row with scaling object attached
     function createScalingRow(pts) {
@@ -368,7 +368,7 @@ function parse_vars(data) {
     var scaling_tbl = id('scaling_tbl');
     var tb = document.createElement('tbody');
     tb.setAttribute('id', 'tablebody');
-    var scaling_lst = JSON.parse(data);
+    var scaling_lst = JSON.parse(data).scalings;
     for (scl of scaling_lst) {
 			//console.log(points_from_slpoff(scl));
 			tb.appendChild(createScalingRow(points_from_slpoff(scl)));	
