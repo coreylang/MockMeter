@@ -167,7 +167,7 @@ function onChange(event) {
 				    row.parentNode.removeChild(row);
 
 				//create tbody
-				parse_vars(payload);
+				parse_vars(payload, 'extFile');
 				
 				
 			} else{
@@ -319,7 +319,7 @@ function update_scaling_onblur(scl) {
     return inner_handler
 }
 
-function parse_vars(data) {
+function parse_vars(data, source) {
     console.log("cgi response", data);
     
     // Create a table row with scaling object attached
@@ -368,7 +368,13 @@ function parse_vars(data) {
     var scaling_tbl = id('scaling_tbl');
     var tb = document.createElement('tbody');
     tb.setAttribute('id', 'tablebody');
-    var scaling_lst = JSON.parse(data).scalings;
+    
+    if(source == 'extFile'){
+		var scaling_lst = JSON.parse(data);
+	}else{
+		var scaling_lst = JSON.parse(data).scalings;	
+	}
+    
     for (scl of scaling_lst) {
 			//console.log(points_from_slpoff(scl));
 			tb.appendChild(createScalingRow(points_from_slpoff(scl)));	
@@ -379,30 +385,51 @@ function parse_vars(data) {
 }
 
 function serialize() {
+	
+	
+	    	fetch('flex/scalings')
+	    	.then(function(resp){
+	    		return resp.json();
+	    	})
+	    	.then(function(data){
+		    		
+	    		jsonData = {};
+	    		jsonData = data;
+	    		
+				    // Build a list of each scaling row in the table
+				    var scaling_tbl = id('scaling_tbl');
+				    var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
 
-    // Build a list of each scaling row in the table
-    var scaling_tbl = id('scaling_tbl');
-    var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
+				    // Convert the format of each scaling and serialize the list of scalings
+				    scl = [];
+				    for (scr of scaling_lst) {
+				    	//console.log(slpoff_from_points(scr.flexscaling));
+				        scl.push(slpoff_from_points(scr.flexscaling));
+				    }
+				    
+				    jsonData.scalings = scl;
+				    var payload = JSON.stringify(jsonData);
+				    
 
-    // Convert the format of each scaling and serialize the list of scalings
-    scl = [];
-    for (scr of scaling_lst) {
-    	//console.log(slpoff_from_points(scr.flexscaling));
-        scl.push(slpoff_from_points(scr.flexscaling));
-    }
-    var payload = JSON.stringify(scl);
+				    // browser compat?
+				    var xhr = new XMLHttpRequest();
+				    xhr.open("PUT", "flex/scalings", true);
+				    xhr.setRequestHeader("Content-Type", "application/json");
+				    xhr.onreadystatechange = function () {
+				        if (xhr.readyState === 4 && xhr.status === 200) {
+				            console.log(xhr.response);
+				        }
+				    };
+				    xhr.send(payload);
+					
+	    		
+	    	})
+	
+	
+	}
+	
+	
 
-    // browser compat?
-    var xhr = new XMLHttpRequest();
-    xhr.open("PUT", "flex/scalings", true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            console.log(xhr.response);
-        }
-    };
-    xhr.send(payload);
-}
 
 function load_once() {
     populate("settings.html");

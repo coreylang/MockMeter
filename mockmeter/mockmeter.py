@@ -18,14 +18,14 @@ exposed handlers.
 
 sample_flex = {
     "scalings": [
-        {"nm": "S2d", "dec":2,"sgn":True,"slp":1,"off":0,"min":0,"max":1000},
+        {"nm": "S2d", "dec":2,"sgn":True,"slp":1,"off":0,"min":0,"max":100 },
         {"nm": "S1d", "dec":1,"sgn":True,"slp":1,"off":0,"min":0,"max":1000},
         {"nm": "S0d", "dec":0,"sgn":True,"slp":1,"off":0,"min":0,"max":1000},
     ],
     "measurements": [
-        {"nm": "kv a", "S1d": "Primary kv", "phs": "A", "nxa": None},
-        {"nm": "kv b", "S1d": "Primary kv", "phs": "B", "nxa": None},
-        {"nm": "kv c", "S1d": "Primary kv", "phs": "C", "nxa": None}
+        {"nm": "kv a", "scl": "Primary kv", "phs": "A", "nxa": None},
+        {"nm": "kv b", "scl": "Primary kv", "phs": "B", "nxa": None},
+        {"nm": "kv c", "scl": "Primary kv", "phs": "C", "nxa": None}
     ]
 }
 
