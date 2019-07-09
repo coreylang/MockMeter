@@ -59,11 +59,16 @@ input{
 /*  width: 200px;*/
 }
     </style>
-    
+
+
+	<script src="jquery.min.js"></script>    
     <script src="request.js"></script>
     <script src="content.js"></script>
     <script src="scaling.js"></script>
-    <script src="djv.js"></script>
+    <script src="tv4.min.js"></script>
+    
+    
+    
 
     
 </head>
@@ -86,17 +91,37 @@ input{
 		    <th class="label2">P1 Show</th>
 		    <th class="label2">P2 Poll</th>
 		    <th class="label2">P2 Show</th>
-		    <!--<td class="label2"></td>-->
 		</tr>
 	</thead>
 </table>
 
 <hr style="width: 110.5%;">
 
+<p style=" width:95%; text-align: center; margin-bottom: 0px; display:inline-block;">
+<button onclick="addFieldScaling();">Insert row</button>
+</p>
+
+<br/><br/><br/>
+
+<table class="fixed_header" id="measurement_tbl" cellspacing="0" border="0">
+	<thead>
+		<tr>
+		    <th class="label2">Name</th>
+		    <th class="label2">Scaling</th>
+		    <th class="label2">Phase</th>
+		    <th class="label2">Modifier</th>
+		</tr>
+	</thead>
+</table>
+
+
+
+<hr style="width: 100%;">
+
 <p style=" width:100%; text-align: left; margin-bottom: 0px; display:inline-block;">
-<label style="margin-right: 37%;" for="jsonFile" class="custom-file-upload">Open Scaling File</label>
+<label style="margin-right: 28%;" for="jsonFile" class="custom-file-upload">Open Scaling File</label>
 <input style="" id="jsonFile" type="file" />
-<button onclick="addField();">Insert row</button>
+<button onclick="addFieldMeasurement();">Insert row</button>
 </p>
 <br/><button onclick="saveFile();">Save Scaling File</button>
 
@@ -114,6 +139,7 @@ input{
 <div class="pagebox"><div id="footer"></div></div>
     <script>
 //<!--
+
 //Load scaling from a Json file
 document.getElementById('jsonFile').addEventListener('change', onChange);
 
@@ -131,7 +157,7 @@ function onChange(event) {
 		 }        
     }
 
-    function onReaderLoad(event){
+function onReaderLoad(event){
     	
     	//async json schema fetch
     	fetch('FlexScale.schema.json')
@@ -144,34 +170,69 @@ function onChange(event) {
     		jsonSchema = data;
     		
     		//getting json from file, parsing and validating it
-    		var obj = JSON.parse(event.target.result);
-	        validation = validateJson(obj, jsonSchema);
-	        
-	        if(validation == undefined){ // file is valid
+    		obj = JSON.parse(event.target.result);
+
+
+	        var valid = tv4.validate(obj, jsonSchema);
+
+
+	        if(valid == true){ // file is valid
 	        
 	        	//convert to scaling objects 
 				scalingNames = Object.getOwnPropertyNames(obj.scalings);
 				//console.log(scalingNames[0]);
 				
 				slpoff = [];
-				for (scl of scalingNames) {
+				for (var scl of scalingNames) {
 			        slpoff.push(slpoff_from_points(new Scaling(scl, [[obj.scalings[scl][0][0], obj.scalings[scl][0][1]], [obj.scalings[scl][1][0], obj.scalings[scl][1][1]]])));
 			        //console.log(obj.scalings[scl][0][0]);
 			    }
+			    
+			    obj.scalings = slpoff;
+			    
+			    
+			    //same but with measurements
+				measurementNames = Object.getOwnPropertyNames(obj.measurements);
+				//console.log(measurementNames[0]);
 				
-				payload = JSON.stringify(slpoff);
+				measureFormat = [];
+				counter = 0;
+				for (var sct of measurementNames) {
+					
+			        everyObject= 
+			        {
+			        	nm: sct,
+			        	scl: obj.measurements[sct][0],
+			            phs: obj.measurements[sct][1],
+			            nxa: obj.measurements[sct][2]
+			        }
+			        measureFormat.push(everyObject);
+			        //console.log(obj.scalings[scl][0][0]);
+			        //counter = counter+1;
+			    }
+			    
+			    
+			    obj.measurements = measureFormat;
+
+				
+				payload = JSON.stringify(obj);
 				
 				//remove tbody
 				var table = document.getElementById('scaling_tbl');
 				var row = document.getElementsByTagName('tbody')[0];
 				    row.parentNode.removeChild(row);
+				    
+				var table = document.getElementById('measurement_tbl');
+				var row = document.getElementsByTagName('tbody')[0];
+				    row.parentNode.removeChild(row);
 
 				//create tbody
-				parse_vars(payload, 'extFile');
+				parse_vars(payload);
 				
 				
 			} else{
-				alert("Invalid Json file");
+				alert("Invalid Json file: "+tv4.error.message+" on "+tv4.error.dataPath);
+				console.log(tv4.error);
 			}
 	        		
 			//Unload file input
@@ -182,40 +243,43 @@ function onChange(event) {
     }
 
 
-//Validate json against json schema
-function validateJson(json, schema){
-	const env = new djv();
-
-	env.addSchema('test', schema);
-	errors = env.validate('test#/scalings', json);
-	
-	return errors;
-}
-
-
-
-
-
 //Save scalings to a Json file
 function saveFile() {
+	
+	var obj = {};
 
     // Build a list of each scaling row in the table
     var scaling_tbl = id('scaling_tbl');
     var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
 
     // keep the scaling data in an object and then jsonify it.
-    var obj = {};
+    
     var scalings = {};
-    for (scr of scaling_lst) {
+    for (var scr of scaling_lst) {
     	scalings[scr.flexscaling.nm] = [];
 		scalings[scr.flexscaling.nm].push([parseInt(scr.flexscaling.x1), scr.flexscaling.y1]);
 		scalings[scr.flexscaling.nm].push([parseInt(scr.flexscaling.x2), scr.flexscaling.y2]);
     }
     obj.scalings = scalings;
     
-    var payload = JSON.stringify(obj);
     
-    //console.log(payload);
+    
+    // Build a list of each measurement row in the table
+    var measurement_tbl = id('measurement_tbl');
+    var measurement_lst = measurement_tbl.querySelectorAll("[measurement]");
+
+    // Convert the format of each measurement and serialize the list of scalings
+    msrmnt = {};
+    for (var scr of measurement_lst) {
+    	//console.log(slpoff_from_points(scr.flexscaling));
+        //msrmnt.push(scr.measurement);
+        msrmnt[scr.measurement.nm] = [];
+		msrmnt[scr.measurement.nm].push(scr.measurement.scl, scr.measurement.phs, scr.measurement.nxa);
+    }
+	
+	obj.measurements = msrmnt;
+	
+	var payload = JSON.stringify(obj);
 
 	download(payload, 'scalings.json','application/json');
 
@@ -248,8 +312,8 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
 }
 
 
- function addField (argument) {
-            var myTable = document.getElementById("tablebody");
+ function addFieldScaling(argument) {
+            var myTable = document.getElementById("tablebodyScalings");
             var currentIndex = myTable.rows.length;
             var currentRow = myTable.insertRow(-1);
 
@@ -312,6 +376,81 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
         }
 
 
+
+ function addFieldMeasurement(argument) {
+ 	
+ 	function fillSelect(selectName, options){
+ 		
+ 		for (var each of options) {
+			  var option = document.createElement("option");
+			  option.setAttribute("value", each);
+			  option.text = each;
+			  selectName.appendChild(option);
+			}
+ 		
+ 	}
+ 	
+ 	
+            var myTable = document.getElementById("tablebodyMeasurements");
+            var currentIndex = myTable.rows.length;
+            var currentRow = myTable.insertRow(-1);
+
+            var name = document.createElement("input");
+            name.setAttribute("name", "nm");
+            name.setAttribute('maxlength', 31);
+            
+            var scalingSelect = document.createElement("select");
+            scalingSelect.setAttribute("name", "scl");
+            scalingSelect.setAttribute('class', "scl");
+            scalingSelect.setAttribute('style', 'width: 100%');  
+            fillSelect(scalingSelect, getNamesFromScaling());  
+
+            var phase = document.createElement("select");
+            phase.setAttribute("name", "phs");
+            phase.setAttribute('class', "phs");
+            phase.setAttribute('style', 'width: 100%');  
+            fillSelect(phase, ["A", "B", "C", "AB", "BC", "CA", null]);
+             
+            var modifier = document.createElement("select");
+            modifier.setAttribute("name", "nxa");
+            modifier.setAttribute('class', "nxa");
+            modifier.setAttribute('style', 'width: 100%');  
+            fillSelect(modifier, ["min", "max", "avg", null]);
+
+
+            var deleteRowBox = document.createElement("input");
+            deleteRowBox.setAttribute("type", "button");
+            deleteRowBox.setAttribute("value", "Delete Row");
+            deleteRowBox.setAttribute("onclick", "SomeDeleteRowFunction(this);");
+            deleteRowBox.setAttribute("class", "button");
+            deleteRowBox.setAttribute("style", "width: 85px !important;");
+            
+
+            currentRow.setAttribute("measurement", true);
+            currentRow.measurement = {nm:"", scl:"", phs:"", nxa:""}
+            
+            var currentCell = currentRow.insertCell(-1);
+            name.onblur = update_measurement_onblur(currentRow);
+            currentCell.appendChild(name);
+
+            currentCell = currentRow.insertCell(-1);
+            scalingSelect.onblur = update_measurement_onblur(currentRow);
+            currentCell.appendChild(scalingSelect);
+
+            currentCell = currentRow.insertCell(-1);
+            phase.onblur = update_measurement_onblur(currentRow);
+            currentCell.appendChild(phase);
+            
+            currentCell = currentRow.insertCell(-1);
+            modifier.onblur = update_measurement_onblur(currentRow);
+            currentCell.appendChild(modifier);
+
+            currentCell = currentRow.insertCell(-1);
+            currentCell.appendChild(deleteRowBox);
+        }
+
+
+
 function update_scaling_onblur(scl) {
     function inner_handler(evt) {
         scl.flexscaling[evt.target.name] = evt.target.value;
@@ -319,8 +458,53 @@ function update_scaling_onblur(scl) {
     return inner_handler
 }
 
+function update_measurement_onblur(scl) {
+    function inner_handler(evt) {
+        scl.measurement[evt.target.name] = evt.target.value;
+    }
+    return inner_handler
+}
+
+
+//select auto-filling
+$(document).on('focus','.scl', function(){
+
+
+  var currentValue = $(this).val();
+
+  $(this).children("option").remove(); // Remove all <option> child tags.
+  
+  var sclng_tbl = id('scaling_tbl');
+	var sclng_lst = scaling_tbl.querySelectorAll("[flexscaling]");
+	names = [];
+		for (eac of sclng_lst) {
+				$(this).append( // Append an object to the inside of the select box
+		            $("<option></option>") // Yes you can do this.
+		                .text(eac.flexscaling.nm)
+		                .val(eac.flexscaling.nm)
+		        );
+	    }
+	
+	$(this).val(currentValue);    
+	//console.log(currentValue);
+});
+
+
+//getting the nm values off the scalings table
+function getNamesFromScaling(){
+		 var sclng_tbl = id('scaling_tbl');
+		 var sclng_lst = scaling_tbl.querySelectorAll("[flexscaling]");
+			names = [];
+			for (eac of sclng_lst) {
+				names.push(eac.flexscaling.nm);
+		    }
+		    
+		    return names;
+}
+
+
+
 function parse_vars(data, source) {
-    console.log("cgi response", data);
     
     // Create a table row with scaling object attached
     function createScalingRow(pts) {
@@ -364,67 +548,162 @@ function parse_vars(data, source) {
         
     }
     
-    // Locate the table and append reach scaling as a row
+    
+    
+    // Create a table row with measurement object attached
+    function createMeasurementRow(pts) {
+    	
+        function innerInput(scl, item, length) {
+            td = document.createElement('td');
+            ti = document.createElement('input');
+            ti.setAttribute('name', item);
+            ti.setAttribute('maxlength', length);
+            ti.value = scl.measurement[item];
+            ti.onblur = update_measurement_onblur(sr);
+            td.appendChild(ti);
+            return td;
+        }
+        
+        
+        function innerSelect(scl, item, options) {
+            td = document.createElement('td');
+            ts = document.createElement('select');
+            ts.setAttribute('name', item);
+            ts.setAttribute('class', item);
+            ts.setAttribute('style', 'width: 100%');            
+            ts.onblur = update_measurement_onblur(sr);
+            
+            for (var each of options) {
+			  var option = document.createElement("option");
+			  option.setAttribute("value", each);
+			  option.text = each;
+			  
+				  //select the value
+				  if(each == scl.measurement[item]){
+				  	option.setAttribute("selected", true);	
+				  }
+			  
+			  ts.appendChild(option);
+			}
+			
+            td.appendChild(ts);
+            return td;
+        }
+        
+        var sr = document.createElement('tr');
+        sr.setAttribute('measurement', true);   // for queryselect
+        sr.measurement = pts;
+        sr.appendChild(innerInput(sr, "nm", 31));
+        sr.appendChild(innerSelect(sr, "scl", getNamesFromScaling())); //***********list of scalings
+        sr.appendChild(innerSelect(sr, "phs", ["none", "A", "B", "C", "AB", "BC", "CA"]));
+        sr.appendChild(innerSelect(sr, "nxa", ["none", "min", "max", "avg"]));
+        
+        
+        
+        //Delete button
+                	
+        	var deleteButton = document.createElement("input");
+            deleteButton.setAttribute("type", "button");
+            deleteButton.setAttribute("value", "Delete Row");
+            deleteButton.setAttribute("onclick", "SomeDeleteRowFunction(this);");
+            deleteButton.setAttribute("class", "button");
+            deleteButton.setAttribute("style", "width: 85px !important; padding.right: 10px;");
+            
+	        var deleteButtonTd = document.createElement('td');
+	        deleteButtonTd.appendChild(deleteButton);
+	        
+	        sr.appendChild(deleteButtonTd);
+        	
+        return sr;
+        
+    }
+    
+    
+    
+
+    // SCALING table fill. Locate the table and append reach scaling as a row
     var scaling_tbl = id('scaling_tbl');
     var tb = document.createElement('tbody');
-    tb.setAttribute('id', 'tablebody');
+    tb.setAttribute('id', 'tablebodyScalings');
     
-    if(source == 'extFile'){
-		var scaling_lst = JSON.parse(data);
-	}else{
-		var scaling_lst = JSON.parse(data).scalings;	
-	}
-    
+	var scaling_lst = JSON.parse(data).scalings;	
+	
     for (scl of scaling_lst) {
-			//console.log(points_from_slpoff(scl));
 			tb.appendChild(createScalingRow(points_from_slpoff(scl)));	
     }
     
     scaling_tbl.appendChild(tb);
+    
+    
+    // MEASUREMENT table fill. Locate the table and append reach scaling as a row
+    var measurement_tbl = id('measurement_tbl');
+    var tb = document.createElement('tbody');
+    tb.setAttribute('id', 'tablebodyMeasurements');
+    
+	var measurement_lst = JSON.parse(data).measurements;	
+	
+    for (scl of measurement_lst) {
+			tb.appendChild(createMeasurementRow(scl));	
+    }
+    
+    measurement_tbl.appendChild(tb);
+    
+    
+    
     
 }
 
 function serialize() {
 	
 	
-	    	fetch('flex/scalings')
-	    	.then(function(resp){
-	    		return resp.json();
-	    	})
-	    	.then(function(data){
-		    		
-	    		jsonData = {};
-	    		jsonData = data;
-	    		
-				    // Build a list of each scaling row in the table
-				    var scaling_tbl = id('scaling_tbl');
-				    var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
-
-				    // Convert the format of each scaling and serialize the list of scalings
-				    scl = [];
-				    for (scr of scaling_lst) {
-				    	//console.log(slpoff_from_points(scr.flexscaling));
-				        scl.push(slpoff_from_points(scr.flexscaling));
-				    }
-				    
-				    jsonData.scalings = scl;
-				    var payload = JSON.stringify(jsonData);
-				    
-
-				    // browser compat?
-				    var xhr = new XMLHttpRequest();
-				    xhr.open("PUT", "flex/scalings", true);
-				    xhr.setRequestHeader("Content-Type", "application/json");
-				    xhr.onreadystatechange = function () {
-				        if (xhr.readyState === 4 && xhr.status === 200) {
-				            console.log(xhr.response);
-				        }
-				    };
-				    xhr.send(payload);
-					
-	    		
-	    	})
+	jsonData = {};
 	
+	// Build a list of each scaling row in the table
+    var scaling_tbl = id('scaling_tbl');
+    var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
+
+    // Convert the format of each scaling and serialize the list of scalings
+    scl = [];
+    for (scr of scaling_lst) {
+    	//console.log(slpoff_from_points(scr.flexscaling));
+        scl.push(slpoff_from_points(scr.flexscaling));
+    }
+    
+    jsonData.scalings = scl;
+	
+	
+	
+	// Build a list of each measurement row in the table
+    var measurement_tbl = id('measurement_tbl');
+    var measurement_lst = measurement_tbl.querySelectorAll("[measurement]");
+
+    // Convert the format of each measurement and serialize the list of scalings
+    msrmnt = [];
+    for (scr of measurement_lst) {
+    	//console.log(slpoff_from_points(scr.flexscaling));
+        msrmnt.push(scr.measurement);
+    }
+	
+	jsonData.measurements = msrmnt;
+	
+	
+	var payload = JSON.stringify(jsonData);
+	
+	
+	//console.log(payload);
+				    
+
+    // browser compat?
+    var xhr = new XMLHttpRequest();
+    xhr.open("PUT", "flex/scalings", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            console.log(xhr.response);
+        }
+    };
+    xhr.send(payload);
+
 	
 	}
 	
