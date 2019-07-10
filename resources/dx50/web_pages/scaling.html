@@ -409,13 +409,13 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
             phase.setAttribute("name", "phs");
             phase.setAttribute('class', "phs");
             phase.setAttribute('style', 'width: 100%');  
-            fillSelect(phase, ["A", "B", "C", "AB", "BC", "CA", null]);
+            fillSelect(phase, ["none", "A", "B", "C", "AB", "BC", "CA"]);
              
             var modifier = document.createElement("select");
             modifier.setAttribute("name", "nxa");
             modifier.setAttribute('class', "nxa");
             modifier.setAttribute('style', 'width: 100%');  
-            fillSelect(modifier, ["min", "max", "avg", null]);
+            fillSelect(modifier, ["none", "min", "max", "avg"]);
 
 
             var deleteRowBox = document.createElement("input");
