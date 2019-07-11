@@ -10,11 +10,24 @@ from slugify import slugify
 exposed handlers.
 """
 
-sample_scalings = [
-    {"nm": "default1", "dec": 3, "sgn": False, "slp": 0.001, "off": 60, "min": -1000, "max": 1000}, 
-    {"nm": "default2", "dec": 2, "sgn": False, "slp": 0.00043946653645435957, "off": 0, "min": 0, "max": 32767}, 
-    {"nm": "default3", "dec": 2, "sgn": False, "slp": 0.0010285714285714286, "off": 0, "min": 0, "max": 14000}
-]
+# sample_scalings = [
+#     {"nm": "default1", "dec": 3, "sgn": False, "slp": 0.001, "off": 60, "min": -1000, "max": 1000}, 
+#     {"nm": "default2", "dec": 2, "sgn": False, "slp": 0.00043946653645435957, "off": 0, "min": 0, "max": 32767}, 
+#     {"nm": "default3", "dec": 2, "sgn": False, "slp": 0.0010285714285714286, "off": 0, "min": 0, "max": 14000}
+# ]
+
+sample_flex = {
+    "scalings": [
+        {"nm": "S2d", "dec":2,"sgn":True,"slp":1,"off":0,"min":0,"max":100 },
+        {"nm": "S1d", "dec":1,"sgn":True,"slp":1,"off":0,"min":0,"max":1000},
+        {"nm": "S0d", "dec":0,"sgn":True,"slp":1,"off":0,"min":0,"max":1000},
+    ],
+    "measurements": [
+        {"nm": "kv a", "scl": "Primary kv", "phs": "A", "nxa": None},
+        {"nm": "kv b", "scl": "Primary kv", "phs": "B", "nxa": None},
+        {"nm": "kv c", "scl": "Primary kv", "phs": "C", "nxa": None}
+    ]
+}
 
 # Move to cherrypy.config if more than one server needed
 states = {
@@ -34,7 +47,7 @@ class ScalingsUrl(object):
         self.fn = cherrypy.request.app.config['path']['json']/"flexbackend.json"
 
     def restore_defaults(self):
-        self.scalings = sample_scalings
+        self.scalings = sample_flex
 
     @cherrypy.tools.json_out()
     def GET(self, *args, **kwargs):
@@ -49,7 +62,7 @@ class ScalingsUrl(object):
                     self.scalings = json.load(fp)
                 cherrypy.log('Using scaling data at {}'.format(self.fn.as_posix()))
             else:
-                self.scalings = sample_scalings
+                self.scalings = sample_flex
                 cherrypy.log('Using scaling data defaults')
             return self.scalings
 

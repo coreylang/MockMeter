@@ -28,8 +28,8 @@
                 "type": "array",
                 "items": [
                     {"type": "string"},
-                    {"enum": ["A", "B", "C", "AB", "BC", "CA", null]},
-                    {"enum": ["min", "max", "avg", null]}
+                    {"enum": ["none", "A", "B", "C", "AB", "BC", "CA", null]},
+                    {"enum": ["none", "min", "max", "avg", null]}
                 ]
             }
         }
