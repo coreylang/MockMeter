@@ -23,9 +23,9 @@ sample_flex = {
         {"nm": "S0d", "dec":0,"sgn":True,"slp":1,"off":0,"min":0,"max":1000},
     ],
     "measurements": [
-        {"nm": "kv a", "scl": "Primary kv", "phs": "A", "nxa": None},
-        {"nm": "kv b", "scl": "Primary kv", "phs": "B", "nxa": None},
-        {"nm": "kv c", "scl": "Primary kv", "phs": "C", "nxa": None}
+        {"nm": "kv a", "scl": "S1d", "phs": "A", "nxa": "none"},
+        {"nm": "kv b", "scl": "S1d", "phs": "B", "nxa": "none"},
+        {"nm": "kv c", "scl": "S1d", "phs": "C", "nxa": "none"}
     ]
 }
 
@@ -77,9 +77,20 @@ class ScalingsUrl(object):
         except AttributeError:
             self._lazy_init()
         with self.fn.open(mode='w') as fp:
-            json.dump(self.scalings, fp, indent=4)
+            json.dump(self.scalings, fp, indent=None, separators=(',', ':'))
             fp.flush()
         states['pending_changes'] = True
+
+        if cherrypy.request.app.config['device']['ipaddress']:
+            ip = cherrypy.request.app.config['device']['ipaddress']
+            url = urlunsplit(('http', ip, 'flex_submit.cgi', '', ''))
+            files = {'flex': ('flex',json.dumps(self.scalings))}
+            try:
+                r = requests.post(url, files=files)
+                r.raise_for_status()
+            except requests.exceptions.ChunkedEncodingError:
+                print('mime errd')
+
         return {
             'message': 'Scalings have been updated',
             'pending': True
@@ -299,7 +310,8 @@ def main(config_file: Path):
 
     cherrypy.tree.mount(FlexApp(), '/flex', {
         '/': {'request.dispatch': cherrypy.dispatch.MethodDispatcher()},
-        'path': {'json': resource_path/'json'}
+        'path': {'json': app.config['path']['json']},
+        'device': {'ipaddress': app.config['device']['ipaddress']}
         }
     )
 
