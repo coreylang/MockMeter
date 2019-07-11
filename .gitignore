@@ -140,3 +140,5 @@ prototypes/*
 python_venv/*
 .gitconfig
 *.bat
+
+resources/dx50/json/*
