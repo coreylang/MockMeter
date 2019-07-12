@@ -700,6 +700,7 @@ function serialize() {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             console.log(xhr.response);
+            pendingCheck();
         }
     };
     xhr.send(payload);
@@ -707,12 +708,31 @@ function serialize() {
 	
 	}
 	
+
+function pendingCheck(){
+	
+	    	fetch('pending.cgi')
+    	.then(function(resp){
+    		return resp.text();
+    	})
+    	.then(function(data){
+    		
+    		var parsed = data.split( "\n" );
+    		var pending_changes = parsed[0];
+    		check_pending(pending_changes);
+
+    	})
+}	
+	
+	
 	
 
 
 function load_once() {
     populate("settings.html");
     makeRequest(nc("flex/scalings"), null);
+    pendingCheck();   
+    
 }
 
 window.onload=load_once;
