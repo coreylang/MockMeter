@@ -10,22 +10,12 @@ from slugify import slugify
 exposed handlers.
 """
 
-# sample_scalings = [
-#     {"nm": "default1", "dec": 3, "sgn": False, "slp": 0.001, "off": 60, "min": -1000, "max": 1000}, 
-#     {"nm": "default2", "dec": 2, "sgn": False, "slp": 0.00043946653645435957, "off": 0, "min": 0, "max": 32767}, 
-#     {"nm": "default3", "dec": 2, "sgn": False, "slp": 0.0010285714285714286, "off": 0, "min": 0, "max": 14000}
-# ]
-
 sample_flex = {
     "scalings": [
-        {"nm": "S2d", "dec":2,"sgn":True,"slp":1,"off":0,"min":0,"max":100 },
-        {"nm": "S1d", "dec":1,"sgn":True,"slp":1,"off":0,"min":0,"max":1000},
-        {"nm": "S0d", "dec":0,"sgn":True,"slp":1,"off":0,"min":0,"max":1000},
+        {"nm": "flex scale", "dec":0,"sgn":True,"slp":1,"off":0,"min":0,"max":1 }
     ],
     "measurements": [
-        {"nm": "kv a", "scl": "Primary kv", "phs": "A", "nxa": None},
-        {"nm": "kv b", "scl": "Primary kv", "phs": "B", "nxa": None},
-        {"nm": "kv c", "scl": "Primary kv", "phs": "C", "nxa": None}
+        {"nm": "flex measurement", "scl": "flex scale", "phs": "none", "nxa": "none"}
     ]
 }
 
@@ -77,9 +67,20 @@ class ScalingsUrl(object):
         except AttributeError:
             self._lazy_init()
         with self.fn.open(mode='w') as fp:
-            json.dump(self.scalings, fp, indent=4)
+            json.dump(self.scalings, fp, indent=None, separators=(',', ':'))
             fp.flush()
         states['pending_changes'] = True
+
+        if cherrypy.request.app.config['device']['ipaddress']:
+            ip = cherrypy.request.app.config['device']['ipaddress']
+            url = urlunsplit(('http', ip, 'flex_submit.cgi', '', ''))
+            files = {'flex': ('flex',json.dumps(self.scalings))}
+            try:
+                r = requests.post(url, files=files)
+                r.raise_for_status()
+            except requests.exceptions.ChunkedEncodingError:
+                print('mime errd')
+
         return {
             'message': 'Scalings have been updated',
             'pending': True
@@ -299,7 +300,8 @@ def main(config_file: Path):
 
     cherrypy.tree.mount(FlexApp(), '/flex', {
         '/': {'request.dispatch': cherrypy.dispatch.MethodDispatcher()},
-        'path': {'json': resource_path/'json'}
+        'path': {'json': app.config['path']['json']},
+        'device': {'ipaddress': app.config['device']['ipaddress']}
         }
     )
 

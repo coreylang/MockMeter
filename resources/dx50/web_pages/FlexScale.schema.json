@@ -1,13 +1,19 @@
 {
     "$schema": "http://json-schema.org/schema#",
-    "$id": "file:///scaling.schema.json",
-    "description": "Value scalings",
-    "title": "prototype schema for hand written json",
+    "$id": "file:///FlexScale.schema.json",
+    "title": "FlexScaling",
+    "description": "Used for validation of handwritten custom measurements and scalings.",
 
     "definitions": {
         "point_arrays": {
+            "title": "Custom Scalings",
+            "description": "Provide conversion from polled value to displayed value.  Scalings are assigned to measurements.",
             "type": "object",
+            "maxProperties": 12,
+            "propertyNames": { "maxLength": 31, "$comment": "draft6" },
             "additionalProperties": {
+                "title": "Scaling Name",
+                "description": "Define with a pair of [poll, display] points.",
                 "type":"array",
                 "minItems": 2,
                 "maxItems": 2,
@@ -16,26 +22,34 @@
                     "minItems": 2,
                     "maxItems": 2,
                         "items": [
-                        {"type": "number"},
-                        {"type": "string", "maxLength": 6}
+                        {"type": "number", "title": "Polled Value"},
+                        {"type": "string", "maxLength": 6, "title": "Displayed Value"}
                     ]
                 }
             }
         },
         "measurement_tuples": {
+            "title": "Custom Measurements",
+            "description": "Provide scaling and LED definitions for new measurements.  Measurements are assigned to display screens and protocols.",
             "type": "object",
+            "maxProperties": 24,
+            "propertyNames": { "maxLength": 31, "$comment": "draft6" },
             "additionalProperties": {
+                "title": "Measurement Name",
                 "type": "array",
+                "maxItems": 3,
+                "minItems": 1,
                 "items": [
-                    {"type": "string"},
-                    {"enum": ["none", "A", "B", "C", "AB", "BC", "CA", null]},
-                    {"enum": ["none", "min", "max", "avg", null]}
+                    {"type": "string", "title": "Scaling Name", "description": "Enter a name from the defined scalings."},
+                    {"enum": ["none", "A", "B", "C", "AB", "BC", "CA", null], "title": "Phase LED"},
+                    {"enum": ["none", "min", "max", "avg", null], "title": "Min/Max/Avg LED"}
                 ]
             }
         }
     },
 
     "type": "object",
+    "required": ["scalings", "measurements"],
     "properties": {
         "scalings": {"$ref": "#/definitions/point_arrays"},
         "measurements": {"$ref": "#/definitions/measurement_tuples"}
