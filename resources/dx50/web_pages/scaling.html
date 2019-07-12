@@ -433,7 +433,7 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
             
 
             currentRow.setAttribute("measurement", true);
-            currentRow.measurement = {nm:"", scl:"", phs:"", nxa:""}
+            currentRow.measurement = {nm:"", scl:getNamesFromScaling()[0], phs:"none", nxa:"none"}
             
             var currentCell = currentRow.insertCell(-1);
             name.onblur = update_measurement_onblur(currentRow);
