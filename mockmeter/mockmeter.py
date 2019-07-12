@@ -10,22 +10,12 @@ from slugify import slugify
 exposed handlers.
 """
 
-# sample_scalings = [
-#     {"nm": "default1", "dec": 3, "sgn": False, "slp": 0.001, "off": 60, "min": -1000, "max": 1000}, 
-#     {"nm": "default2", "dec": 2, "sgn": False, "slp": 0.00043946653645435957, "off": 0, "min": 0, "max": 32767}, 
-#     {"nm": "default3", "dec": 2, "sgn": False, "slp": 0.0010285714285714286, "off": 0, "min": 0, "max": 14000}
-# ]
-
 sample_flex = {
     "scalings": [
-        {"nm": "S2d", "dec":2,"sgn":True,"slp":1,"off":0,"min":0,"max":100 },
-        {"nm": "S1d", "dec":1,"sgn":True,"slp":1,"off":0,"min":0,"max":1000},
-        {"nm": "S0d", "dec":0,"sgn":True,"slp":1,"off":0,"min":0,"max":1000},
+        {"nm": "flex scale", "dec":0,"sgn":True,"slp":1,"off":0,"min":0,"max":1 }
     ],
     "measurements": [
-        {"nm": "kv a", "scl": "S1d", "phs": "A", "nxa": "none"},
-        {"nm": "kv b", "scl": "S1d", "phs": "B", "nxa": "none"},
-        {"nm": "kv c", "scl": "S1d", "phs": "C", "nxa": "none"}
+        {"nm": "flex measurement", "scl": "flex scale", "phs": "none", "nxa": "none"}
     ]
 }
 
