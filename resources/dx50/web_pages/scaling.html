@@ -252,7 +252,47 @@ function onReaderLoad(event){
 //Save scalings to a Json file
 function saveFile() {
 	
-	var obj = {};
+	
+		//async json schema fetch
+    	fetch('FlexScale.schema.json')
+    	.then(function(resp){
+    		return resp.json();
+    	})
+    	.then(function(data){
+    		
+    		jsonSchema = {};
+    		jsonSchema = data;
+    		
+	        var valid = tv4.validate(specialFormat(), jsonSchema);
+
+
+	        if(valid == true){ // file is valid
+	        
+	        	
+	        		var payload = JSON.stringify(specialFormat());
+
+					download(payload, 'scalings.json','application/json');
+				
+				
+			} else{
+				alert("Invalid Json file: "+tv4.error.message+" on "+tv4.error.dataPath);
+				console.log(tv4.error);
+			}
+	        		
+
+    		
+    	})
+	
+	
+
+
+}
+
+
+
+function specialFormat(){
+	
+		var obj = {};
 
     // Build a list of each scaling row in the table
     var scaling_tbl = id('scaling_tbl');
@@ -285,11 +325,11 @@ function saveFile() {
 	
 	obj.measurements = msrmnt;
 	
-	var payload = JSON.stringify(obj);
-
-	download(payload, 'scalings.json','application/json');
-
+	return obj;
+	
 }
+
+
 
 
 function download(text, name, type)
@@ -661,57 +701,84 @@ function parse_vars(data, source) {
 
 function serialize() {
 	
-	
-	jsonData = {};
-	
-	// Build a list of each scaling row in the table
-    var scaling_tbl = id('scaling_tbl');
-    var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
 
-    // Convert the format of each scaling and serialize the list of scalings
-    scl = [];
-    for (scr of scaling_lst) {
-    	//console.log(slpoff_from_points(scr.flexscaling));
-        scl.push(slpoff_from_points(scr.flexscaling));
-    }
-    
-    jsonData.scalings = scl;
-	
-	
-	
-	// Build a list of each measurement row in the table
-    var measurement_tbl = id('measurement_tbl');
-    var measurement_lst = measurement_tbl.querySelectorAll("[measurement]");
+		//async json schema fetch
+    	fetch('FlexScale.schema.json')
+    	.then(function(resp){
+    		return resp.json();
+    	})
+    	.then(function(data){
+    		
+    		jsonSchema = {};
+    		jsonSchema = data;
+    		
+	        var valid = tv4.validate(specialFormat(), jsonSchema);
 
-    // Convert the format of each measurement and serialize the list of scalings
-    msrmnt = [];
-    for (scr of measurement_lst) {
-    	//console.log(slpoff_from_points(scr.flexscaling));
-        msrmnt.push(scr.measurement);
-    }
-	
-	jsonData.measurements = msrmnt;
-	
-	
-	var payload = JSON.stringify(jsonData);
-	
-	
-	//console.log(payload);
-				    
 
-    // browser compat?
-    var xhr = new XMLHttpRequest();
-    xhr.open("PUT", "flex/scalings", true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            console.log(xhr.response);
-            pendingCheck();
-        }
-    };
-    xhr.send(payload);
-
+	        if(valid == true){ // file is valid
+	        
+	        	
+	        	jsonData = {};
 	
+				// Build a list of each scaling row in the table
+			    var scaling_tbl = id('scaling_tbl');
+			    var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
+
+			    // Convert the format of each scaling and serialize the list of scalings
+			    scl = [];
+			    for (scr of scaling_lst) {
+			    	//console.log(slpoff_from_points(scr.flexscaling));
+			        scl.push(slpoff_from_points(scr.flexscaling));
+			    }
+			    
+			    jsonData.scalings = scl;
+				
+				
+				
+				// Build a list of each measurement row in the table
+			    var measurement_tbl = id('measurement_tbl');
+			    var measurement_lst = measurement_tbl.querySelectorAll("[measurement]");
+
+			    // Convert the format of each measurement and serialize the list of scalings
+			    msrmnt = [];
+			    for (scr of measurement_lst) {
+			    	//console.log(slpoff_from_points(scr.flexscaling));
+			        msrmnt.push(scr.measurement);
+			    }
+				
+				jsonData.measurements = msrmnt;
+				
+				
+				var payload = JSON.stringify(jsonData);
+				
+				
+				//console.log(payload);
+							    
+
+			    // browser compat?
+			    var xhr = new XMLHttpRequest();
+			    xhr.open("PUT", "flex/scalings", true);
+			    xhr.setRequestHeader("Content-Type", "application/json");
+			    xhr.onreadystatechange = function () {
+			        if (xhr.readyState === 4 && xhr.status === 200) {
+			            console.log(xhr.response);
+			            pendingCheck();
+			        }
+			    };
+			    xhr.send(payload);
+				
+				
+			} else{
+				alert("Invalid Json file: "+tv4.error.message+" on "+tv4.error.dataPath);
+				console.log(tv4.error);
+			}
+	        		
+
+    		
+    	})
+	
+	
+
 	}
 	
 
