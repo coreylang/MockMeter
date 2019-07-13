@@ -24,7 +24,12 @@ input[type="file"] {
     border-left: 1px solid #CCCCCC;
 }
     
-    
+    .color-p1 {
+		background-color:lightgray
+	}
+	.color-p2 {
+		background-color:lightsteelblue;
+	}
     
     
     html {
@@ -87,14 +92,14 @@ input{
     <thead>
 		<tr>
 		    <th ROWSPAN=2 class="label2">Name</th>
-            <TH COLSPAN=2 class="label2" style="text-align: left">Point 1</TH>
-            <TH COLSPAN=2 class="label2" style="text-align: left">Point 2</TH>
+            <TH COLSPAN=2 class="label2 color-p1" style="text-align: left">Point 1</TH>
+            <TH COLSPAN=2 class="label2 color-p2" style="text-align: left">Point 2</TH>
         </tr>
         <tr>
-            <th ROWSPAN=2 class="label2">Poll</th>
-		    <th ROWSPAN=2 class="label2">Display</th>
-		    <th ROWSPAN=2 class="label2">Poll</th>
-            <th ROWSPAN=2 class="label2">Display</th>
+            <th ROWSPAN=2 class="label2 color-p1">Poll</th>
+		    <th ROWSPAN=2 class="label2 color-p1">Display</th>
+		    <th ROWSPAN=2 class="label2 color-p2">Poll</th>
+            <th ROWSPAN=2 class="label2 color-p2">Display</th>
         </tr>
 	</thead>
 </table>
@@ -403,18 +408,22 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
 
             currentCell = currentRow.insertCell(-1);
             p1poll.onblur = update_scaling_onblur(currentRow);
+            currentCell.setAttribute('class', "color-p1");
             currentCell.appendChild(p1poll);
 
             currentCell = currentRow.insertCell(-1);
             p1show.onblur = update_scaling_onblur(currentRow);
+            currentCell.setAttribute('class', "color-p1");
             currentCell.appendChild(p1show);
             
             currentCell = currentRow.insertCell(-1);
             p2poll.onblur = update_scaling_onblur(currentRow);
+            currentCell.setAttribute('class', "color-p2");
             currentCell.appendChild(p2poll);
 
             currentCell = currentRow.insertCell(-1);
             p2show.onblur = update_scaling_onblur(currentRow);
+            currentCell.setAttribute('class', "color-p2");
             currentCell.appendChild(p2show);
 
             currentCell = currentRow.insertCell(-1);
@@ -555,13 +564,14 @@ function parse_vars(data, source) {
     // Create a table row with scaling object attached
     function createScalingRow(pts) {
     	
-        function inner(scl, item, length) {
+        function inner(scl, item, length, clase) {
             td = document.createElement('td');
             ti = document.createElement('input');
             ti.setAttribute('name', item);
             ti.setAttribute('maxlength', length);
             ti.value = scl.flexscaling[item];
             ti.onblur = update_scaling_onblur(sr);
+            td.setAttribute('class', clase);
             td.appendChild(ti);
             return td;
         }
@@ -570,10 +580,10 @@ function parse_vars(data, source) {
         sr.setAttribute('flexscaling', true);   // for queryselect
         sr.flexscaling = pts;
         sr.appendChild(inner(sr, "nm", 16));
-        sr.appendChild(inner(sr, "x1", 6));
-        sr.appendChild(inner(sr, "y1", 6));
-        sr.appendChild(inner(sr, "x2", 6));
-        sr.appendChild(inner(sr, "y2", 6));
+        sr.appendChild(inner(sr, "x1", 6, "color-p1"));
+        sr.appendChild(inner(sr, "y1", 6, "color-p1"));
+        sr.appendChild(inner(sr, "x2", 6, "color-p2"));
+        sr.appendChild(inner(sr, "y2", 6, "color-p2"));
         
         
         //Delete button
