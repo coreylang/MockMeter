@@ -141,4 +141,4 @@ python_venv/*
 .gitconfig
 *.bat
 
-resources/dx50/json/*
+resources/dx50/json/*.json
