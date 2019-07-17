@@ -18,10 +18,10 @@ input[type="file"] {
     cursor: pointer;
     font-size: 13px;
     background: #dddddd;
-    border-top: 1px solid #CCCCCC;
+    border-top: 1px solid #333333;
     border-right: 1px solid #333333;
     border-bottom: 1px solid #333333;
-    border-left: 1px solid #CCCCCC;
+    border-left: 1px solid #333333;
 }
     
     
@@ -49,14 +49,13 @@ input[type="file"] {
 }
 
 input{
-	width: 145px !important;
+	width: 120px !important;
 }
 
 .fixed_header th, .fixed_header td {
-	width: 149px !important;
+	width: 124px !important;
   padding: 3px;
   text-align: left;
-/*  width: 200px;*/
 }
     </style>
 
@@ -86,7 +85,7 @@ input{
 <table class="fixed_header" id="scaling_tbl" cellspacing="0" border="0">
     <thead>
 		<tr>
-		    <th ROWSPAN=2 class="label2">Name</th>
+            <th ROWSPAN=2 class="label2">Name</th>
             <TH COLSPAN=2 class="label2" style="text-align: left">Point 1</TH>
             <TH COLSPAN=2 class="label2" style="text-align: left">Point 2</TH>
         </tr>
@@ -95,17 +94,13 @@ input{
 		    <th ROWSPAN=2 class="label2">Display</th>
 		    <th ROWSPAN=2 class="label2">Poll</th>
             <th ROWSPAN=2 class="label2">Display</th>
+            <th><button onclick="addFieldScaling();">Insert row</button></th>
         </tr>
-	</thead>
+    </thead>
 </table>
 
-<hr style="width: 110.5%;">
-
-<p style=" width:95%; text-align: center; margin-bottom: 0px; display:inline-block;">
-<button onclick="addFieldScaling();">Insert row</button>
-</p>
-
-<br/><br/><br/>
+<hr style="width: 100%;">
+<br/><br/>
 
 <h2>Measurements</h2>
 
@@ -115,7 +110,8 @@ input{
 		    <th class="label2">Name</th>
 		    <th class="label2">Scaling</th>
 		    <th class="label2">Phase</th>
-		    <th class="label2">Modifier</th>
+            <th class="label2">Modifier</th>
+            <th><button onclick="addFieldMeasurement();">Insert row</button></th>
 		</tr>
 	</thead>
 </table>
@@ -125,11 +121,10 @@ input{
 <hr style="width: 100%;">
 
 <p style=" width:100%; text-align: left; margin-bottom: 0px; display:inline-block;">
-<label style="margin-right: 28%;" for="jsonFile" class="custom-file-upload">Open Scaling File</label>
-<input style="" id="jsonFile" type="file" />
-<button onclick="addFieldMeasurement();">Insert row</button>
+    <button style="margin-right: 10%;" onclick="saveFile();">Save Scaling File</button>
+    <label for="jsonFile" class="custom-file-upload">Open Scaling File</label>
+    <input id="jsonFile" type="file" />
 </p>
-<br/><button onclick="saveFile();">Save Scaling File</button>
 
 <br><br/>
 
@@ -325,7 +320,7 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
 
             var name = document.createElement("input");
             name.setAttribute("name", "nm");
-            name.setAttribute('maxlength', 16);
+            name.setAttribute('maxlength', 31);
             
             var p1poll = document.createElement("input");
             p1poll.setAttribute("name", "x1");
