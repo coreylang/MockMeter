@@ -774,32 +774,35 @@ function addResvd() {
     var menu2 = id("menu2");
     var isModbus = document.getElementsByName("mprt")[0].checked;
     var type = (isModbus)?0:id("dnp_t").value;
+    var reserved_count = id("resvd_count").value;
 
-    if(listTooLong(isModbus))
-        return;
+    for (var ii=reserved_count; ii--; ) {
+        if(listTooLong(isModbus))
+            return;
 
-    var resvd = {};
-    var list = ord.lists[type];
-    for (var i = list.serdes.length;  i--;  )
-        resvd[list.serdes[i]] = 0;
-    resvd.dbIdx = NEWO_RESERVED;
-    
-    if(list.vec == null) {
-        list.vec = [];
+        var resvd = {};
+        var list = ord.lists[type];
+        for (var i = list.serdes.length;  i--;  )
+            resvd[list.serdes[i]] = 0;
+        resvd.dbIdx = NEWO_RESERVED;
+        
+        if(list.vec == null) {
+            list.vec = [];
+        }
+
+        var selected = find_selected(menu2);
+        if(selected == -1) {
+            selected = menu2.options.length-1;
+        }
+        list.vec.splice(selected,0, resvd);
+        
+        var num = (isModbus)?"00000":"000";
+        insertOption(menu2, num + " Reserved", NEWO_RESERVED, menu2.options[selected]);
+        menu2.selectedIndex = -1;
+        if(selected >= 0 && selected < menu2.length-2)
+            menu2.options[selected+1].selected = true;
+        renumber();
     }
-
-    var selected = find_selected(menu2);
-    if(selected == -1) {
-        selected = menu2.options.length-1;
-    }
-    list.vec.splice(selected,0, resvd);
-    
-    var num = (isModbus)?"00000":"000";
-    insertOption(menu2, num + " Reserved", NEWO_RESERVED, menu2.options[selected]);
-	menu2.selectedIndex = -1;
-	if(selected >= 0 && selected < menu2.length-2)
-		menu2.options[selected+1].selected = true;
-    renumber();
 }
 
 function go_next() {
