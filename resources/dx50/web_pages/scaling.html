@@ -24,7 +24,12 @@ input[type="file"] {
     border-left: 1px solid #333333;
 }
     
-    
+    .color-p1 {
+		background-color:lightgray
+	}
+	.color-p2 {
+		background-color:lightsteelblue;
+	}
     
     
     html {
@@ -86,14 +91,14 @@ input{
     <thead>
 		<tr>
             <th ROWSPAN=2 class="label2">Name</th>
-            <TH COLSPAN=2 class="label2" style="text-align: left">Point 1</TH>
-            <TH COLSPAN=2 class="label2" style="text-align: left">Point 2</TH>
+            <TH COLSPAN=2 class="label2 color-p1" style="text-align: left">Point 1</TH>
+            <TH COLSPAN=2 class="label2 color-p2" style="text-align: left">Point 2</TH>
         </tr>
         <tr>
-            <th ROWSPAN=2 class="label2">Poll</th>
-		    <th ROWSPAN=2 class="label2">Display</th>
-		    <th ROWSPAN=2 class="label2">Poll</th>
-            <th ROWSPAN=2 class="label2">Display</th>
+            <th ROWSPAN=2 class="label2 color-p1">Poll</th>
+		    <th ROWSPAN=2 class="label2 color-p1">Display</th>
+		    <th ROWSPAN=2 class="label2 color-p2">Poll</th>
+            <th ROWSPAN=2 class="label2 color-p2">Display</th>
             <th><button onclick="addFieldScaling();">Insert Row</button></th>
         </tr>
     </thead>
@@ -247,7 +252,47 @@ function onReaderLoad(event){
 //Save scalings to a Json file
 function saveFile() {
 	
-	var obj = {};
+	
+		//async json schema fetch
+    	fetch('FlexScale.schema.json')
+    	.then(function(resp){
+    		return resp.json();
+    	})
+    	.then(function(data){
+    		
+    		jsonSchema = {};
+    		jsonSchema = data;
+    		
+	        var valid = tv4.validate(specialFormat(), jsonSchema);
+
+
+	        if(valid == true){ // file is valid
+	        
+	        	
+	        		var payload = JSON.stringify(specialFormat());
+
+					download(payload, 'scalings.json','application/json');
+				
+				
+			} else{
+				alert("Invalid Json file: "+tv4.error.message+" on "+tv4.error.dataPath);
+				console.log(tv4.error);
+			}
+	        		
+
+    		
+    	})
+	
+	
+
+
+}
+
+
+
+function specialFormat(){
+	
+		var obj = {};
 
     // Build a list of each scaling row in the table
     var scaling_tbl = id('scaling_tbl');
@@ -280,11 +325,11 @@ function saveFile() {
 	
 	obj.measurements = msrmnt;
 	
-	var payload = JSON.stringify(obj);
-
-	download(payload, 'scalings.json','application/json');
-
+	return obj;
+	
 }
+
+
 
 
 function download(text, name, type)
@@ -358,18 +403,22 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
 
             currentCell = currentRow.insertCell(-1);
             p1poll.onblur = update_scaling_onblur(currentRow);
+            currentCell.setAttribute('class', "color-p1");
             currentCell.appendChild(p1poll);
 
             currentCell = currentRow.insertCell(-1);
             p1show.onblur = update_scaling_onblur(currentRow);
+            currentCell.setAttribute('class', "color-p1");
             currentCell.appendChild(p1show);
             
             currentCell = currentRow.insertCell(-1);
             p2poll.onblur = update_scaling_onblur(currentRow);
+            currentCell.setAttribute('class', "color-p2");
             currentCell.appendChild(p2poll);
 
             currentCell = currentRow.insertCell(-1);
             p2show.onblur = update_scaling_onblur(currentRow);
+            currentCell.setAttribute('class', "color-p2");
             currentCell.appendChild(p2show);
 
             currentCell = currentRow.insertCell(-1);
@@ -428,7 +477,7 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
             
 
             currentRow.setAttribute("measurement", true);
-            currentRow.measurement = {nm:"", scl:"", phs:"", nxa:""}
+            currentRow.measurement = {nm:"", scl:getNamesFromScaling()[0], phs:"none", nxa:"none"}
             
             var currentCell = currentRow.insertCell(-1);
             name.onblur = update_measurement_onblur(currentRow);
@@ -510,13 +559,14 @@ function parse_vars(data, source) {
     // Create a table row with scaling object attached
     function createScalingRow(pts) {
     	
-        function inner(scl, item, length) {
+        function inner(scl, item, length, clase) {
             td = document.createElement('td');
             ti = document.createElement('input');
             ti.setAttribute('name', item);
             ti.setAttribute('maxlength', length);
             ti.value = scl.flexscaling[item];
             ti.onblur = update_scaling_onblur(sr);
+            td.setAttribute('class', clase);
             td.appendChild(ti);
             return td;
         }
@@ -525,10 +575,10 @@ function parse_vars(data, source) {
         sr.setAttribute('flexscaling', true);   // for queryselect
         sr.flexscaling = pts;
         sr.appendChild(inner(sr, "nm", 16));
-        sr.appendChild(inner(sr, "x1", 6));
-        sr.appendChild(inner(sr, "y1", 6));
-        sr.appendChild(inner(sr, "x2", 6));
-        sr.appendChild(inner(sr, "y2", 6));
+        sr.appendChild(inner(sr, "x1", 6, "color-p1"));
+        sr.appendChild(inner(sr, "y1", 6, "color-p1"));
+        sr.appendChild(inner(sr, "x2", 6, "color-p2"));
+        sr.appendChild(inner(sr, "y2", 6, "color-p2"));
         
         
         //Delete button
@@ -656,57 +706,102 @@ function parse_vars(data, source) {
 
 function serialize() {
 	
-	
-	jsonData = {};
-	
-	// Build a list of each scaling row in the table
-    var scaling_tbl = id('scaling_tbl');
-    var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
 
-    // Convert the format of each scaling and serialize the list of scalings
-    scl = [];
-    for (scr of scaling_lst) {
-    	//console.log(slpoff_from_points(scr.flexscaling));
-        scl.push(slpoff_from_points(scr.flexscaling));
-    }
-    
-    jsonData.scalings = scl;
-	
-	
-	
-	// Build a list of each measurement row in the table
-    var measurement_tbl = id('measurement_tbl');
-    var measurement_lst = measurement_tbl.querySelectorAll("[measurement]");
+		//async json schema fetch
+    	fetch('FlexScale.schema.json')
+    	.then(function(resp){
+    		return resp.json();
+    	})
+    	.then(function(data){
+    		
+    		jsonSchema = {};
+    		jsonSchema = data;
+    		
+	        var valid = tv4.validate(specialFormat(), jsonSchema);
 
-    // Convert the format of each measurement and serialize the list of scalings
-    msrmnt = [];
-    for (scr of measurement_lst) {
-    	//console.log(slpoff_from_points(scr.flexscaling));
-        msrmnt.push(scr.measurement);
-    }
-	
-	jsonData.measurements = msrmnt;
-	
-	
-	var payload = JSON.stringify(jsonData);
-	
-	
-	//console.log(payload);
-				    
 
-    // browser compat?
-    var xhr = new XMLHttpRequest();
-    xhr.open("PUT", "flex/scalings", true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            console.log(xhr.response);
-        }
-    };
-    xhr.send(payload);
-
+	        if(valid == true){ // file is valid
+	        
+	        	
+	        	jsonData = {};
 	
+				// Build a list of each scaling row in the table
+			    var scaling_tbl = id('scaling_tbl');
+			    var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
+
+			    // Convert the format of each scaling and serialize the list of scalings
+			    scl = [];
+			    for (scr of scaling_lst) {
+			    	//console.log(slpoff_from_points(scr.flexscaling));
+			        scl.push(slpoff_from_points(scr.flexscaling));
+			    }
+			    
+			    jsonData.scalings = scl;
+				
+				
+				
+				// Build a list of each measurement row in the table
+			    var measurement_tbl = id('measurement_tbl');
+			    var measurement_lst = measurement_tbl.querySelectorAll("[measurement]");
+
+			    // Convert the format of each measurement and serialize the list of scalings
+			    msrmnt = [];
+			    for (scr of measurement_lst) {
+			    	//console.log(slpoff_from_points(scr.flexscaling));
+			        msrmnt.push(scr.measurement);
+			    }
+				
+				jsonData.measurements = msrmnt;
+				
+				
+				var payload = JSON.stringify(jsonData);
+				
+				
+				//console.log(payload);
+							    
+
+			    // browser compat?
+			    var xhr = new XMLHttpRequest();
+			    xhr.open("PUT", "flex/scalings", true);
+			    xhr.setRequestHeader("Content-Type", "application/json");
+			    xhr.onreadystatechange = function () {
+			        if (xhr.readyState === 4 && xhr.status === 200) {
+			            console.log(xhr.response);
+			            pendingCheck();
+			        }
+			    };
+			    xhr.send(payload);
+				
+				
+			} else{
+				alert("Invalid Json file: "+tv4.error.message+" on "+tv4.error.dataPath);
+				console.log(tv4.error);
+			}
+	        		
+
+    		
+    	})
+	
+	
+
 	}
+	
+
+function pendingCheck(){
+	
+	    	fetch('pending.cgi')
+    	.then(function(resp){
+    		return resp.text();
+    	})
+    	.then(function(data){
+    		
+    		var parsed = data.split( "\n" );
+    		var pending_changes = parsed[0];
+    		check_pending(pending_changes);
+
+    	})
+}	
+	
 	
 	
 
@@ -714,6 +809,8 @@ function serialize() {
 function load_once() {
     populate("settings.html");
     makeRequest(nc("flex/scalings"), null);
+    pendingCheck();   
+    
 }
 
 window.onload=load_once;
