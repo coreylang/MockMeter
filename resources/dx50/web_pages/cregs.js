@@ -775,7 +775,8 @@ function addResvd() {
     var isModbus = document.getElementsByName("mprt")[0].checked;
     var type = (isModbus)?0:id("dnp_t").value;
     var reserved_count = id("resvd_count").value;
-
+    
+    if (reserved_count < 1) reserved_count = 1;
     for (var ii=reserved_count; ii--; ) {
         if(listTooLong(isModbus))
             return;
