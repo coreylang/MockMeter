@@ -7,7 +7,21 @@
     
     <style type="text/css"> 
     
-    
+@font-face {
+    font-family: "D7CMBI";
+    src: url("./DSEG7ClassicMini-BoldItalic.woff2") format('woff2');
+  }
+.seven-seg {
+    font-family: 'D7CMBI', 'Courier New Bold', Courier, monospace;
+    letter-spacing: 2px;
+    background-color:black; 
+    color:red;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    text-align: right;
+    /* font-size: 12px; */
+}
+
 input[type="file"] {
     display: none;
 }
@@ -95,10 +109,10 @@ input{
             <TH COLSPAN=2 class="label2 color-p2" style="text-align: left">Point 2</TH>
         </tr>
         <tr>
-            <th ROWSPAN=2 class="label2 color-p1">Poll</th>
-		    <th ROWSPAN=2 class="label2 color-p1">Display</th>
-		    <th ROWSPAN=2 class="label2 color-p2">Poll</th>
-            <th ROWSPAN=2 class="label2 color-p2">Display</th>
+            <th ROWSPAN=2 class="label2 color-p1" style="text-align: center">Poll</th>
+		    <th ROWSPAN=2 class="label2 color-p1" style="text-align: center">Display</th>
+		    <th ROWSPAN=2 class="label2 color-p2" style="text-align: center">Poll</th>
+            <th ROWSPAN=2 class="label2 color-p2" style="text-align: center">Display</th>
             <th><button onclick="addFieldScaling();">Insert Row</button></th>
         </tr>
     </thead>
@@ -249,7 +263,7 @@ function onReaderLoad(event){
     }
 
 
-//Save scalings to a Json file
+    //Save scalings to a Json file
 function saveFile() {
 	
 	
@@ -369,19 +383,23 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
             
             var p1poll = document.createElement("input");
             p1poll.setAttribute("name", "x1");
-            p1poll.setAttribute('maxlength', 6);          
-
+            p1poll.setAttribute('maxlength', 6);
+            p1poll.setAttribute('style', 'text-align: right');
+            
             var p1show = document.createElement("input");
             p1show.setAttribute("name", "y1");
             p1show.setAttribute('maxlength', 6);
-             
+            p1show.setAttribute('class', 'seven-seg');
+            
             var p2poll = document.createElement("input");
             p2poll.setAttribute("name", "x2");
             p2poll.setAttribute('maxlength', 6);
+            p2poll.setAttribute('style', 'text-align: right');
             
             var p2show = document.createElement("input");
             p2show.setAttribute("name", "y2");
             p2show.setAttribute('maxlength', 6);
+            p2show.setAttribute('class', 'seven-seg');
       
             /*var keywordsBox = document.createElement("input");
             keywordsBox.setAttribute("name", "keywords" + currentIndex);*/
@@ -559,13 +577,15 @@ function parse_vars(data, source) {
     // Create a table row with scaling object attached
     function createScalingRow(pts) {
     	
-        function inner(scl, item, length, clase) {
+        function inner(scl, item, length, clase, clasi) {
             td = document.createElement('td');
             ti = document.createElement('input');
             ti.setAttribute('name', item);
             ti.setAttribute('maxlength', length);
+            ti.setAttribute('style', 'text-align: right')
             ti.value = scl.flexscaling[item];
             ti.onblur = update_scaling_onblur(sr);
+            ti.setAttribute('class', clasi);
             td.setAttribute('class', clase);
             td.appendChild(ti);
             return td;
@@ -574,11 +594,11 @@ function parse_vars(data, source) {
         var sr = document.createElement('tr');
         sr.setAttribute('flexscaling', true);   // for queryselect
         sr.flexscaling = pts;
-        sr.appendChild(inner(sr, "nm", 16));
+        sr.appendChild(inner(sr, "nm", 31));
         sr.appendChild(inner(sr, "x1", 6, "color-p1"));
-        sr.appendChild(inner(sr, "y1", 6, "color-p1"));
+        sr.appendChild(inner(sr, "y1", 6, "color-p1", "seven-seg"));
         sr.appendChild(inner(sr, "x2", 6, "color-p2"));
-        sr.appendChild(inner(sr, "y2", 6, "color-p2"));
+        sr.appendChild(inner(sr, "y2", 6, "color-p2", "seven-seg"));
         
         
         //Delete button
