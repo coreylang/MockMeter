@@ -274,7 +274,15 @@ function saveFile() {
 	        if(valid == true){ // file is valid
 	        
 	        	
-	        		var payload = JSON.stringify(specialFormat());
+	        		var payload = JSON.stringify(specialFormat(), null, ' ');
+	        		
+	        		payload = payload.replace(/\[\n\s+\"/g, '["');
+	        		payload = payload.replace(/\"\,\n\s+\"/g, '", "');
+	        		payload = payload.replace(/\"\n\s+/g, '"');
+	        		payload = payload.replace(/\,\n\s\s\s\s\"/g, ', "');
+	        		payload = payload.replace(/\[\n\s+/g, '[');
+	        		payload = payload.replace(/\[\[/g, '[\n   \[');
+
 
 					download(payload, 'scalings.json','application/json');
 				
