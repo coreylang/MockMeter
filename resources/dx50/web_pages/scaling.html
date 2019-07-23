@@ -1,61 +1,61 @@
 <!DOCTYPE HTML>
 <html><head> 
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Scaling - Bitronics Web Server</title> 
-    <link rel="stylesheet" type="text/css" href="site.css">
-    <link rel="icon" href="favicon.ico">
-    
-    <style type="text/css"> 
-    
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Scaling - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	
+	<style type="text/css"> 
+	
 @font-face {
-    font-family: "D7CMBI";
-    src: url("./DSEG7ClassicMini-BoldItalic.woff2") format('woff2');
-    /* licensed https://github.com/keshikan/DSEG/blob/master/DSEG-LICENSE.txt */
+	font-family: "D7CMBI";
+	src: url("./DSEG7ClassicMini-BoldItalic.woff2") format('woff2');
+	/* licensed https://github.com/keshikan/DSEG/blob/master/DSEG-LICENSE.txt */
   }
 .seven-seg {
-    font-family: 'D7CMBI', 'Courier New Bold', Courier, monospace;
-    letter-spacing: 2px;
-    background-color:black; 
-    color:red;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    text-align: right;
-    /* font-size: 12px; */
+	font-family: 'D7CMBI', 'Courier New Bold', Courier, monospace;
+	letter-spacing: 2px;
+	background-color:black; 
+	color:red;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	text-align: right;
+	/* font-size: 12px; */
 }
 
 input[type="file"] {
-    display: none;
+	display: none;
 }
 .custom-file-upload {
-    border: 1px solid #ccc;
-    display: inline-block;
-    padding: 3px 7px;
-    cursor: pointer;
-    font-size: 13px;
-    background: #dddddd;
-    border-top: 1px solid #333333;
-    border-right: 1px solid #333333;
-    border-bottom: 1px solid #333333;
-    border-left: 1px solid #333333;
+	border: 1px solid #ccc;
+	display: inline-block;
+	padding: 3px 7px;
+	cursor: pointer;
+	font-size: 13px;
+	background: #dddddd;
+	border-top: 1px solid #333333;
+	border-right: 1px solid #333333;
+	border-bottom: 1px solid #333333;
+	border-left: 1px solid #333333;
 }
-    
-    .color-p1 {
+	
+	.color-p1 {
 		background-color:lightgray
 	}
 	.color-p2 {
 		background-color:lightsteelblue;
 	}
-    
-    
-    html {
+	
+	
+	html {
   -ms-overflow-style: -ms-autohiding-scrollbar;
 }
-    
+	
  
 .fixed_header{
 /*    width: 100%;*/
 /*    table-layout: fixed;*/
-    border-collapse: collapse;
+	border-collapse: collapse;
 }
 
 .fixed_header tbody{
@@ -77,19 +77,19 @@ input{
   padding: 3px;
   text-align: left;
 }
-    </style>
+	</style>
 
 
 	<script src="jquery.min.js"></script>    
-    <script src="request.js"></script>
-    <script src="content.js"></script>
-    <script src="scaling.js"></script>
-    <script src="tv4.min.js"></script>
-    
-    
-    
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+	<script src="scaling.js"></script>
+	<script src="tv4.min.js"></script>
+	
+	
+	
 
-    
+	
 </head>
 <body>
 <div id="Content"></div>
@@ -103,20 +103,20 @@ input{
 <h2>Scalings</h2>
 
 <table class="fixed_header" id="scaling_tbl" cellspacing="0" border="0">
-    <thead>
+	<thead>
 		<tr>
-            <th ROWSPAN=2 class="label2">Name</th>
-            <TH COLSPAN=2 class="label2 color-p1" style="text-align: left">Point 1</TH>
-            <TH COLSPAN=2 class="label2 color-p2" style="text-align: left">Point 2</TH>
-        </tr>
-        <tr>
-            <th ROWSPAN=2 class="label2 color-p1" style="text-align: center">Poll</th>
-		    <th ROWSPAN=2 class="label2 color-p1" style="text-align: center">Display</th>
-		    <th ROWSPAN=2 class="label2 color-p2" style="text-align: center">Poll</th>
-            <th ROWSPAN=2 class="label2 color-p2" style="text-align: center">Display</th>
-            <th><button onclick="addFieldScaling();">Insert Row</button></th>
-        </tr>
-    </thead>
+			<th ROWSPAN=2 class="label2">Name</th>
+			<TH COLSPAN=2 class="label2 color-p1" style="text-align: left">Point 1</TH>
+			<TH COLSPAN=2 class="label2 color-p2" style="text-align: left">Point 2</TH>
+		</tr>
+		<tr>
+			<th ROWSPAN=2 class="label2 color-p1" style="text-align: center">Poll</th>
+			<th ROWSPAN=2 class="label2 color-p1" style="text-align: center">Display</th>
+			<th ROWSPAN=2 class="label2 color-p2" style="text-align: center">Poll</th>
+			<th ROWSPAN=2 class="label2 color-p2" style="text-align: center">Display</th>
+			<th><button onclick="addFieldScaling();">Insert Row</button></th>
+		</tr>
+	</thead>
 </table>
 
 <hr style="width: 100%;">
@@ -127,11 +127,11 @@ input{
 <table class="fixed_header" id="measurement_tbl" cellspacing="0" border="0">
 	<thead>
 		<tr>
-		    <th class="label2">Name</th>
-		    <th class="label2">Scaling</th>
-		    <th class="label2">Phase</th>
-            <th class="label2">Modifier</th>
-            <th><button onclick="addFieldMeasurement();">Insert Row</button></th>
+			<th class="label2">Name</th>
+			<th class="label2">Scaling</th>
+			<th class="label2">Phase</th>
+			<th class="label2">Modifier</th>
+			<th><button onclick="addFieldMeasurement();">Insert Row</button></th>
 		</tr>
 	</thead>
 </table>
@@ -141,9 +141,9 @@ input{
 <hr style="width: 100%;">
 
 <p style=" width:100%; text-align: left; margin-bottom: 0px; display:inline-block;">
-    <button style="margin-right: 10%;" onclick="saveFile();">Save Scaling File</button>
-    <label for="jsonFile" class="custom-file-upload">Open Scaling File</label>
-    <input id="jsonFile" type="file" />
+	<button style="margin-right: 10%;" onclick="saveFile();">Save Scaling File</button>
+	<label for="jsonFile" class="custom-file-upload">Open Scaling File</label>
+	<input id="jsonFile" type="file" />
 </p>
 
 <br><br/>
@@ -158,7 +158,7 @@ input{
 </form>
 </div>
 <div class="pagebox"><div id="footer"></div></div>
-    <script>
+	<script>
 //<!--
 
 //Load scaling from a Json file
@@ -170,49 +170,49 @@ function onChange(event) {
 		 var ext = this.value.match(/\.([^\.]+)$/)[1];
 		 if(ext == 'json'){
 		 	var reader = new FileReader();
-	        reader.readAsText(event.target.files[0]);
-	        reader.onload = onReaderLoad;
+			reader.readAsText(event.target.files[0]);
+			reader.onload = onReaderLoad;
 		 }else{
 		 	alert('Only Json files are allowed');
 		 	this.value = '';
 		 }        
-    }
+	}
 
 function onReaderLoad(event){
-    	
-    	//async json schema fetch
-    	fetch('FlexScale.schema.json')
-    	.then(function(resp){
-    		return resp.json();
-    	})
-    	.then(function(data){
-    		
-    		jsonSchema = {};
-    		jsonSchema = data;
-    		
-    		//getting json from file, parsing and validating it
-    		obj = JSON.parse(event.target.result);
+		
+		//async json schema fetch
+		fetch('FlexScale.schema.json')
+		.then(function(resp){
+			return resp.json();
+		})
+		.then(function(data){
+			
+			jsonSchema = {};
+			jsonSchema = data;
+			
+			//getting json from file, parsing and validating it
+			obj = JSON.parse(event.target.result);
 
 
-	        var valid = tv4.validate(obj, jsonSchema);
+			var valid = tv4.validate(obj, jsonSchema);
 
 
-	        if(valid == true){ // file is valid
-	        
-	        	//convert to scaling objects 
+			if(valid == true){ // file is valid
+			
+				//convert to scaling objects 
 				scalingNames = Object.getOwnPropertyNames(obj.scalings);
 				//console.log(scalingNames[0]);
 				
 				slpoff = [];
 				for (var scl of scalingNames) {
-			        slpoff.push(slpoff_from_points(new Scaling(scl, [[obj.scalings[scl][0][0], obj.scalings[scl][0][1]], [obj.scalings[scl][1][0], obj.scalings[scl][1][1]]])));
-			        //console.log(obj.scalings[scl][0][0]);
-			    }
-			    
-			    obj.scalings = slpoff;
-			    
-			    
-			    //same but with measurements
+					slpoff.push(slpoff_from_points(new Scaling(scl, [[obj.scalings[scl][0][0], obj.scalings[scl][0][1]], [obj.scalings[scl][1][0], obj.scalings[scl][1][1]]])));
+					//console.log(obj.scalings[scl][0][0]);
+				}
+				
+				obj.scalings = slpoff;
+				
+				
+				//same but with measurements
 				measurementNames = Object.getOwnPropertyNames(obj.measurements);
 				//console.log(measurementNames[0]);
 				
@@ -220,20 +220,20 @@ function onReaderLoad(event){
 				counter = 0;
 				for (var sct of measurementNames) {
 					
-			        everyObject= 
-			        {
-			        	nm: sct,
-			        	scl: obj.measurements[sct][0],
-			            phs: obj.measurements[sct][1],
-			            nxa: obj.measurements[sct][2]
-			        }
-			        measureFormat.push(everyObject);
-			        //console.log(obj.scalings[scl][0][0]);
-			        //counter = counter+1;
-			    }
-			    
-			    
-			    obj.measurements = measureFormat;
+					everyObject= 
+					{
+						nm: sct,
+						scl: obj.measurements[sct][0],
+						phs: obj.measurements[sct][1],
+						nxa: obj.measurements[sct][2]
+					}
+					measureFormat.push(everyObject);
+					//console.log(obj.scalings[scl][0][0]);
+					//counter = counter+1;
+				}
+				
+				
+				obj.measurements = measureFormat;
 
 				
 				payload = JSON.stringify(obj);
@@ -241,11 +241,11 @@ function onReaderLoad(event){
 				//remove tbody
 				var table = document.getElementById('scaling_tbl');
 				var row = document.getElementsByTagName('tbody')[0];
-				    row.parentNode.removeChild(row);
-				    
+					row.parentNode.removeChild(row);
+					
 				var table = document.getElementById('measurement_tbl');
 				var row = document.getElementsByTagName('tbody')[0];
-				    row.parentNode.removeChild(row);
+					row.parentNode.removeChild(row);
 
 				//create tbody
 				parse_vars(payload);
@@ -255,43 +255,43 @@ function onReaderLoad(event){
 				alert("Invalid Json file: "+tv4.error.message+" on "+tv4.error.dataPath);
 				console.log(tv4.error);
 			}
-	        		
+					
 			//Unload file input
 			document.getElementById('jsonFile').value = "";
-    		
-    	})
-    		
-    }
+			
+		})
+			
+	}
 
 
-    //Save scalings to a Json file
+	//Save scalings to a Json file
 function saveFile() {
 	
 	
 		//async json schema fetch
-    	fetch('FlexScale.schema.json')
-    	.then(function(resp){
-    		return resp.json();
-    	})
-    	.then(function(data){
-    		
-    		jsonSchema = {};
-    		jsonSchema = data;
-    		
-	        var valid = tv4.validate(specialFormat(), jsonSchema);
+		fetch('FlexScale.schema.json')
+		.then(function(resp){
+			return resp.json();
+		})
+		.then(function(data){
+			
+			jsonSchema = {};
+			jsonSchema = data;
+			
+			var valid = tv4.validate(specialFormat(), jsonSchema);
 
 
-	        if(valid == true){ // file is valid
-	        
-	        	
-	        		var payload = JSON.stringify(specialFormat(), null, ' ');
-	        		
-	        		payload = payload.replace(/\[\n\s+\"/g, '["');
-	        		payload = payload.replace(/\"\,\n\s+\"/g, '", "');
-	        		payload = payload.replace(/\"\n\s+/g, '"');
-	        		payload = payload.replace(/\,\n\s\s\s\s\"/g, ', "');
-	        		payload = payload.replace(/\[\n\s+/g, '[');
-	        		payload = payload.replace(/\[\[/g, '[\n   \[');
+			if(valid == true){ // file is valid
+			
+				
+					var payload = JSON.stringify(specialFormat(), null, ' ');
+					
+					payload = payload.replace(/\[\n\s+\"/g, '["');
+					payload = payload.replace(/\"\,\n\s+\"/g, '", "');
+					payload = payload.replace(/\"\n\s+/g, '"');
+					payload = payload.replace(/\,\n\s\s\s\s\"/g, ', "');
+					payload = payload.replace(/\[\n\s+/g, '[');
+					payload = payload.replace(/\[\[/g, '[\n   \[');
 
 
 					download(payload, 'scalings.json','application/json');
@@ -301,10 +301,10 @@ function saveFile() {
 				alert("Invalid Json file: "+tv4.error.message+" on "+tv4.error.dataPath);
 				console.log(tv4.error);
 			}
-	        		
+					
 
-    		
-    	})
+			
+		})
 	
 	
 
@@ -317,34 +317,34 @@ function specialFormat(){
 	
 		var obj = {};
 
-    // Build a list of each scaling row in the table
-    var scaling_tbl = id('scaling_tbl');
-    var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
+	// Build a list of each scaling row in the table
+	var scaling_tbl = id('scaling_tbl');
+	var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
 
-    // keep the scaling data in an object and then jsonify it.
-    
-    var scalings = {};
-    for (var scr of scaling_lst) {
-    	scalings[scr.flexscaling.nm] = [];
+	// keep the scaling data in an object and then jsonify it.
+	
+	var scalings = {};
+	for (var scr of scaling_lst) {
+		scalings[scr.flexscaling.nm] = [];
 		scalings[scr.flexscaling.nm].push([parseInt(scr.flexscaling.x1), scr.flexscaling.y1]);
 		scalings[scr.flexscaling.nm].push([parseInt(scr.flexscaling.x2), scr.flexscaling.y2]);
-    }
-    obj.scalings = scalings;
-    
-    
-    
-    // Build a list of each measurement row in the table
-    var measurement_tbl = id('measurement_tbl');
-    var measurement_lst = measurement_tbl.querySelectorAll("[measurement]");
+	}
+	obj.scalings = scalings;
+	
+	
+	
+	// Build a list of each measurement row in the table
+	var measurement_tbl = id('measurement_tbl');
+	var measurement_lst = measurement_tbl.querySelectorAll("[measurement]");
 
-    // Convert the format of each measurement and serialize the list of scalings
-    msrmnt = {};
-    for (var scr of measurement_lst) {
-    	//console.log(slpoff_from_points(scr.flexscaling));
-        //msrmnt.push(scr.measurement);
-        msrmnt[scr.measurement.nm] = [];
+	// Convert the format of each measurement and serialize the list of scalings
+	msrmnt = {};
+	for (var scr of measurement_lst) {
+		//console.log(slpoff_from_points(scr.flexscaling));
+		//msrmnt.push(scr.measurement);
+		msrmnt[scr.measurement.nm] = [];
 		msrmnt[scr.measurement.nm].push(scr.measurement.scl, scr.measurement.phs, scr.measurement.nxa);
-    }
+	}
 	
 	obj.measurements = msrmnt;
 	
@@ -356,101 +356,101 @@ function specialFormat(){
 
 
 function download(text, name, type)
-    {
-        var file = new Blob([text], {type: type});
-        var isIE = /*@cc_on!@*/false || !!document.documentMode;
-        if (isIE)
-        {
-            window.navigator.msSaveOrOpenBlob(file, name);
-        }
-        else
-        {
-            var a = document.createElement('a');
-            a.href = URL.createObjectURL(file);
-            a.download = name;
-            a.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));
-        }
-     }
+	{
+		var file = new Blob([text], {type: type});
+		var isIE = /*@cc_on!@*/false || !!document.documentMode;
+		if (isIE)
+		{
+			window.navigator.msSaveOrOpenBlob(file, name);
+		}
+		else
+		{
+			var a = document.createElement('a');
+			a.href = URL.createObjectURL(file);
+			a.download = name;
+			a.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));
+		}
+	 }
 
 
 
 
 window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
-     var p=o.parentNode.parentNode;
-     p.parentNode.removeChild(p);
+	 var p=o.parentNode.parentNode;
+	 p.parentNode.removeChild(p);
 }
 
 
  function addFieldScaling(argument) {
-            var myTable = document.getElementById("tablebodyScalings");
-            var currentIndex = myTable.rows.length;
-            var currentRow = myTable.insertRow(-1);
+			var myTable = document.getElementById("tablebodyScalings");
+			var currentIndex = myTable.rows.length;
+			var currentRow = myTable.insertRow(-1);
 
-            var name = document.createElement("input");
-            name.setAttribute("name", "nm");
-            name.setAttribute('maxlength', 31);
-            
-            var p1poll = document.createElement("input");
-            p1poll.setAttribute("name", "x1");
-            p1poll.setAttribute('maxlength', 6);
-            p1poll.setAttribute('style', 'text-align: right');
-            
-            var p1show = document.createElement("input");
-            p1show.setAttribute("name", "y1");
-            p1show.setAttribute('maxlength', 6);
-            p1show.setAttribute('class', 'seven-seg');
-            
-            var p2poll = document.createElement("input");
-            p2poll.setAttribute("name", "x2");
-            p2poll.setAttribute('maxlength', 6);
-            p2poll.setAttribute('style', 'text-align: right');
-            
-            var p2show = document.createElement("input");
-            p2show.setAttribute("name", "y2");
-            p2show.setAttribute('maxlength', 6);
-            p2show.setAttribute('class', 'seven-seg');
-      
-            /*var keywordsBox = document.createElement("input");
-            keywordsBox.setAttribute("name", "keywords" + currentIndex);*/
+			var name = document.createElement("input");
+			name.setAttribute("name", "nm");
+			name.setAttribute('maxlength', 31);
+			
+			var p1poll = document.createElement("input");
+			p1poll.setAttribute("name", "x1");
+			p1poll.setAttribute('maxlength', 6);
+			p1poll.setAttribute('style', 'text-align: right');
+			
+			var p1show = document.createElement("input");
+			p1show.setAttribute("name", "y1");
+			p1show.setAttribute('maxlength', 6);
+			p1show.setAttribute('class', 'seven-seg');
+			
+			var p2poll = document.createElement("input");
+			p2poll.setAttribute("name", "x2");
+			p2poll.setAttribute('maxlength', 6);
+			p2poll.setAttribute('style', 'text-align: right');
+			
+			var p2show = document.createElement("input");
+			p2show.setAttribute("name", "y2");
+			p2show.setAttribute('maxlength', 6);
+			p2show.setAttribute('class', 'seven-seg');
+	  
+			/*var keywordsBox = document.createElement("input");
+			keywordsBox.setAttribute("name", "keywords" + currentIndex);*/
 
-            var deleteRowBox = document.createElement("input");
-            deleteRowBox.setAttribute("type", "button");
-            deleteRowBox.setAttribute("value", "Delete Row");
-            deleteRowBox.setAttribute("onclick", "SomeDeleteRowFunction(this);");
-            deleteRowBox.setAttribute("class", "button");
-            deleteRowBox.setAttribute("style", "width: 85px !important;");
-            
+			var deleteRowBox = document.createElement("input");
+			deleteRowBox.setAttribute("type", "button");
+			deleteRowBox.setAttribute("value", "Delete Row");
+			deleteRowBox.setAttribute("onclick", "SomeDeleteRowFunction(this);");
+			deleteRowBox.setAttribute("class", "button");
+			deleteRowBox.setAttribute("style", "width: 85px !important;");
+			
 
-            currentRow.setAttribute("flexscaling", true);
-            currentRow.flexscaling = new Scaling('', [[0, 0], [0, 0]]);
-            
-            var currentCell = currentRow.insertCell(-1);
-            name.onblur = update_scaling_onblur(currentRow);
-            currentCell.appendChild(name);
+			currentRow.setAttribute("flexscaling", true);
+			currentRow.flexscaling = new Scaling('', [[0, 0], [0, 0]]);
+			
+			var currentCell = currentRow.insertCell(-1);
+			name.onblur = update_scaling_onblur(currentRow);
+			currentCell.appendChild(name);
 
-            currentCell = currentRow.insertCell(-1);
-            p1poll.onblur = update_scaling_onblur(currentRow);
-            currentCell.setAttribute('class', "color-p1");
-            currentCell.appendChild(p1poll);
+			currentCell = currentRow.insertCell(-1);
+			p1poll.onblur = update_scaling_onblur(currentRow);
+			currentCell.setAttribute('class', "color-p1");
+			currentCell.appendChild(p1poll);
 
-            currentCell = currentRow.insertCell(-1);
-            p1show.onblur = update_scaling_onblur(currentRow);
-            currentCell.setAttribute('class', "color-p1");
-            currentCell.appendChild(p1show);
-            
-            currentCell = currentRow.insertCell(-1);
-            p2poll.onblur = update_scaling_onblur(currentRow);
-            currentCell.setAttribute('class', "color-p2");
-            currentCell.appendChild(p2poll);
+			currentCell = currentRow.insertCell(-1);
+			p1show.onblur = update_scaling_onblur(currentRow);
+			currentCell.setAttribute('class', "color-p1");
+			currentCell.appendChild(p1show);
+			
+			currentCell = currentRow.insertCell(-1);
+			p2poll.onblur = update_scaling_onblur(currentRow);
+			currentCell.setAttribute('class', "color-p2");
+			currentCell.appendChild(p2poll);
 
-            currentCell = currentRow.insertCell(-1);
-            p2show.onblur = update_scaling_onblur(currentRow);
-            currentCell.setAttribute('class', "color-p2");
-            currentCell.appendChild(p2show);
+			currentCell = currentRow.insertCell(-1);
+			p2show.onblur = update_scaling_onblur(currentRow);
+			currentCell.setAttribute('class', "color-p2");
+			currentCell.appendChild(p2show);
 
-            currentCell = currentRow.insertCell(-1);
-            currentCell.appendChild(deleteRowBox);
-        }
+			currentCell = currentRow.insertCell(-1);
+			currentCell.appendChild(deleteRowBox);
+		}
 
 
 
@@ -468,78 +468,78 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
  	}
  	
  	
-            var myTable = document.getElementById("tablebodyMeasurements");
-            var currentIndex = myTable.rows.length;
-            var currentRow = myTable.insertRow(-1);
+			var myTable = document.getElementById("tablebodyMeasurements");
+			var currentIndex = myTable.rows.length;
+			var currentRow = myTable.insertRow(-1);
 
-            var name = document.createElement("input");
-            name.setAttribute("name", "nm");
-            name.setAttribute('maxlength', 31);
-            
-            var scalingSelect = document.createElement("select");
-            scalingSelect.setAttribute("name", "scl");
-            scalingSelect.setAttribute('class', "scl");
-            scalingSelect.setAttribute('style', 'width: 100%');  
-            fillSelect(scalingSelect, getNamesFromScaling());  
+			var name = document.createElement("input");
+			name.setAttribute("name", "nm");
+			name.setAttribute('maxlength', 31);
+			
+			var scalingSelect = document.createElement("select");
+			scalingSelect.setAttribute("name", "scl");
+			scalingSelect.setAttribute('class', "scl");
+			scalingSelect.setAttribute('style', 'width: 100%');  
+			fillSelect(scalingSelect, getNamesFromScaling());  
 
-            var phase = document.createElement("select");
-            phase.setAttribute("name", "phs");
-            phase.setAttribute('class', "phs");
-            phase.setAttribute('style', 'width: 100%');  
-            fillSelect(phase, ["none", "A", "B", "C", "AB", "BC", "CA"]);
-             
-            var modifier = document.createElement("select");
-            modifier.setAttribute("name", "nxa");
-            modifier.setAttribute('class', "nxa");
-            modifier.setAttribute('style', 'width: 100%');  
-            fillSelect(modifier, ["none", "min", "max", "avg"]);
+			var phase = document.createElement("select");
+			phase.setAttribute("name", "phs");
+			phase.setAttribute('class', "phs");
+			phase.setAttribute('style', 'width: 100%');  
+			fillSelect(phase, ["none", "A", "B", "C", "AB", "BC", "CA"]);
+			 
+			var modifier = document.createElement("select");
+			modifier.setAttribute("name", "nxa");
+			modifier.setAttribute('class', "nxa");
+			modifier.setAttribute('style', 'width: 100%');  
+			fillSelect(modifier, ["none", "min", "max", "avg"]);
 
 
-            var deleteRowBox = document.createElement("input");
-            deleteRowBox.setAttribute("type", "button");
-            deleteRowBox.setAttribute("value", "Delete Row");
-            deleteRowBox.setAttribute("onclick", "SomeDeleteRowFunction(this);");
-            deleteRowBox.setAttribute("class", "button");
-            deleteRowBox.setAttribute("style", "width: 85px !important;");
-            
+			var deleteRowBox = document.createElement("input");
+			deleteRowBox.setAttribute("type", "button");
+			deleteRowBox.setAttribute("value", "Delete Row");
+			deleteRowBox.setAttribute("onclick", "SomeDeleteRowFunction(this);");
+			deleteRowBox.setAttribute("class", "button");
+			deleteRowBox.setAttribute("style", "width: 85px !important;");
+			
 
-            currentRow.setAttribute("measurement", true);
-            currentRow.measurement = {nm:"", scl:getNamesFromScaling()[0], phs:"none", nxa:"none"}
-            
-            var currentCell = currentRow.insertCell(-1);
-            name.onblur = update_measurement_onblur(currentRow);
-            currentCell.appendChild(name);
+			currentRow.setAttribute("measurement", true);
+			currentRow.measurement = {nm:"", scl:getNamesFromScaling()[0], phs:"none", nxa:"none"}
+			
+			var currentCell = currentRow.insertCell(-1);
+			name.onblur = update_measurement_onblur(currentRow);
+			currentCell.appendChild(name);
 
-            currentCell = currentRow.insertCell(-1);
-            scalingSelect.onblur = update_measurement_onblur(currentRow);
-            currentCell.appendChild(scalingSelect);
+			currentCell = currentRow.insertCell(-1);
+			scalingSelect.onblur = update_measurement_onblur(currentRow);
+			currentCell.appendChild(scalingSelect);
 
-            currentCell = currentRow.insertCell(-1);
-            phase.onblur = update_measurement_onblur(currentRow);
-            currentCell.appendChild(phase);
-            
-            currentCell = currentRow.insertCell(-1);
-            modifier.onblur = update_measurement_onblur(currentRow);
-            currentCell.appendChild(modifier);
+			currentCell = currentRow.insertCell(-1);
+			phase.onblur = update_measurement_onblur(currentRow);
+			currentCell.appendChild(phase);
+			
+			currentCell = currentRow.insertCell(-1);
+			modifier.onblur = update_measurement_onblur(currentRow);
+			currentCell.appendChild(modifier);
 
-            currentCell = currentRow.insertCell(-1);
-            currentCell.appendChild(deleteRowBox);
-        }
+			currentCell = currentRow.insertCell(-1);
+			currentCell.appendChild(deleteRowBox);
+		}
 
 
 
 function update_scaling_onblur(scl) {
-    function inner_handler(evt) {
-        scl.flexscaling[evt.target.name] = evt.target.value;
-    }
-    return inner_handler
+	function inner_handler(evt) {
+		scl.flexscaling[evt.target.name] = evt.target.value;
+	}
+	return inner_handler
 }
 
 function update_measurement_onblur(scl) {
-    function inner_handler(evt) {
-        scl.measurement[evt.target.name] = evt.target.value;
-    }
-    return inner_handler
+	function inner_handler(evt) {
+		scl.measurement[evt.target.name] = evt.target.value;
+	}
+	return inner_handler
 }
 
 
@@ -556,11 +556,11 @@ $(document).on('focus','.scl', function(){
 	names = [];
 		for (eac of sclng_lst) {
 				$(this).append( // Append an object to the inside of the select box
-		            $("<option></option>") // Yes you can do this.
-		                .text(eac.flexscaling.nm)
-		                .val(eac.flexscaling.nm)
-		        );
-	    }
+					$("<option></option>") // Yes you can do this.
+						.text(eac.flexscaling.nm)
+						.val(eac.flexscaling.nm)
+				);
+		}
 	
 	$(this).val(currentValue);    
 	//console.log(currentValue);
@@ -574,86 +574,86 @@ function getNamesFromScaling(){
 			names = [];
 			for (eac of sclng_lst) {
 				names.push(eac.flexscaling.nm);
-		    }
-		    
-		    return names;
+			}
+			
+			return names;
 }
 
 
 
 function parse_vars(data, source) {
-    
-    // Create a table row with scaling object attached
-    function createScalingRow(pts) {
-    	
-        function inner(scl, item, length, clase, clasi) {
-            td = document.createElement('td');
-            ti = document.createElement('input');
-            ti.setAttribute('name', item);
-            ti.setAttribute('maxlength', length);
-            ti.setAttribute('style', 'text-align: right')
-            ti.value = scl.flexscaling[item];
-            ti.onblur = update_scaling_onblur(sr);
-            ti.setAttribute('class', clasi);
-            td.setAttribute('class', clase);
-            td.appendChild(ti);
-            return td;
-        }
-        
-        var sr = document.createElement('tr');
-        sr.setAttribute('flexscaling', true);   // for queryselect
-        sr.flexscaling = pts;
-        sr.appendChild(inner(sr, "nm", 31));
-        sr.appendChild(inner(sr, "x1", 6, "color-p1"));
-        sr.appendChild(inner(sr, "y1", 6, "color-p1", "seven-seg"));
-        sr.appendChild(inner(sr, "x2", 6, "color-p2"));
-        sr.appendChild(inner(sr, "y2", 6, "color-p2", "seven-seg"));
-        
-        
-        //Delete button
-                	
-        	var deleteButton = document.createElement("input");
-            deleteButton.setAttribute("type", "button");
-            deleteButton.setAttribute("value", "Delete Row");
-            deleteButton.setAttribute("onclick", "SomeDeleteRowFunction(this);");
-            deleteButton.setAttribute("class", "button");
-            deleteButton.setAttribute("style", "width: 85px !important; padding.right: 10px;");
-            
-	        var deleteButtonTd = document.createElement('td');
-	        deleteButtonTd.appendChild(deleteButton);
-	        
-	        sr.appendChild(deleteButtonTd);
-        	
-        return sr;
-        
-    }
-    
-    
-    
-    // Create a table row with measurement object attached
-    function createMeasurementRow(pts) {
-    	
-        function innerInput(scl, item, length) {
-            td = document.createElement('td');
-            ti = document.createElement('input');
-            ti.setAttribute('name', item);
-            ti.setAttribute('maxlength', length);
-            ti.value = scl.measurement[item];
-            ti.onblur = update_measurement_onblur(sr);
-            td.appendChild(ti);
-            return td;
-        }
-        
-        
-        function innerSelect(scl, item, options) {
-            td = document.createElement('td');
-            ts = document.createElement('select');
-            ts.setAttribute('name', item);
-            ts.setAttribute('class', item);
-            ts.setAttribute('style', 'width: 100%');            
-            ts.onblur = update_measurement_onblur(sr);
-            
-            for (var each of options) {
+	
+	// Create a table row with scaling object attached
+	function createScalingRow(pts) {
+		
+		function inner(scl, item, length, clase, clasi) {
+			td = document.createElement('td');
+			ti = document.createElement('input');
+			ti.setAttribute('name', item);
+			ti.setAttribute('maxlength', length);
+			ti.setAttribute('style', 'text-align: right')
+			ti.value = scl.flexscaling[item];
+			ti.onblur = update_scaling_onblur(sr);
+			ti.setAttribute('class', clasi);
+			td.setAttribute('class', clase);
+			td.appendChild(ti);
+			return td;
+		}
+		
+		var sr = document.createElement('tr');
+		sr.setAttribute('flexscaling', true);   // for queryselect
+		sr.flexscaling = pts;
+		sr.appendChild(inner(sr, "nm", 31));
+		sr.appendChild(inner(sr, "x1", 6, "color-p1"));
+		sr.appendChild(inner(sr, "y1", 6, "color-p1", "seven-seg"));
+		sr.appendChild(inner(sr, "x2", 6, "color-p2"));
+		sr.appendChild(inner(sr, "y2", 6, "color-p2", "seven-seg"));
+		
+		
+		//Delete button
+					
+			var deleteButton = document.createElement("input");
+			deleteButton.setAttribute("type", "button");
+			deleteButton.setAttribute("value", "Delete Row");
+			deleteButton.setAttribute("onclick", "SomeDeleteRowFunction(this);");
+			deleteButton.setAttribute("class", "button");
+			deleteButton.setAttribute("style", "width: 85px !important; padding.right: 10px;");
+			
+			var deleteButtonTd = document.createElement('td');
+			deleteButtonTd.appendChild(deleteButton);
+			
+			sr.appendChild(deleteButtonTd);
+			
+		return sr;
+		
+	}
+	
+	
+	
+	// Create a table row with measurement object attached
+	function createMeasurementRow(pts) {
+		
+		function innerInput(scl, item, length) {
+			td = document.createElement('td');
+			ti = document.createElement('input');
+			ti.setAttribute('name', item);
+			ti.setAttribute('maxlength', length);
+			ti.value = scl.measurement[item];
+			ti.onblur = update_measurement_onblur(sr);
+			td.appendChild(ti);
+			return td;
+		}
+		
+		
+		function innerSelect(scl, item, options) {
+			td = document.createElement('td');
+			ts = document.createElement('select');
+			ts.setAttribute('name', item);
+			ts.setAttribute('class', item);
+			ts.setAttribute('style', 'width: 100%');            
+			ts.onblur = update_measurement_onblur(sr);
+			
+			for (var each of options) {
 			  var option = document.createElement("option");
 			  option.setAttribute("value", each);
 			  option.text = each;
@@ -666,150 +666,144 @@ function parse_vars(data, source) {
 			  ts.appendChild(option);
 			}
 			
-            td.appendChild(ts);
-            return td;
-        }
-        
-        var sr = document.createElement('tr');
-        sr.setAttribute('measurement', true);   // for queryselect
-        sr.measurement = pts;
-        sr.appendChild(innerInput(sr, "nm", 31));
-        sr.appendChild(innerSelect(sr, "scl", getNamesFromScaling())); //***********list of scalings
-        sr.appendChild(innerSelect(sr, "phs", ["none", "A", "B", "C", "AB", "BC", "CA"]));
-        sr.appendChild(innerSelect(sr, "nxa", ["none", "min", "max", "avg"]));
-        
-        
-        
-        //Delete button
-                	
-        	var deleteButton = document.createElement("input");
-            deleteButton.setAttribute("type", "button");
-            deleteButton.setAttribute("value", "Delete Row");
-            deleteButton.setAttribute("onclick", "SomeDeleteRowFunction(this);");
-            deleteButton.setAttribute("class", "button");
-            deleteButton.setAttribute("style", "width: 85px !important; padding.right: 10px;");
-            
-	        var deleteButtonTd = document.createElement('td');
-	        deleteButtonTd.appendChild(deleteButton);
-	        
-	        sr.appendChild(deleteButtonTd);
-        	
-        return sr;
-        
-    }
-    
-    
-    
+			td.appendChild(ts);
+			return td;
+		}
+		
+		var sr = document.createElement('tr');
+		sr.setAttribute('measurement', true);   // for queryselect
+		sr.measurement = pts;
+		sr.appendChild(innerInput(sr, "nm", 31));
+		sr.appendChild(innerSelect(sr, "scl", getNamesFromScaling())); //***********list of scalings
+		sr.appendChild(innerSelect(sr, "phs", ["none", "A", "B", "C", "AB", "BC", "CA"]));
+		sr.appendChild(innerSelect(sr, "nxa", ["none", "min", "max", "avg"]));
+		
+		
+		
+		//Delete button
+					
+			var deleteButton = document.createElement("input");
+			deleteButton.setAttribute("type", "button");
+			deleteButton.setAttribute("value", "Delete Row");
+			deleteButton.setAttribute("onclick", "SomeDeleteRowFunction(this);");
+			deleteButton.setAttribute("class", "button");
+			deleteButton.setAttribute("style", "width: 85px !important; padding.right: 10px;");
+			
+			var deleteButtonTd = document.createElement('td');
+			deleteButtonTd.appendChild(deleteButton);
+			
+			sr.appendChild(deleteButtonTd);
+			
+		return sr;
+		
+	}
+	
+	
+	
 
-    // SCALING table fill. Locate the table and append reach scaling as a row
-    var scaling_tbl = id('scaling_tbl');
-    var tb = document.createElement('tbody');
-    tb.setAttribute('id', 'tablebodyScalings');
-    
+	// SCALING table fill. Locate the table and append reach scaling as a row
+	var scaling_tbl = id('scaling_tbl');
+	var tb = document.createElement('tbody');
+	tb.setAttribute('id', 'tablebodyScalings');
+	
 	var scaling_lst = JSON.parse(data).scalings;	
 	
-    for (scl of scaling_lst) {
+	for (scl of scaling_lst) {
 			tb.appendChild(createScalingRow(points_from_slpoff(scl)));	
-    }
-    
-    scaling_tbl.appendChild(tb);
-    
-    
-    // MEASUREMENT table fill. Locate the table and append reach scaling as a row
-    var measurement_tbl = id('measurement_tbl');
-    var tb = document.createElement('tbody');
-    tb.setAttribute('id', 'tablebodyMeasurements');
-    
+	}
+	
+	scaling_tbl.appendChild(tb);
+	
+	
+	// MEASUREMENT table fill. Locate the table and append reach scaling as a row
+	var measurement_tbl = id('measurement_tbl');
+	var tb = document.createElement('tbody');
+	tb.setAttribute('id', 'tablebodyMeasurements');
+	
 	var measurement_lst = JSON.parse(data).measurements;	
 	
-    for (scl of measurement_lst) {
+	for (scl of measurement_lst) {
 			tb.appendChild(createMeasurementRow(scl));	
-    }
-    
-    measurement_tbl.appendChild(tb);
-    
-    
-    
-    
+	}
+	
+	measurement_tbl.appendChild(tb);
+	
+	
+	
+	
 }
 
 function serialize() {
 	
 
 		//async json schema fetch
-    	fetch('FlexScale.schema.json')
-    	.then(function(resp){
-    		return resp.json();
-    	})
-    	.then(function(data){
-    		
-    		jsonSchema = {};
-    		jsonSchema = data;
-    		
-	        var valid = tv4.validate(specialFormat(), jsonSchema);
+		fetch('FlexScale.schema.json')
+		.then(function(resp){
+			return resp.json();
+		})
+		.then(function(data){
+			
+			jsonSchema = {};
+			jsonSchema = data;
+			
+			var valid = tv4.validate(specialFormat(), jsonSchema);
 
 
-	        if(valid == true){ // file is valid
-	        
-	        	
-	        	jsonData = {};
+			if(valid == true){ // file is valid
+			
+				
+				jsonData = {};
 	
 				// Build a list of each scaling row in the table
-			    var scaling_tbl = id('scaling_tbl');
-			    var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
+				var scaling_tbl = id('scaling_tbl');
+				var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
 
-			    // Convert the format of each scaling and serialize the list of scalings
-			    scl = [];
-			    for (scr of scaling_lst) {
-			    	//console.log(slpoff_from_points(scr.flexscaling));
-			        scl.push(slpoff_from_points(scr.flexscaling));
-			    }
-			    
-			    jsonData.scalings = scl;
+				// Convert the format of each scaling and serialize the list of scalings
+				scl = [];
+				for (scr of scaling_lst) {
+					//console.log(slpoff_from_points(scr.flexscaling));
+					scl.push(slpoff_from_points(scr.flexscaling));
+				}
+				
+				jsonData.scalings = scl;
 				
 				
 				
 				// Build a list of each measurement row in the table
-			    var measurement_tbl = id('measurement_tbl');
-			    var measurement_lst = measurement_tbl.querySelectorAll("[measurement]");
+				var measurement_tbl = id('measurement_tbl');
+				var measurement_lst = measurement_tbl.querySelectorAll("[measurement]");
 
-			    // Convert the format of each measurement and serialize the list of scalings
-			    msrmnt = [];
-			    for (scr of measurement_lst) {
-			    	//console.log(slpoff_from_points(scr.flexscaling));
-			        msrmnt.push(scr.measurement);
-			    }
+				// Convert the format of each measurement and serialize the list of scalings
+				msrmnt = [];
+				for (scr of measurement_lst) {
+					//console.log(slpoff_from_points(scr.flexscaling));
+					msrmnt.push(scr.measurement);
+				}
 				
 				jsonData.measurements = msrmnt;
-				
-				
 				var payload = JSON.stringify(jsonData);
-				
-				
-				//console.log(payload);
-							    
 
-			    // browser compat?
-			    var xhr = new XMLHttpRequest();
-			    xhr.open("PUT", "flex/scalings", true);
-			    xhr.setRequestHeader("Content-Type", "application/json");
-			    xhr.onreadystatechange = function () {
-			        if (xhr.readyState === 4 && xhr.status === 200) {
-			            console.log(xhr.response);
-			            pendingCheck();
-			        }
-			    };
-			    xhr.send(payload);
-				
+				var formdata = new FormData();
+				formdata.append("flex", payload);
+
+				var xhr = new XMLHttpRequest();
+				xhr.open("POST", "flex_submit.cgi", true);
+				xhr.onreadystatechange = function () {
+					if (xhr.readyState === 4 && xhr.status === 200) {
+						console.log(xhr.response);
+						pendingCheck();
+					}
+				};
+				xhr.send(formdata);
 				
 			} else{
 				alert("Invalid Json file: "+tv4.error.message+" on "+tv4.error.dataPath);
 				console.log(tv4.error);
 			}
-	        		
+					
 
-    		
-    	})
+			
+		})
 	
 	
 
@@ -818,17 +812,17 @@ function serialize() {
 
 function pendingCheck(){
 	
-	    	fetch('pending.cgi')
-    	.then(function(resp){
-    		return resp.text();
-    	})
-    	.then(function(data){
-    		
-    		var parsed = data.split( "\n" );
-    		var pending_changes = parsed[0];
-    		check_pending(pending_changes);
+			fetch('pending.cgi')
+		.then(function(resp){
+			return resp.text();
+		})
+		.then(function(data){
+			
+			var parsed = data.split( "\n" );
+			var pending_changes = parsed[0];
+			check_pending(pending_changes);
 
-    	})
+		})
 }	
 	
 	
@@ -836,10 +830,10 @@ function pendingCheck(){
 
 
 function load_once() {
-    populate("settings.html");
-    makeRequest(nc("flex/scalings"), null);
-    pendingCheck();   
-    
+	populate("settings.html");
+	makeRequest(nc("flex_submit.cgi"), null);
+	pendingCheck();   
+	
 }
 
 window.onload=load_once;

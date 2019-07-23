@@ -24,17 +24,24 @@ states = {
     'pending_changes': False
 }
 
-@cherrypy.expose
-class MeasurementsUrl(object):
-    def GET(self):
-        return """<html><body>measurements tbd</body></html>"""
 
 @cherrypy.expose
-class ScalingsUrl(object):
-    """ API for custom scalings """
-
+class FlexApp(object):
+    """ API for flex scalings """
+    
     def _lazy_init(self):
         self.fn = cherrypy.request.app.config['path']['json']/"flexbackend.json"
+
+    def _handle_incoming_json(self):
+        # expects new json was loaded into self.scalings
+        try:
+            self.fn.exists()
+        except AttributeError:
+            self._lazy_init()
+        with self.fn.open(mode='w') as fp:
+            json.dump(self.scalings, fp, indent=None, separators=(',', ':'))
+            fp.flush()
+        states['pending_changes'] = True
 
     def restore_defaults(self):
         self.scalings = sample_flex
@@ -61,15 +68,7 @@ class ScalingsUrl(object):
     def PUT(self, *args, **kwargs):
         """ emulation for development """
         self.scalings = cherrypy.request.json
-        # [print(x) for x in self.scalings]
-        try:
-            self.fn.exists()
-        except AttributeError:
-            self._lazy_init()
-        with self.fn.open(mode='w') as fp:
-            json.dump(self.scalings, fp, indent=None, separators=(',', ':'))
-            fp.flush()
-        states['pending_changes'] = True
+        self._handle_incoming_json()
 
         if cherrypy.request.app.config['device']['ipaddress']:
             ip = cherrypy.request.app.config['device']['ipaddress']
@@ -86,20 +85,13 @@ class ScalingsUrl(object):
             'pending': True
         }
 
-@cherrypy.expose
-class FlexApp(object):
-    """ Add responses for the FlexScaling feature """
-    scalings = ScalingsUrl()
-    measurements = MeasurementsUrl()
-
-    @classmethod
-    def restore_defaults(cls):
-        cls.scalings.restore_defaults()
-
-    def GET(self, **kwargs):
-        return """<html><body>
-        Hello from Flex App via {} with {}
-        </body></html>""".format(cherrypy.request.method, kwargs)
+    def POST(self, *args, **kwargs):
+        """ emulation for developement """
+        """ mimics the behavior of a POST to protcol1.html """
+        cherrypy.log("Received upload for {}".format([x for x in kwargs]))
+        self.scalings = json.loads(kwargs['flex'])
+        self._handle_incoming_json()
+        return """<script>window.top.window.stopUpload(1);void 0;</script>\r\n"""
 
 
 class StaticsApp(object):
@@ -220,7 +212,7 @@ class StaticsApp(object):
     def restore_cgi(self, *args, dflt, **kwargs):
         # only providing emulation for flex feature
         if dflt.lower() == 'scaling':
-            FlexApp.restore_defaults()
+            cherrypy.tree.apps['/flex_submit.cgi'].root.restore_defaults()
             return b"""<script>setTimeout(function() {window.location="scaling.html"; }, 0);</script>"""
         else:
             return self._fetch_cgi_resource({'data':kwargs})
@@ -298,7 +290,7 @@ def main(config_file: Path):
     # load application configuration
     app.merge(config_dict)
 
-    cherrypy.tree.mount(FlexApp(), '/flex', {
+    cherrypy.tree.mount(FlexApp(), '/flex_submit.cgi', {
         '/': {'request.dispatch': cherrypy.dispatch.MethodDispatcher()},
         'path': {'json': app.config['path']['json']},
         'device': {'ipaddress': app.config['device']['ipaddress']}
