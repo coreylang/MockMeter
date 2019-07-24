@@ -72,7 +72,7 @@ class FlexApp(object):
 
         if cherrypy.request.app.config['device']['ipaddress']:
             ip = cherrypy.request.app.config['device']['ipaddress']
-            url = urlunsplit(('http', ip, 'flex_submit.cgi', '', ''))
+            url = urlunsplit(('http', ip, 'flexscale', '', ''))
             files = {'flex': ('flex',json.dumps(self.scalings))}
             try:
                 r = requests.post(url, files=files)
@@ -212,7 +212,7 @@ class StaticsApp(object):
     def restore_cgi(self, *args, dflt, **kwargs):
         # only providing emulation for flex feature
         if dflt.lower() == 'scaling':
-            cherrypy.tree.apps['/flex_submit.cgi'].root.restore_defaults()
+            cherrypy.tree.apps['/flexscale'].root.restore_defaults()
             return b"""<script>setTimeout(function() {window.location="scaling.html"; }, 0);</script>"""
         else:
             return self._fetch_cgi_resource({'data':kwargs})
@@ -290,7 +290,7 @@ def main(config_file: Path):
     # load application configuration
     app.merge(config_dict)
 
-    cherrypy.tree.mount(FlexApp(), '/flex_submit.cgi', {
+    cherrypy.tree.mount(FlexApp(), '/flexscale', {
         '/': {'request.dispatch': cherrypy.dispatch.MethodDispatcher()},
         'path': {'json': app.config['path']['json']},
         'device': {'ipaddress': app.config['device']['ipaddress']}

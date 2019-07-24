@@ -787,7 +787,7 @@ function serialize() {
 				formdata.append("flex", payload);
 
 				var xhr = new XMLHttpRequest();
-				xhr.open("POST", "flex_submit.cgi", true);
+				xhr.open("POST", "flexscale", true);
 				xhr.onreadystatechange = function () {
 					if (xhr.readyState === 4 && xhr.status === 200) {
 						console.log(xhr.response);
@@ -831,7 +831,7 @@ function pendingCheck(){
 
 function load_once() {
 	populate("settings.html");
-	makeRequest(nc("flex_submit.cgi"), null);
+	makeRequest(nc("flexscale"), null);
 	pendingCheck();   
 	
 }
