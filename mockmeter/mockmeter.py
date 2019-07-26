@@ -91,7 +91,7 @@ class FlexApp(object):
         cherrypy.log("Received upload for {}".format([x for x in kwargs]))
         self.scalings = json.loads(kwargs['flex'])
         self._handle_incoming_json()
-        return """<script>window.top.window.stopUpload(1);void 0;</script>\r\n"""
+        return """<script>window.top.window.stopUpload(2,"/flex_submit");void 0;</script>\r\n"""
 
 
 class StaticsApp(object):

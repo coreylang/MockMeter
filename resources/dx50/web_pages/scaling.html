@@ -146,10 +146,11 @@ input{
 	<input id="jsonFile" type="file" />
 </p>
 
-<br><br/>
-
 <p style="margin-top: 0px;" >
-<button onclick="serialize();">Apply</button>
+<div id="upbox" class="ubox">
+	<button onclick="serialize();">Apply</button>
+	<a id="msg" class="msg"></a>
+</div>
 </p>
 
 <form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return get_resp()">
@@ -791,6 +792,7 @@ function serialize() {
 				xhr.onreadystatechange = function () {
 					if (xhr.readyState === 4 && xhr.status === 200) {
 						console.log(xhr.response);
+						$(document.body).append(xhr.response);
 						pendingCheck();
 					}
 				};
@@ -825,9 +827,20 @@ function pendingCheck(){
 		})
 }	
 	
-	
-	
-
+function stopUpload(success, fname)
+{
+	if (success == 1)
+	{
+        id("upbox").style.backgroundColor = "#e8fee4";
+		id("msg").text = 'Settings stored successfully!';
+	}
+	else
+	{
+		id("upbox").style.backgroundColor = "#fcc";
+		id("msg").text = 'Failed to store settings to device.';
+	}
+	msg_reset_if_pending(1);
+}
 
 function load_once() {
 	populate("settings.html");
