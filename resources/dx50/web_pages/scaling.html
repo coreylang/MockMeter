@@ -240,13 +240,8 @@ function onReaderLoad(event){
 				payload = JSON.stringify(obj);
 				
 				//remove tbody
-				var table = document.getElementById('scaling_tbl');
-				var row = document.getElementsByTagName('tbody')[0];
-					row.parentNode.removeChild(row);
-					
-				var table = document.getElementById('measurement_tbl');
-				var row = document.getElementsByTagName('tbody')[0];
-					row.parentNode.removeChild(row);
+				id("tablebodyScalings").remove();
+				id("tablebodyMeasurements").remove();
 
 				//create tbody
 				parse_vars(payload);
