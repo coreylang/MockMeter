@@ -9,7 +9,7 @@
             "title": "Custom Scalings",
             "description": "Provide conversion from polled value to displayed value.  Scalings are assigned to measurements.",
             "type": "object",
-            "maxProperties": 12,
+            "maxProperties": 15,
             "propertyNames": { "maxLength": 31, "$comment": "draft6" },
             "additionalProperties": {
                 "title": "Scaling Name",
@@ -32,7 +32,7 @@
             "title": "Custom Measurements",
             "description": "Provide scaling and LED definitions for new measurements.  Measurements are assigned to display screens and protocols.",
             "type": "object",
-            "maxProperties": 24,
+            "maxProperties": 45,
             "propertyNames": { "maxLength": 31, "$comment": "draft6" },
             "additionalProperties": {
                 "title": "Measurement Name",
@@ -41,8 +41,8 @@
                 "minItems": 1,
                 "items": [
                     {"type": "string", "title": "Scaling Name", "description": "Enter a name from the defined scalings."},
-                    {"enum": ["none", "A", "B", "C", "AB", "BC", "CA", null], "title": "Phase LED"},
-                    {"enum": ["none", "min", "max", "avg", null], "title": "Min/Max/Avg LED"}
+                    {"enum": ["none", "A", "B", "C", "AB", "BC", "CA", null], "title": "Phase LED", "default": "none"},
+                    {"enum": ["none", "min", "max", "avg", null], "title": "Min/Max/Avg LED", "default": "none"}
                 ]
             }
         }
