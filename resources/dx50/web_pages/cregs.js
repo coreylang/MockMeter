@@ -25,12 +25,13 @@ var db_names = ["Phase Current",
 var getsAllClasses_list  = ["Analog Inputs", "Binary Inputs"];
 var getsDeadband_list    = ["Analog Inputs"];
 
-function filterCol(inp, src) {
+function filterCat(inp) {
 
     function model_has_item(dbIdx) {
         if(dbIdx == NEWO_RESERVED || dbIdx >= 2048)
             return true;
 
+        // TODO: should be protocol specific
         for(var j=0; j<dnpModelMode.length; j++) {
             if(dbIdx == dnpModelMode[j])
                 return true;
@@ -38,16 +39,55 @@ function filterCol(inp, src) {
         return false;
     }
 
-    var action = (src=="cat")?(function() {inp.lists[type].vec.splice(i--,1);})
-      : (function() { var o = inp.lists[type].vec[i]; o.calcType = 0; o.classMask = 0; o.dbIdx = NEWO_RESERVED; o.deadband = 0;});
+    var action = (function() {inp.lists[type].vec.splice(i--,1);});
 
     for(var type=0; type<inp.lists.length; type++) {
         for(var i=0; i<inp.lists[type].vec.length; i++) {
-            if(!model_has_item(inp.lists[type].vec[i].dbIdx))
-                 action();
+            if(!model_has_item(inp.lists[type].vec[i].dbIdx)) {
+                console.log("filterCat removed", inp.lists[type].vec[i])
+                action();
+            }
         }
     }
     
+    return inp;
+}
+
+function filterOrd(inp, cat) {
+
+    var reserved = {
+        calcType: 0,
+        dbIdx: NEWO_RESERVED,
+        classMask: 0,
+        deadband: 0
+    };
+    function comparable_of(x) {
+        return JSON.stringify([x.dbIdx, x.calcType]);
+    }
+    function build_filter(flat_cat) {
+        var a = [comparable_of(reserved)];
+        flat_cat.forEach(
+            function(x) {a.push(comparable_of(x));}
+        )
+        return a;
+    }
+
+    for(var type=0; type<inp.lists.length; type++) {
+        var filter = build_filter(cat.lists[type].vec);
+
+        filteredlist = inp.lists[type].vec.map(
+            // item  => filter.includes(JSON.stringify(item))?item:reserved
+            item => {
+                if (filter.includes(comparable_of(item))) {
+                    return item;
+                } else {
+                    console.log("filterOrd removed", item);
+                    return reserved;
+                }
+            }
+        );
+        inp.lists[type].vec = filteredlist;
+    }
     return inp;
 }
                 
@@ -76,10 +116,10 @@ function show_plist() {
 
 function show_plist_1(request) {
     eval (request.responseText);    // JSON sets dnpOrder
-    ord = filterCol(desCollection (dnpOrder), "ord");
     col = desCollection (dnpCatalog);
     listLimits[1] = getLength(col);
-    col = filterCol(col, "cat");
+    col = filterCat(col);
+    ord = filterOrd(desCollection (dnpOrder), col);
 
     id("edit_btn").disabled = false;
     id("bilf_btn").value = "Use BiLF List";
@@ -122,10 +162,10 @@ function show_regset() {
 	
 function show_regset_1 (request) {
     eval(request.responseText);     // JSON sets mbOrder
-    ord = filterCol(desCollection (mbOrder), "ord");
     col = desCollection (mbCat16);
     listLimits[0] = getLength(col);
-    col = filterCol(col, "cat");
+    col = filterCat(col);
+    ord = filterOrd(desCollection (mbOrder), col);
 
     if(id("mpli").value > 2) {
         id("edit_btn").disabled = false;
@@ -723,7 +763,8 @@ function setMask() {
     }
 
     if(isModbus) {
-        ord = filterCol(desCollection (mbBilf16), "ord");
+        // filter spec order as a catalog
+        ord = filterCat(desCollection (mbBilf16));
         ord.name = "mbOrder_" + ses;
     }
     else {
@@ -731,7 +772,8 @@ function setMask() {
 			alert("Class 0 Enable mask must be (0..15) or 16384");
 			return;
 		}
-        ord = filterCol(desCollection (dnpBilf), "ord");
+        // filter spec order as a catalog
+        ord = filterCat(desCollection (dnpBilf));
         ord.name = "dnpOrder_" + ses;
     }
 
