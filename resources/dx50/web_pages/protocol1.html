@@ -450,8 +450,11 @@
 			</td>
 		<td align="center">
 		<p id="success"><b>BiLF set applied to list!</b><br></p>
-		<p id="mnu_btns"><input type="button" name="clr_btn" value="Clear" onclick="clr();"/>
-		<input type="button" name="bilf_btn" id="bilf_btn" value="Use BiLF List" onclick="useBilf();"/></p>
+		<p id="mnu_btns">
+		<input type="button" name="clr_btn" value="Clear Page" onclick="clr();"/>
+		<input type="button" name="bilf_btn" id="bilf_btn" value="Use BiLF List" onclick="useBilf();"/>
+		<input type="button" name="clrall_btn" id="clrall_btn" value="Clear All" onclick="clrAllTypes();"/>
+		</p>
 		<div id="c0e"><a class="label8">Class 0 Enable &nbsp;</a><input type="text" id="c0e_val" size="6" maxlength="5" value="3" /><br>
 		<input type="button" name="set_btn" value="Set BiLF" onclick="setMask();"/>
 		<input type="button" name="cncl_btn" value="Cancel" onclick="show_btns();"/></div>

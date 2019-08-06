@@ -124,7 +124,8 @@ function show_plist_1(request) {
     id("edit_btn").disabled = false;
     id("bilf_btn").value = "Use BiLF List";
     id("back_btn").value = "Cancel";
-	id("back_btn").style.visibility = 'visible';
+    id("back_btn").style.visibility = 'visible';
+    id("clrall_btn").style.display = 'inline';
 	id("tucNext").style.visibility = 'hidden';
     id("dnp").style.display = 'none';
     id("regedit").style.display = 'block';
@@ -177,6 +178,7 @@ function show_regset_1 (request) {
     }
     id("bilf_btn").value = "Use BiLF16 List";
 	id("back_btn").style.visibility = 'visible';
+	id("clrall_btn").style.display = 'none';
 	id("tucNext").style.visibility = 'hidden';
     id("modbus").style.display = 'none';
     id("regedit").style.display = 'block';
@@ -330,8 +332,8 @@ function getLength(thing) {
 }
 
 function listTooLong(protocol) {
-    var limit = listLimits[(protocol)?0:1] * 1.5;
-
+    var limit = 500;
+    
     if(getLength(ord) > limit ) {
         alert("List length limit reached");
         return true;
@@ -807,6 +809,18 @@ function clr() {
     }
 
     ord.lists[type].vec.length = 0;
+    populate_menus();
+	filterMenu(null,1);
+	clrSearch(2);
+}
+
+function clrAllTypes() {
+    if(!confirm("This will clear all DNP types.\n(AI, AO, BI, BO, Counters)\nContinue?")) {
+        return;
+    }
+
+    for (type of ord.lists) type.vec.length = 0
+
     populate_menus();
 	filterMenu(null,1);
 	clrSearch(2);

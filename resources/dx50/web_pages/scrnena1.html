@@ -10,6 +10,8 @@
 	<script src="cregs.js"></script>
 	<script src="mbModelMode.js"></script>
 	<script src="dnpModelMode.js"></script>
+	<script src="mbCat16.js"></script>
+	<script src="dnpCatalog.js"></script>
 	<script src="load.js"></script>
 <style>#fill_in table tr:hover {background-color:#bbfbfb;}</style>
 <script>
@@ -23,6 +25,7 @@ var DNP = 1;
 var right_scrn;
 var left_scrn;
 var hm_idx;
+var NO_SCREEN;
 
 function populate_table()
 {
@@ -46,7 +49,7 @@ function populate_table()
 		
 		for(var i=0; i<screens.length; i++)
 		{
-			if(screens[i] == "169")
+			if(screens[i] == NO_SCREEN)
 				continue;
 			if(!is_in_list(idx_list, screens[i]))
 				return false;
@@ -124,6 +127,7 @@ function parse_vars(data) {
 	var left_scrn = dtype[1];
 	var protocol = parsed[j++];
 	var ptype = parsed[j++];
+	NO_SCREEN = parsed[j++].split(":")[0];
 	var idx_list=[];
 	
 	if(is_triple_display) {
