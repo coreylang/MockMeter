@@ -19,8 +19,10 @@
 	color:red;
 	padding-top: 2px;
 	padding-bottom: 2px;
-	text-align: right;
 	/* font-size: 12px; */
+}
+.point-input{
+	text-align: right;
 }
 
 input[type="file"] {
@@ -385,30 +387,31 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
 			var name = document.createElement("input");
 			name.setAttribute("name", "nm");
 			name.setAttribute('maxlength', 31);
+			name.setAttribute('placeholder', 'example');
 			
 			var p1poll = document.createElement("input");
 			p1poll.setAttribute("name", "x1");
 			p1poll.setAttribute('maxlength', 6);
-			p1poll.setAttribute('style', 'text-align: right');
-			p1poll.setAttribute('placeholder', 'enter value');
+			p1poll.setAttribute('class', 'point-input');
+			p1poll.setAttribute('placeholder', '0');
 			
 			var p1show = document.createElement("input");
 			p1show.setAttribute("name", "y1");
 			p1show.setAttribute('maxlength', 6);
-			p1show.setAttribute('class', 'seven-seg');
-			p1show.setAttribute('placeholder','0.000');
+			p1show.setAttribute('class', 'point-input seven-seg');
+			p1show.setAttribute('placeholder','0.0');
 			
 			var p2poll = document.createElement("input");
 			p2poll.setAttribute("name", "x2");
 			p2poll.setAttribute('maxlength', 6);
-			p2poll.setAttribute('style', 'text-align: right');
-			p2poll.setAttribute('placeholder', 'enter value');
+			p2poll.setAttribute('class', 'point-input');
+			p2poll.setAttribute('placeholder', '1000');
 			
 			var p2show = document.createElement("input");
 			p2show.setAttribute("name", "y2");
 			p2show.setAttribute('maxlength', 6);
-			p2show.setAttribute('class', 'seven-seg');
-			p2show.setAttribute('placeholder','0.000');
+			p2show.setAttribute('class', 'point-input seven-seg');
+			p2show.setAttribute('placeholder','212.0');
 	  
 			/*var keywordsBox = document.createElement("input");
 			keywordsBox.setAttribute("name", "keywords" + currentIndex);*/
@@ -422,7 +425,7 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
 			
 
 			currentRow.setAttribute("flexscaling", true);
-			currentRow.flexscaling = new Scaling('', [[0, "0.000"], [0, "0.000"]]);
+			currentRow.flexscaling = new Scaling('', [[0, 0], [0, 0]]);
 			
 			var currentCell = currentRow.insertCell(-1);
 			name.onblur = update_scaling_onblur(currentRow);
@@ -595,7 +598,6 @@ function parse_vars(data, source) {
 			ti = document.createElement('input');
 			ti.setAttribute('name', item);
 			ti.setAttribute('maxlength', length);
-			ti.setAttribute('style', 'text-align: right')
 			ti.value = scl.flexscaling[item];
 			ti.onblur = update_scaling_onblur(sr);
 			ti.setAttribute('class', clasi);
@@ -608,10 +610,10 @@ function parse_vars(data, source) {
 		sr.setAttribute('flexscaling', true);   // for queryselect
 		sr.flexscaling = pts;
 		sr.appendChild(inner(sr, "nm", 31));
-		sr.appendChild(inner(sr, "x1", 6, "color-p1"));
-		sr.appendChild(inner(sr, "y1", 6, "color-p1", "seven-seg"));
-		sr.appendChild(inner(sr, "x2", 6, "color-p2"));
-		sr.appendChild(inner(sr, "y2", 6, "color-p2", "seven-seg"));
+		sr.appendChild(inner(sr, "x1", 6, "color-p1", "point-input"));
+		sr.appendChild(inner(sr, "y1", 6, "color-p1", "point-input seven-seg"));
+		sr.appendChild(inner(sr, "x2", 6, "color-p2", "point-input"));
+		sr.appendChild(inner(sr, "y2", 6, "color-p2", "point-input seven-seg"));
 		
 		
 		//Delete button
