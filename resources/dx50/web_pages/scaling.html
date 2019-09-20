@@ -66,8 +66,15 @@ input[type="file"] {
   display: block;
 }
 
-.fixed_header thead {
+.fixed_header thead, .fixed_header tfoot{
   display: block;
+}
+
+.fixed_header tfoot td {
+	text-align: center;
+	font-size: 90%;
+	font-style:oblique;
+	color: gray;
 }
 
 input{
@@ -119,6 +126,16 @@ input{
 			<th><button onclick="addFieldScaling();">Insert Row</button></th>
 		</tr>
 	</thead>
+	<tbody id="tablebodyScalings"></tbody>
+	<tfoot>
+		<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+		<tr>
+			<td>enter name</td>
+			<td colspan=2>enter a polled value and its display format</td>
+			<td colspan=2>enter a second pair of values</td>
+			<td></td>
+		</tr>
+	</tfoot>
 </table>
 
 <hr style="width: 100%;">
@@ -136,6 +153,16 @@ input{
 			<th><button onclick="addFieldMeasurement();">Insert Row</button></th>
 		</tr>
 	</thead>
+	<tbody id="tablebodyMeasurements"></tbody>
+	<tfoot>
+		<tr><td></td><td></td><td></td><td></td><td></td></tr>
+		<tr>
+			<td>enter name</td>
+			<td>select scaling method</td>
+			<td COLSPAN=2>select optional LEDs to illuminate</td>
+		</tr>
+	</tfoot>
+
 </table>
 
 
@@ -240,10 +267,6 @@ function onReaderLoad(event){
 
 				
 				payload = JSON.stringify(obj);
-				
-				//remove tbody
-				id("tablebodyScalings").remove();
-				id("tablebodyMeasurements").remove();
 
 				//create tbody
 				parse_vars(payload);
@@ -707,10 +730,9 @@ function parse_vars(data, source) {
 	
 	
 
-	// SCALING table fill. Locate the table and append reach scaling as a row
-	var scaling_tbl = id('scaling_tbl');
-	var tb = document.createElement('tbody');
-	tb.setAttribute('id', 'tablebodyScalings');
+	// SCALING table fill. Locate the table and append each scaling as a row
+	var tb = id('tablebodyScalings');
+	while (tb.firstChild) tb.removeChild(tb.firstChild);
 	
 	var scaling_lst = JSON.parse(data).scalings;	
 	
@@ -718,25 +740,15 @@ function parse_vars(data, source) {
 			tb.appendChild(createScalingRow(points_from_slpoff(scl)));	
 	}
 	
-	scaling_tbl.appendChild(tb);
-	
-	
-	// MEASUREMENT table fill. Locate the table and append reach scaling as a row
-	var measurement_tbl = id('measurement_tbl');
-	var tb = document.createElement('tbody');
-	tb.setAttribute('id', 'tablebodyMeasurements');
-	
+	// MEASUREMENT table fill. Locate the table and append each scaling as a row
+	var tb = id('tablebodyMeasurements');
+	while (tb.firstChild) tb.removeChild(tb.firstChild);
+
 	var measurement_lst = JSON.parse(data).measurements;	
 	
 	for (scl of measurement_lst) {
 			tb.appendChild(createMeasurementRow(scl));	
 	}
-	
-	measurement_tbl.appendChild(tb);
-	
-	
-	
-	
 }
 
 function serialize() {
