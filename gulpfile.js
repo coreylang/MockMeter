@@ -49,7 +49,7 @@ function clean(cb) {
 }
 
 function callMktfs(cb) {
-    return execFile('../../mqx/tools/mktfs.exe',[blddir, target_file], cb)
+    return execFile('/projects/mqx/tools/mktfs.exe',[blddir, target_file], cb)
 }
 
 function createManifest() {

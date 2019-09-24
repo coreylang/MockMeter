@@ -135,6 +135,8 @@ ENV/
 # Visual Studio Code
 .vscode
 
+# node.js
+**/node_modules/
 
 prototypes/*
 python_venv/*
@@ -142,3 +144,6 @@ python_venv/*
 *.bat
 
 resources/dx50/json/*.json
+
+# firmware specific
+web_pages_*/
