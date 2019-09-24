@@ -1,0 +1,12 @@
+#ifndef TFS_DATA_H
+#define TFS_DATA_H 1
+
+// single reference examples
+// {{"load.js"}} replaces "load.js"
+// or with modification: {{assetPath "load.js"}}
+
+{{#each @root}}
+#define {{macroFor @key}} "{{this}}"
+{{/each}}
+
+#endif

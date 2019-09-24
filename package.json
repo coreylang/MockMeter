@@ -1,0 +1,29 @@
+{
+  "name": "dx50",
+  "version": "1.0.0",
+  "description": "",
+  "main": "none",
+  "scripts": {
+    "build": "gulp build --inspect-brk=9229",
+    "clean": "gulp clean",
+    "mktfs": "gulp mktfs",
+    "watch": "gulp watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "delete": "^1.1.0",
+    "gulp": "^4.0.2",
+    "gulp-compile-handlebars": "^0.6.1",
+    "gulp-filelist": "^2.0.3",
+    "gulp-gzip": "^1.4.2",
+    "gulp-htmlmin": "^5.0.1",
+    "gulp-if": "^3.0.0",
+    "gulp-merge-json": "^1.3.1",
+    "gulp-rename": "^1.4.0",
+    "gulp-rev-all": "^2.0.2",
+    "gulp-size": "^3.0.0",
+    "gulp-terser": "^1.2.0"
+  },
+  "dependencies": {}
+}
