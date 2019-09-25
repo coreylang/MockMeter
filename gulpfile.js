@@ -49,6 +49,9 @@ const target_file='tfs_data.c';
 const rev_file='rev.json';
 const manifest_file='manifest.json';
 
+const srcglobs = ['*', 'dx50/*'];
+// setting base allows 'rename' to see relative dir differences
+const srcopts = {cwd: srcdir, base: srcdir, nodir: true};
 
 function defaultTask(cb) {
     console.log('type "gulp --tasks" for command list')
@@ -67,10 +70,12 @@ function callMktfs(cb) {
 }
 
 function createManifest() {
-    return src('*', {cwd: srcdir, nodir: true})     // needs to match optioned_build()
-        .pipe(filelist("filelist.json", {flatten: true}))
+    return src(srcglobs, srcopts)     // needs to match optioned_build()
+        .pipe(rename( path=> {path.dirname= ''; /*console.log(path)*/ }))
+        .pipe(filelist("filelist.json", {flatten: false}))
         .pipe(src(rev_file, {allowEmpty: true}))
         .pipe(merge({fileName: manifest_file, edit: 
+            // order matters, expecting array first then rev file
             (parsedJson, file) => {
                 if (Array.isArray(parsedJson)) {
                     returnJson = {};
@@ -124,7 +129,11 @@ function buildit(doBust=true, doMini=true, doGzip=true, globHammerTime=['']) {
         if (globHammerTime!='!') console.log(chalk.black.bgRedBright("Excluding",globHammerTime));
 
         // TODO: sourcemaps true causes WOFF2 integrity check to fail
-        return src('*', {cwd: srcdir, nodir: true, sourcemaps: false})
+        return src(srcglobs, Object.assign(srcopts, {sourcemaps: false}))
+            .pipe(rename( path=> {path.dirname= ''; /* console.log(path) */ }))
+            // TODO: this takes care of flattening .. dupes seem to replace but 
+            // it could just be by accident?  maybe use negative globs to rmove?
+            // .pipe(dest('test'))
             .pipe(size({title: chalk.inverse('initial size for'), showFiles: false}))
 
             // cache busting
