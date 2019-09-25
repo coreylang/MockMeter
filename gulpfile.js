@@ -44,12 +44,12 @@ const origindir = (()=>{
 // gulp invoked in bld and main files are in web_pages
 // path.dirname acts as a cheap 'cd ..'
 const srcdir= path.dirname(path.dirname(origindir));
-const blddir='./web_pages_gulp/';
-const target_file='tfs_data.c';
-const rev_file='rev.json';
-const manifest_file='manifest.json';
+const blddir= path.join(origindir,'web_pages_gulp');
+const target_file=path.join(origindir,'tfs_data.c');
+const rev_file=path.join(origindir,'rev.json');
+const manifest_file=path.join(origindir,'manifest.json');
 
-const srcglobs = ['*', 'dx50/*'];
+const srcglobs = ['*', 'dx50/*']; // TODO: get name from origindir
 // setting base allows 'rename' to see relative dir differences
 const srcopts = {cwd: srcdir, base: srcdir, nodir: true};
 
@@ -62,7 +62,7 @@ function clean(cb) {
     del(rev_file);
     del(manifest_file);
     del(target_file);
-    del(blddir+'*', cb);
+    del(blddir+'/*', cb);
 }
 
 function callMktfs(cb) {
@@ -71,7 +71,7 @@ function callMktfs(cb) {
 
 function createManifest() {
     return src(srcglobs, srcopts)     // needs to match optioned_build()
-        .pipe(rename( path=> {path.dirname= ''; /*console.log(path)*/ }))
+        .pipe(rename( path=> {path.dirname= ''; /*console.log(path)*/ })) // TODO: make conditional
         .pipe(filelist("filelist.json", {flatten: false}))
         .pipe(src(rev_file, {allowEmpty: true}))
         .pipe(merge({fileName: manifest_file, edit: 
@@ -85,7 +85,7 @@ function createManifest() {
                 else return parsedJson;
             }
         }))
-        .pipe(dest('.'));
+        .pipe(dest(origindir));
 };
 
 // Create a handlebars helper to look up
@@ -110,7 +110,7 @@ function hbsManifest() {
     .pipe(size({title: 'templating', showFiles: verbose, showTotal: false}))
     .pipe(handlebars(manifest, handlebarOpts))
     .pipe(rename( (path) => path.extname='' ))
-    .pipe(dest('.'))
+    .pipe(dest(origindir))
     ;
 };
 
@@ -191,7 +191,7 @@ function buildit(doBust=true, doMini=true, doGzip=true, globHammerTime=['']) {
             .pipe(size({title: chalk.inverse('payload for tfs')}))
             .pipe(dest(blddir, {sourcemaps: '../web_pages_map'}))
             .pipe(gulpif(doBust, RevAll.manifestFile()))
-            .pipe(gulpif(doBust, dest('.')))
+            .pipe(gulpif(doBust, dest(origindir)))
             ;
     }
     return optioned_build;
