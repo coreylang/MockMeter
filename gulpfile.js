@@ -25,16 +25,30 @@ const fs = require('fs');
 const handlebars = require('gulp-compile-handlebars');
 const filelist = require('gulp-filelist');
 const merge = require('gulp-merge-json');
+const path = require('path');
 
-srcdir='./web_pages/';
+const origindir = (()=>{
+    if (process.argv.includes('--gulpfile')) {
+        // some environments pass the location of gulpfile.js when invoking
+        dir = path.dirname(process.argv[process.argv.indexOf('--gulpfile')+1]);
+    } else {
+        // but when invoked from command line, we only need the cwd()
+        dir = process.cwd();
+    }
+    console.log("origin=>"+dir);
+    // return absolute path to the invoked gulpfile.js
+    return dir
+})();
+
+// assume dir layout is $(proj)/web_pages/mx50/bld
+// gulp invoked in bld and main files are in web_pages
+// path.dirname acts as a cheap 'cd ..'
+const srcdir= path.dirname(path.dirname(origindir));
 const blddir='./web_pages_gulp/';
 const target_file='tfs_data.c';
 const rev_file='rev.json';
 const manifest_file='manifest.json';
 
-function setSrcdir(dir) {
-    return cb => {srcdir = dir; cb();}
-}
 
 function defaultTask(cb) {
     console.log('type "gulp --tasks" for command list')
@@ -53,7 +67,7 @@ function callMktfs(cb) {
 }
 
 function createManifest() {
-    return src(srcdir+'*')     // needs to match optioned_build()
+    return src('*', {cwd: srcdir, nodir: true})     // needs to match optioned_build()
         .pipe(filelist("filelist.json", {flatten: true}))
         .pipe(src(rev_file, {allowEmpty: true}))
         .pipe(merge({fileName: manifest_file, edit: 
@@ -87,7 +101,7 @@ function hbsManifest() {
     } catch (error) {
         manifest = {};
     }
-    return src('*.hbs')
+    return src('../*.hbs', {cwd: srcdir}) // TODO: consider relocating hbs files
     .pipe(size({title: 'templating', showFiles: verbose, showTotal: false}))
     .pipe(handlebars(manifest, handlebarOpts))
     .pipe(rename( (path) => path.extname='' ))
@@ -110,7 +124,7 @@ function buildit(doBust=true, doMini=true, doGzip=true, globHammerTime=['']) {
         if (globHammerTime!='!') console.log(chalk.black.bgRedBright("Excluding",globHammerTime));
 
         // TODO: sourcemaps true causes WOFF2 integrity check to fail
-        return src(srcdir+'*', {sourcemaps: false})
+        return src('*', {cwd: srcdir, nodir: true, sourcemaps: false})
             .pipe(size({title: chalk.inverse('initial size for'), showFiles: false}))
 
             // cache busting
