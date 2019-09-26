@@ -96,6 +96,10 @@ const srcglobs = (() => {
 
 // setting base to srcdir allows 'rename' to see relative dir differences
 const srcopts = {cwd: srcdir, base: srcdir, nodir: true};
+function remove_model_from_path(path) { 
+    if (path.dirname==model) path.dirname= '.';
+    //console.log(path);
+}
 
 function defaultTask(cb) {
     console.log('type "gulp --tasks" for command list')
@@ -115,7 +119,7 @@ function callMktfs(cb) {
 
 function createManifest() {
     return src(srcglobs, srcopts)     // needs to match optioned_build()
-        .pipe(rename( path=> {path.dirname= ''; /*console.log(path)*/ })) // TODO: make conditional
+        .pipe(rename( remove_model_from_path ))
         .pipe(filelist("filelist.json", {flatten: false}))
         .pipe(src(rev_file, {allowEmpty: true}))
         .pipe(merge({fileName: manifest_file, edit: 
@@ -174,7 +178,7 @@ function buildit(doBust=true, doMini=true, doGzip=true, globHammerTime=['']) {
 
         // TODO: sourcemaps true causes WOFF2 integrity check to fail
         return src(srcglobs, Object.assign(srcopts, {sourcemaps: false}))
-            .pipe(rename( path=> {path.dirname= ''; /* console.log(path) */ }))
+            .pipe(rename( remove_model_from_path))
             .pipe(size({title: chalk.inverse('initial size for'), showFiles: false}))
 
             // cache busting
