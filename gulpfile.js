@@ -244,7 +244,7 @@ function buildit(doBust=true, doMini=true, doGzip=true, globHammerTime=['']) {
 }
 
 function build_release(){
-    return series(clean, buildit(), createManifest, parallel(hbsManifest));
+    return series(clean, buildit(), createManifest, parallel(hbsManifest, callMktfs));
 }
 
 function build_debug(){
