@@ -26,6 +26,7 @@ const handlebars = require('gulp-compile-handlebars');
 const filelist = require('gulp-filelist');
 const merge = require('gulp-merge-json');
 const path = require('path');
+const glob = require('glob');
 
 /*
 Assume directory layout
@@ -85,10 +86,13 @@ const manifest_file=path.join(origindir,'manifest.json');
 // setting model to mx50 (with no delimiters)
 const srcglobs = (() => {
     model = path.basename(path.dirname(origindir));
-    console.log('model => '+model);
-    globs = ['*', model+'/*'];
-    return globs;
-})();
+    glob_array = ['*', model+'/*'];
+    excludes = glob.sync('*', {cwd: path.dirname(origindir), nodir: true });
+    excludes.forEach((x, i, a) => a[i]='!'+x);
+    glob_array = glob_array.concat(excludes)
+    console.log("srcglobs =>", glob_array)
+    return glob_array;
+})(); // example ['*', 'dx50/*', '!scaling.html', '!scaling.js']
 
 // setting base to srcdir allows 'rename' to see relative dir differences
 const srcopts = {cwd: srcdir, base: srcdir, nodir: true};
@@ -171,9 +175,6 @@ function buildit(doBust=true, doMini=true, doGzip=true, globHammerTime=['']) {
         // TODO: sourcemaps true causes WOFF2 integrity check to fail
         return src(srcglobs, Object.assign(srcopts, {sourcemaps: false}))
             .pipe(rename( path=> {path.dirname= ''; /* console.log(path) */ }))
-            // TODO: this takes care of flattening .. dupes seem to replace but 
-            // it could just be by accident?  maybe use negative globs to rmove?
-            // .pipe(dest('test'))
             .pipe(size({title: chalk.inverse('initial size for'), showFiles: false}))
 
             // cache busting
