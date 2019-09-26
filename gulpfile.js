@@ -149,12 +149,13 @@ const handlebarOpts = {
 };
 
 function hbsManifest() {
+    // apply manifest.json context to templates/*.hbs and save as origindir/*
     try {
         manifest = JSON.parse(fs.readFileSync(manifest_file, 'utf8'));
     } catch (error) {
         manifest = {};
     }
-    return src('../*.hbs', {cwd: srcdir}) // TODO: consider relocating hbs files
+    return src('templates/*.hbs', {cwd: srcdir})
     .pipe(size({title: 'templating', showFiles: verbose, showTotal: false}))
     .pipe(handlebars(manifest, handlebarOpts))
     .pipe(rename( (path) => path.extname='' ))
@@ -243,7 +244,7 @@ function buildit(doBust=true, doMini=true, doGzip=true, globHammerTime=['']) {
 }
 
 function build_release(){
-    return series(clean, buildit(), createManifest, parallel(hbsManifest, callMktfs));
+    return series(clean, buildit(), createManifest, parallel(hbsManifest));
 }
 
 function build_debug(){
