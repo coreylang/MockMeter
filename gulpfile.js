@@ -27,6 +27,37 @@ const filelist = require('gulp-filelist');
 const merge = require('gulp-merge-json');
 const path = require('path');
 
+/*
+Assume directory layout
+
+# $(project_dir)
+## .git
+## .vscode
+## ...
+## node_modules
+## resources
+## web_pages <--(common static files, becomes `srcdir`)
+### dx50 <-- (model static files, overrides)
+#### scaling.html
+#### ...
+#### bld <-- (becomes `origindir`)
+##### gulpfile.js <-- (launch file)
+##### web_pages_cache
+### mx50
+#### bld
+##### gulpfile.js
+##### web_pages_cache
+### mx60
+#### bld
+##### gulpfile.js
+##### web_pages_cache
+### index.html
+### site.css
+### ...
+## gulpfile.js <-- (main build logic)
+# end
+
+*/
 const origindir = (()=>{
     if (process.argv.includes('--gulpfile')) {
         // some environments pass the location of gulpfile.js when invoking
@@ -40,17 +71,26 @@ const origindir = (()=>{
     return dir
 })();
 
-// assume dir layout is $(proj)/web_pages/mx50/bld
-// gulp invoked in bld and main files are in web_pages
+// assume origindir is $(proj)/web_pages/mx50/bld
 // path.dirname acts as a cheap 'cd ..'
+// setting srcdir to $(proj)/web_pages
 const srcdir= path.dirname(path.dirname(origindir));
 const blddir= path.join(origindir,'web_pages_gulp');
 const target_file=path.join(origindir,'tfs_data.c');
 const rev_file=path.join(origindir,'rev.json');
 const manifest_file=path.join(origindir,'manifest.json');
 
-const srcglobs = ['*', 'dx50/*']; // TODO: get name from origindir
-// setting base allows 'rename' to see relative dir differences
+// assume origindir is $(proj)/web_pages/mx50/bld
+// path.basename on a dir returns the leaf dir
+// setting model to mx50 (with no delimiters)
+const srcglobs = (() => {
+    model = path.basename(path.dirname(origindir));
+    console.log('model => '+model);
+    globs = ['*', model+'/*'];
+    return globs;
+})();
+
+// setting base to srcdir allows 'rename' to see relative dir differences
 const srcopts = {cwd: srcdir, base: srcdir, nodir: true};
 
 function defaultTask(cb) {
