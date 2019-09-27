@@ -42,14 +42,17 @@ Assume directory layout
 #### scaling.html
 #### ...
 #### bld <-- (becomes `origindir`)
+##### destination.json
 ##### gulpfile.js <-- (launch file)
 ##### web_pages_cache
 ### mx50
 #### bld
+##### destination.json
 ##### gulpfile.js
 ##### web_pages_cache
 ### mx60
 #### bld
+##### destination.json
 ##### gulpfile.js
 ##### web_pages_cache
 ### index.html
@@ -59,17 +62,51 @@ Assume directory layout
 # end
 
 */
+
 const origindir = (()=>{
     if (process.argv.includes('--gulpfile')) {
         // some environments pass the location of gulpfile.js when invoking
         dir = path.dirname(process.argv[process.argv.indexOf('--gulpfile')+1]);
+    } else if (process.argv.includes('-f')) {
+        // some environments pass the location of gulpfile.js when invoking
+        dir = path.dirname(process.argv[process.argv.indexOf('-f')+1]);
     } else {
         // but when invoked from command line, we only need the cwd()
         dir = process.cwd();
     }
-    console.log("origin=>"+dir);
+    if (!path.isAbsolute(dir)) {
+        // attempt to construct an absolute path
+        dir = path.resolve(process.cwd(), dir);
+    }
+    console.log("origin=>",dir);
     // return absolute path to the invoked gulpfile.js
     return dir
+})();
+
+// assume origindir is $(proj)/web_pages/mx50/bld
+// path.basename on a dir returns the leaf dir
+// setting model to mx50 (with no delimiters)
+const srcglobs = (() => {
+    model = path.basename(path.dirname(origindir));
+    glob_array = ['*', model+'/*'];
+    excludes = glob.sync('*', {cwd: path.dirname(origindir), nodir: true });
+    excludes.forEach((x, i, a) => a[i]='!'+x);
+    glob_array = glob_array.concat(excludes)
+    console.log("source=>", glob_array)
+    return glob_array;
+})(); // example ['*', 'dx50/*', '!scaling.html', '!scaling.js']
+
+const destination = (()=>{
+    // expect destination.json in origindir
+    try {
+        dests = JSON.parse(fs.readFileSync(path.join(origindir,"destination.json"), 'utf8'));
+        console.log("target=>",dests);
+        return dests;
+    } catch (error) {
+        console.log(chalk.bgRedBright("target=> ERROR: typically due to invoke location, check origin path"));
+        console.log(error);
+        process.exit();
+    }
 })();
 
 // assume origindir is $(proj)/web_pages/mx50/bld
@@ -81,19 +118,6 @@ const target_file=path.join(origindir,'tfs_data.c');
 const rev_file=path.join(origindir,'rev.json');
 const manifest_file=path.join(origindir,'manifest.json');
 
-// assume origindir is $(proj)/web_pages/mx50/bld
-// path.basename on a dir returns the leaf dir
-// setting model to mx50 (with no delimiters)
-const srcglobs = (() => {
-    model = path.basename(path.dirname(origindir));
-    glob_array = ['*', model+'/*'];
-    excludes = glob.sync('*', {cwd: path.dirname(origindir), nodir: true });
-    excludes.forEach((x, i, a) => a[i]='!'+x);
-    glob_array = glob_array.concat(excludes)
-    console.log("srcglobs =>", glob_array)
-    return glob_array;
-})(); // example ['*', 'dx50/*', '!scaling.html', '!scaling.js']
-
 // setting base to srcdir allows 'rename' to see relative dir differences
 const srcopts = {cwd: srcdir, base: srcdir, nodir: true};
 function remove_model_from_path(path) { 
@@ -102,7 +126,7 @@ function remove_model_from_path(path) {
 }
 
 function defaultTask(cb) {
-    console.log('type "gulp --tasks" for command list')
+    console.log('CTRL+C to exit, then "gulp --tasks" for additional commands')
     cb();
 }
 
@@ -265,17 +289,14 @@ function watch_web(cb) {
     watch(srcdir+'*', build_release())
 }
 
-exports.default = defaultTask;
-exports.clean = clean;
-exports.debug = build_debug();
+exports.default = series(defaultTask, watch_web);
 exports.build = build_release();
-exports.mktfs = build_release();
-exports.watch = watch_web;
+exports.debug = build_debug();
 exports.custom = build_custom();
+exports.clean = clean;
 
 exports.build.description = 'production build';
 exports.debug.description = 'debug build with only compression';
-exports.mktfs.description = 'alias for build';
 exports.custom.description = 'glob exclusion from cache busting and minification';
 exports.custom.flags = {'--exclude': 'comma seperated globs to exclude '};
 exports.default.flags = {
