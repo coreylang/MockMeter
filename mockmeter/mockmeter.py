@@ -1,8 +1,12 @@
 from pathlib import Path
 from urllib.parse import urlunsplit
 import json
+import mimetypes
 
 import cherrypy
+from cherrypy._cpdispatch import Dispatcher
+from cherrypy._cptools import HandlerTool
+from cherrypy.lib import static
 import requests
 from slugify import slugify
 
@@ -218,6 +222,49 @@ class StaticsApp(object):
             return self._fetch_cgi_resource({'data':kwargs})
 
 
+# Custom dispatcher for precompressed (gz) static files
+class PrecompressedDispatcher(Dispatcher):
+    def __call__(self, path):
+        # print(path, self.find_handler(path))
+        z = Dispatcher.__call__(self, path)
+        return z
+
+
+class StaticDirGz(HandlerTool):
+    def __init__(self):
+        super().__init__(self._interloper) # TODO: change to partial
+    def _interloper(self, *args, **kwargs):
+        # print('==> Interloper! <==',args, kwargs)
+        if args: print('WARNING')   # TODO: handle presence of positional args
+        localargs = {'section': '/', 'dir': './static'}
+        localargs.update(kwargs)
+        result = static.staticdir(**localargs)
+        # if false then try with gz suffix
+        if not result:
+            path_info = cherrypy.serving.request.path_info
+            if path_info.endswith('/'):
+                # match / to /index.htmlgz and guess mime on index.html.gz
+                virtual_path = localargs['index']+'.gz'
+                localargs['index'] += 'gz'
+            else:
+                # match file.extgz against statics and guess mime on file.ext.gz
+                virtual_path = path_info+'.gz'
+                cherrypy.serving.request.path_info = path_info+'gz' 
+
+            result = static.staticdir(**localargs)
+            if result:
+                # fixup headers using mimetypes standard module with '.gz'
+                ct, ce = mimetypes.guess_type(virtual_path)
+                cherrypy.serving.response.headers['Content-Type'] = ct
+                cherrypy.serving.response.headers['Content-Encoding'] = ce
+            # restore request.path_info
+            cherrypy.serving.request.path_info = path_info
+        return result
+
+# instantiate custom tool
+cherrypy.tools.staticdirgz = StaticDirGz()
+
+
 def main(config_file: Path):
 
     # load global defaults
@@ -249,7 +296,7 @@ def main(config_file: Path):
         cherrypy.log('Using live meter at {} for missing cgi'.format(
             app.config['device']['ipaddress']))
 
-    resource_path = config_file.absolute().parent/app.config['device']['source']
+    resource_path = config_file.absolute().parent/'web_pages'/app.config['device']['source']
     if resource_path.exists():
         cherrypy.log('Serving WEB from {}'.format(resource_path.as_posix()))
     else:
@@ -268,23 +315,19 @@ def main(config_file: Path):
             'json': resource_path/'json'
         },
         '/': {
+            'request.dispatch': PrecompressedDispatcher(),
             'tools.sessions.on': True,
             'tools.response_headers.on': True,
             'tools.response_headers.headers': [('Server','Bitronics')],
-            'tools.staticdir.on': True,
-            'tools.staticdir.root': resource_path,
-            'tools.staticdir.dir': './web_pages',
-            'tools.staticdir.index': 'index.html'
-        },
-        '/stub.html': {
-            'tools.staticfile.on': True,
-            'tools.staticfile.root': cgi_path,
-            'tools.staticfile.filename': 'stub.html'
+            'tools.staticdirgz.on': True,
+            'tools.staticdirgz.root': resource_path,
+            'tools.staticdirgz.dir': './static',
+            'tools.staticdirgz.index': 'index.html',
         },
         '/favicon.ico': {
             'tools.staticfile.on': True,
             'tools.staticfile.root': resource_path,
-            'tools.staticfile.filename': './web_pages/favicon.ico'
+            'tools.staticfile.filename': '../favicon.ico'
         }
     }
     # load application configuration
@@ -321,7 +364,7 @@ def cli():
             # search for file relative to virtual environment
             try:
                 env = Path(os.environ['VIRTUAL_ENV']).parent
-                conf = env/'mockmeter/resources'/conf.name
+                conf = env/'mockmeter'/conf.name
             except KeyError:
                 # no virtual env defined, out of search locations
                 pass
@@ -332,4 +375,4 @@ def cli():
 
 if __name__ == '__main__':
     cli()
-    # main(config_file = Path.cwd()/'mockmeter/resources/app.conf')
+    # main(config_file = Path.cwd()/'mockmeter/app.conf')

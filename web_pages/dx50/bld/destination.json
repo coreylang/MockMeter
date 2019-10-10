@@ -1,3 +1,4 @@
 {
-    "tfs_data": "projects/bi/d650"
+    "tfs_data": "/projects/bi/d650",
+    "static": "../static"
 }

@@ -97,10 +97,17 @@ const srcglobs = (() => {
 })(); // example ['*', 'dx50/*', '!scaling.html', '!scaling.js']
 
 const destination = (()=>{
+    // preload return varaible with defaults
+    dests = {
+        tfs_data: origindir,
+        static: path.join(origindir,'web_pages_gulp') // TODO: make default '../static'?
+    }
     // expect destination.json in origindir
     try {
-        dests = JSON.parse(fs.readFileSync(path.join(origindir,"destination.json"), 'utf8'));
+        dests = Object.assign(dests,JSON.parse(fs.readFileSync(path.join(origindir,"destination.json"), 'utf8')));
+        // resolve user paths from origindir if relative, no effect if absolute
         console.log("target=>",dests);
+        for (x in dests) dests[x]=path.resolve(origindir, dests[x]);
         return dests;
     } catch (error) {
         console.log(chalk.bgRedBright("target=> ERROR: typically due to invoke location, check origin path"));
@@ -109,12 +116,13 @@ const destination = (()=>{
     }
 })();
 
+
 // assume origindir is $(proj)/web_pages/mx50/bld
 // path.dirname acts as a cheap 'cd ..'
 // setting srcdir to $(proj)/web_pages
 const srcdir= path.dirname(path.dirname(origindir));
-const blddir= path.join(origindir,'web_pages_gulp');
-const target_file=path.join(origindir,'tfs_data.c');
+const blddir= destination.static;
+const tfsdir= destination.tfs_data;
 const rev_file=path.join(origindir,'rev.json');
 const manifest_file=path.join(origindir,'manifest.json');
 
@@ -131,14 +139,16 @@ function defaultTask(cb) {
 }
 
 function clean(cb) {
+    // force:true option required if outside of node's cwd
     del(rev_file);
     del(manifest_file);
-    del(target_file);
-    del(blddir+'/*', cb);
+    del(tfsdir+'/tfs_data.[ch]', {force: true});
+    // console.log('delete -> ',blddir);
+    del(blddir+'/*',  cb);
 }
 
 function callMktfs(cb) {
-    return execFile('/projects/mqx/tools/mktfs.exe',[blddir, target_file], cb)
+    return execFile('/projects/mqx/tools/mktfs.exe',[blddir, path.join(tfsdir,'tfs_data.c')], cb)
 }
 
 function createManifest() {
@@ -173,7 +183,8 @@ const handlebarOpts = {
 };
 
 function hbsManifest() {
-    // apply manifest.json context to templates/*.hbs and save as origindir/*
+    // apply manifest.json context to templates/*.hbs and 
+    // save to either tfsdir/* or save as origindir/*
     try {
         manifest = JSON.parse(fs.readFileSync(manifest_file, 'utf8'));
     } catch (error) {
@@ -183,7 +194,7 @@ function hbsManifest() {
     .pipe(size({title: 'templating', showFiles: verbose, showTotal: false}))
     .pipe(handlebars(manifest, handlebarOpts))
     .pipe(rename( (path) => path.extname='' ))
-    .pipe(dest(origindir))
+    .pipe(gulpif(['tfs_data.h'], dest(tfsdir), dest(origindir)))
     ;
 };
 

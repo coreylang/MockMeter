@@ -147,3 +147,4 @@ resources/dx50/json/*.json
 
 # firmware specific
 web_pages_*/
+web_pages/*/static/
