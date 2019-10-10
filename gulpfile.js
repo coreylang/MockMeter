@@ -144,7 +144,8 @@ function clean(cb) {
     del(manifest_file);
     del(tfsdir+'/tfs_data.[ch]', {force: true});
     // console.log('delete -> ',blddir);
-    del(blddir+'/*',  cb);
+    process.chdir(srcdir);  // del doesn't seem to accept option={cwd:srcdir}
+    del(blddir+'/*', cb);
 }
 
 function callMktfs(cb) {
@@ -297,7 +298,9 @@ function build_custom(){
 }
 
 function watch_web(cb) {
-    watch(srcdir+'*', build_release())
+    watch(srcglobs, {cwd:srcdir, depth:0, queue:true}, series(build_release(),
+        cb => { console.log('=== Build complete for ',srcglobs,' ===' ); cb(); } 
+    ))
 }
 
 exports.default = series(defaultTask, watch_web);
