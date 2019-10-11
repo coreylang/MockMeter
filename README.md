@@ -18,10 +18,14 @@ pip, and git are installed on the system, then pip's [VCS support](https://pip.p
 will insure that the required library dependencies are resolved.  Use the following
 commands in a new directory.
 
+> TODO: check and revise shell commands, update directory layout
+
 ```shell
 python -m venv venv
-venv\scripts\activate
+venv/scripts/activate
 pip install -e git+https://github.com/bitronics-llc/MockMeter#egg=mockmeter --src .
+cd mockmeter
+npm install
 ```
 
 Using the '.' for the src parameter will resulting in the following disk layout.

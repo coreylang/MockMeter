@@ -35,8 +35,8 @@ Assume directory layout
 ## .git
 ## .vscode
 ## ...
+## mockmeter <--(python web server)
 ## node_modules
-## resources
 ## web_pages <--(common static files, becomes `srcdir`)
 ### dx50 <-- (model static files, overrides)
 #### scaling.html
@@ -44,17 +44,20 @@ Assume directory layout
 #### bld <-- (becomes `origindir`)
 ##### destination.json
 ##### gulpfile.js <-- (launch file)
-##### web_pages_cache
+#### static
+#### cgi
 ### mx50
 #### bld
 ##### destination.json
 ##### gulpfile.js
-##### web_pages_cache
+#### static
+#### cgi
 ### mx60
 #### bld
 ##### destination.json
 ##### gulpfile.js
-##### web_pages_cache
+#### static
+#### cgi
 ### index.html
 ### site.css
 ### ...
@@ -299,7 +302,7 @@ function build_custom(){
 
 function watch_web(cb) {
     watch(srcglobs, {cwd:srcdir, depth:0, queue:true}, series(build_release(),
-        cb => { console.log('=== Build complete for ',srcglobs,' ===' ); cb(); } 
+        cb => { console.log('=== Build complete for',srcglobs,'===' ); cb(); } 
     ))
 }
 
@@ -312,7 +315,7 @@ exports.clean = clean;
 exports.build.description = 'production build';
 exports.debug.description = 'debug build with only compression';
 exports.custom.description = 'glob exclusion from cache busting and minification';
-exports.custom.flags = {'--exclude': 'comma seperated globs to exclude '};
+exports.custom.flags = {'--exclude': 'comma separated globs to exclude '};
 exports.default.flags = {
     '--verbose': 'enables some file listings in optioned_build()',
     '--silent': 'disables most messages in optioned_build()'
