@@ -222,7 +222,7 @@ function buildit(doBust=true, doMini=true, doGzip=true, globHammerTime=['']) {
             .pipe(size({title: chalk.inverse('initial size for'), showFiles: false}))
 
             // cache busting
-            .pipe(gulpif(doBust, gulpif(['*', '!mb*.js', '!dnp*.js'].concat(globHammerTime), 
+            .pipe(gulpif(doBust, gulpif(['*', '!mb*.js', '!dnp*.js'],
                 RevAll.revision({
                     debug: false,
                     // includeFilesInManifest: ['*.*'], // oddly doesn't accept wildcards
@@ -314,7 +314,7 @@ exports.clean = clean;
 
 exports.build.description = 'production build';
 exports.debug.description = 'debug build with only compression';
-exports.custom.description = 'glob exclusion from cache busting and minification';
+exports.custom.description = 'specify file exclusions from minification';
 exports.custom.flags = {'--exclude': 'comma separated globs to exclude '};
 exports.default.flags = {
     '--verbose': 'enables some file listings in optioned_build()',
