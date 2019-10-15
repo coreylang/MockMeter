@@ -232,7 +232,7 @@ class PrecompressedDispatcher(Dispatcher):
 
 class StaticDirGz(HandlerTool):
     def __init__(self):
-        super().__init__(self._interloper) # TODO: change to partial
+        super().__init__(self._interloper)
     def _interloper(self, *args, **kwargs):
         # print('==> Interloper! <==',args, kwargs)
         if args: print('WARNING')   # TODO: handle presence of positional args
