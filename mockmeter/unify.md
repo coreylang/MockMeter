@@ -34,6 +34,7 @@ If it's transferred by the library build, then this isn't any different even if
 ### General
 
 - needs mechanism to define and include disjoint sets of files
+- consider making index.html not cacheable
 
 ### Mx50 vs Mx60
 
