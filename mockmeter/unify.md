@@ -10,10 +10,15 @@ Research into viability of consolidating all three (Mx50, Dx50, Mx60) of the web
  for the firmware, so we will only need to transfer or import the `tfs_data.h`
  and `tfs_data.c` files.  Optionally, may want to also transfer `manifest.json`.
 
-The gulp build process can use the existing mockmeter folder structure:  
-`resources/dx50/web_pages`  
-`resources/mx50/web_pages`  
-`resources/mx60/web_pages`  
+The gulp build process will use the following folder structure within mockmeter:  
+`web_pages/dx50/bld`  
+`web_pages/mx50/bld`  
+`web_pages/mx60/bld`  
+
+Within each `bld` folder, a destination.json file defines where to copy the
+ processed static files and the tfs_data files.  The former are for use by mockmeter
+ and latter for the firmware.  The `web_pages` folder holds files common to all
+ builds, while the subfolders hold product specific files.
 
 > Should we rename web_pages to static or assets?
 
