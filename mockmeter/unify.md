@@ -20,11 +20,9 @@ Within each `bld` folder, a destination.json file defines where to copy the
  and latter for the firmware.  The `web_pages` folder holds files common to all
  builds, while the subfolders hold product specific files.
 
-> Should we rename web_pages to static or assets?
-
-In any case, using the structure will preserve using the mockmeter config file.
- The remaining question is how to transfer the tfs_data files to the firmware
- folders?
+In the conf file, setting [device]/devmode True will change the mock server to
+ use the unprocessed files.  This allows in place editing for convenience during
+ web development.
 
 > When does `rtcs.a` get transferred from mqx to our projects?
 

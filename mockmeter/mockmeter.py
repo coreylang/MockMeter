@@ -224,6 +224,7 @@ class StaticsApp(object):
 
 # Custom dispatcher for precompressed (gz) static files
 class PrecompressedDispatcher(Dispatcher):
+    """ not currently used """
     def __call__(self, path):
         # print(path, self.find_handler(path))
         z = Dispatcher.__call__(self, path)
@@ -261,8 +262,24 @@ class StaticDirGz(HandlerTool):
             cherrypy.serving.request.path_info = path_info
         return result
 
-# instantiate custom tool
-cherrypy.tools.staticdirgz = StaticDirGz()
+class StaticDevMode(HandlerTool):
+    def __init__(self):
+        super().__init__(self._interloper)
+    def _interloper(self, *args, **kwargs):
+        # print('==> Interloper! <==',args, kwargs)
+        if args: print('WARNING')   # TODO: handle presence of positional args
+        localargs = {'section': '/', 'dir': ''}
+        localargs.update(kwargs)
+        result = static.staticdir(**localargs)
+        # if false then try parent dir
+        if not result:
+            localargs['root'] = localargs['root'].parent
+            result = static.staticdir(**localargs)
+        return result
+
+# instantiate custom tools
+cherrypy.tools.staticdirgz   = StaticDirGz()
+cherrypy.tools.staticdevmode = StaticDevMode()
 
 
 def main(config_file: Path):
@@ -309,6 +326,11 @@ def main(config_file: Path):
         raise NotADirectoryError(cgi_path.as_posix()+
             "\nIf attempting to capture new cgi data, directory must already exist")
 
+    try:
+        devmode = app.config['device']['devmode']
+    except KeyError:
+        devmode = False
+
     config_dict = {
         'path': {
             'cgi': cgi_path,
@@ -319,10 +341,12 @@ def main(config_file: Path):
             'tools.sessions.on': True,
             'tools.response_headers.on': True,
             'tools.response_headers.headers': [('Server','Bitronics')],
-            'tools.staticdirgz.on': True,
+            'tools.staticdirgz.on': not devmode,
             'tools.staticdirgz.root': resource_path,
-            'tools.staticdirgz.dir': './static',
             'tools.staticdirgz.index': 'index.html',
+            'tools.staticdevmode.on': devmode,
+            'tools.staticdevmode.root': resource_path,
+            'tools.staticdevmode.index': 'index.html',
         },
         '/favicon.ico': {
             'tools.staticfile.on': True,
