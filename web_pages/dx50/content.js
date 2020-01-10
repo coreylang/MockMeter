@@ -1,6 +1,8 @@
 var pg = {};
 
-pg.hdr = '<div id="Header"><div id="Left"><img src="header_logo.png"></div><div id="Right"></div></div>' +
+pg.hdr = '<div id="Header"><div id="Left">' +
+	'<a href="/"><img src="header_logo.png"></a>' +
+	'</div><div id="Right"></div></div>' +
     '<div id="Navigation">' +
 		'<ul id="mainNav">' +
 			'<li><a href="index.html"><span>Home</span></a></li>' +
