@@ -230,12 +230,18 @@ class PrecompressedDispatcher(Dispatcher):
         z = Dispatcher.__call__(self, path)
         return z
 
+def dont_cache_root(root_index):
+    path_info = cherrypy.serving.request.path_info
+    if path_info.endswith('/') or path_info.endswith(root_index):
+        cherrypy.serving.response.headers['Cache-control'] = 'no-store'
+        # print('==> dont_cache_root <==')
 
 class StaticDirGz(HandlerTool):
     def __init__(self):
         super().__init__(self._interloper)
     def _interloper(self, *args, **kwargs):
         # print('==> Interloper! <==',args, kwargs)
+        dont_cache_root(kwargs['index'])
         if args: print('WARNING')   # TODO: handle presence of positional args
         localargs = {'section': '/', 'dir': './static'}
         localargs.update(kwargs)
@@ -267,6 +273,7 @@ class StaticDevMode(HandlerTool):
         super().__init__(self._interloper)
     def _interloper(self, *args, **kwargs):
         # print('==> Interloper! <==',args, kwargs)
+        dont_cache_root(kwargs['index'])
         if args: print('WARNING')   # TODO: handle presence of positional args
         localargs = {'section': '/', 'dir': ''}
         localargs.update(kwargs)
