@@ -39,6 +39,23 @@ If it's transferred by the library build, then this isn't any different even if
 - needs mechanism to define and include disjoint sets of files
 - consider making index.html not cacheable
 
+### Handling root index for firmware updates
+
+- Change to serve root and index with header  `'Cache-control' = 'no-store'`.
+  Done for mock and D650 firmware (`httpd_supp.c`).  Need for Mx50, Mx60.
+- Added a version parameter to page redirects occuring on reboot.  (`cgi_web.c`)
+  The effect is redundant to disabling caching above.
+- Increased wait time on firmware reboot to 20 secs (`cgi_web.c`)
+- Added an alias for `index1.html` to asset revisioned name. (`RTCS.C`)
+- D650 logo banner is now clickable for root.  Add this to other products (`content.js`)
+
+The combination of the above should quickly get the web client back on the correct
+ set of files under any circumstances.  Typical scenario is a firmware update where
+ the page redirect on reboot should suffice.  More challenging is a 'meter swap'
+ at the same IP.  Clicking the banner, the web page home tab, or browser refresh
+ will load the right files.  However, an upgrade from firmware without these changes
+ to firmware with the changes will require the user to do a browser refresh.
+
 ### Mx50 vs Mx60
 
 - `auth.html`
