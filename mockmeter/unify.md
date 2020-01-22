@@ -1,9 +1,40 @@
-# Unify branch notes
+# Development Notes
+
+## Asset Revisioning
+
+The default behaviour for gulp-revall may incorrectly replace text with revisioned
+ names. See <https://github.com/smysnk/gulp-rev-all#annotater--replacer>.  In
+ general this is seen when a quoted string happens to match the name of a
+ javascript asset without the extension.  The intended use case appears to be
+ with module loaders such as RequiresJS and CommonJS, neither of which we use.
+
+Some specific occurrences found in our application:
+
+- Reference to "load", "content", "data" in `jquery.min.js`
+- Reference to "content" in `output.html`, unnecessary and probably harmless
+- Reference to "protocol" in `protocol.js`
+- Reference to "protocol" in `protocol1.html`, two wrongs make a right with above
+- Reference to "scaling" in `scaling.html`, breaks restore defaults
+
+As a remedy, we'll specify a replacer function that alters the behavior of the
+ case where the reference is a JS file but the regex is only looking for the
+ quoted filename without extension.  The change forces inclusion of the extension
+ and will likely break the original use case mentioned above.  The regex in
+ question is of the form `/('|")(filename)()('|"|$)/g`.
+
+### Alternative Revision Naming
+
+Consider using the transformFilename option to add the hash as a url parameter.
+ For instance, `filename.ext?hash=12345678` instead of `filename.12345678.ext`.
+ It reduces or eliminates the need for the manifest for firmware, and allows
+ typing urls into the browser.
+
+## Unify branch notes
 
 Research into viability of consolidating all three (Mx50, Dx50, Mx60) of the web
  page source code folders into one.  Expecting to use gulp.js for automation.
 
-## Workflow
+### Workflow
 
 (wip) Edit html and js files in the mockmeter repository.  Package with gulp and
  serve up with CherryPy for testing.  We will treat the 'web app' as a library
@@ -32,13 +63,6 @@ If it's transferred by the library build, then this isn't any different even if
 
 > Build all three at once or have option to specifiy via cli arg or config?
 
-## Comparisons
-
-### General
-
-- needs mechanism to define and include disjoint sets of files
-- consider making index.html not cacheable
-
 ### Handling root index for firmware updates
 
 - Change to serve root and index with header  `'Cache-control' = 'no-store'`.
@@ -56,7 +80,14 @@ The combination of the above should quickly get the web client back on the corre
  will load the right files.  However, an upgrade from firmware without these changes
  to firmware with the changes will require the user to do a browser refresh.
 
-### Mx50 vs Mx60
+### Comparisons
+
+#### General
+
+- needs mechanism to define and include disjoint sets of files
+- consider making index.html not cacheable
+
+#### Mx50 vs Mx60
 
 - `auth.html`
   - Mx50 adds a radio button for a third lock option.  Need to migrate

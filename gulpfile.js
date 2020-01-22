@@ -202,6 +202,14 @@ function hbsManifest() {
     ;
 };
 
+function replacer (fragment, replaceRegExp, newReference, referencedFile){
+    if (!referencedFile.path.match(/.js$/) || replaceRegExp.toString().includes('.js')) {
+        fragment.contents = fragment.contents.replace(replaceRegExp, '$1' + newReference + '$3$4');
+    } else {
+        // console.log(chalk.redBright('Skip replacing ==> '+replaceRegExp));
+    }
+};
+
 function buildit(doBust=true, doMini=true, doGzip=true, globHammerTime=['']) {
 
     // negate the globs that we can't touch
@@ -226,10 +234,13 @@ function buildit(doBust=true, doMini=true, doGzip=true, globHammerTime=['']) {
                 RevAll.revision({
                     debug: false,
                     // includeFilesInManifest: ['*.*'], // oddly doesn't accept wildcards
+                    // TODO: see if handles regexp directly, e.g. something like [/*.*/g]
                     fileNameManifest: rev_file,
                     includeFilesInManifest: ['.css', '.gif', '.html', '.ico', '.js', '.json', '.png', '.woff2'],
                     dontRenameFile:      ["index.html"],
-                    dontUpdateReference: ["index.html"]
+                    dontUpdateReference: ["index.html"],
+                    dontSearchFile:      [".min.js"],  
+                    replacer: replacer
                 }),
                 size({title:'not busting', showFiles: verbose, showTotal: !verbose && !silent})
             )))
@@ -287,7 +298,7 @@ function build_release(){
 }
 
 function build_debug(){
-    return series(clean, buildit(false, false), createManifest, parallel(hbsManifest, callMktfs));
+    return series(clean, buildit(true, false, false), createManifest, parallel(hbsManifest, callMktfs));
 }
 
 function build_custom(){
@@ -301,7 +312,7 @@ function build_custom(){
 }
 
 function watch_web(cb) {
-    watch(srcglobs, {cwd:srcdir, depth:0, queue:true}, series(build_release(),
+    watch(srcglobs, {cwd:srcdir, depth:1, queue:true}, series(build_release(),
         cb => { console.log('=== Build complete for',srcglobs,'===' ); cb(); } 
     ))
 }
