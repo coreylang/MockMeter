@@ -6,7 +6,8 @@
   "scripts": {
     "web-build-all": "gulp build --f web_pages/dx50/bld/gulpfile.js & gulp build --f web_pages/mx50/bld/gulpfile.js & gulp build --f web_pages/mx60/bld/gulpfile.js",
     "web-clean-all": "echo not implemented",
-    "gulp_debug": "gulp build --inspect-brk=9229 --f web_pages/dx50/bld/gulpfile.js"
+    "gulp_debug": "gulp build --inspect-brk=9229 --f web_pages/dx50/bld/gulpfile.js",
+    "test": "jasmine"
   },
   "author": "",
   "license": "ISC",
@@ -22,7 +23,8 @@
     "gulp-rename": "^1.4.0",
     "gulp-rev-all": "^2.0.2",
     "gulp-size": "^3.0.0",
-    "gulp-terser": "^1.2.0"
+    "gulp-terser": "^1.2.0",
+    "jasmine": "^3.5.0"
   },
   "dependencies": {}
 }

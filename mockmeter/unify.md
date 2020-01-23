@@ -1,5 +1,46 @@
 # Development Notes
 
+## Shareable JS modules
+
+To use a JS file in both a browser/client and Node.js, the following recipe
+ handles the requires/exports inconsistency.  The initial motivation for using
+ our client side JS files in Node is for unit testing.  In the future, a more
+ feature rich app based on Node or Electron would also need this facility.  See
+ <https://code-maven.com/javascript-module-to-run-in-browser-and-in-node>
+
+The protected and safe implementation can be referenced via Calc.add(), Calc.div(),
+ etc:
+
+```javascript
+(function(){
+    "use strict";
+    this.Calc = function () {
+        return Object.freeze({
+            add: function(x, y) { return x + y; },
+            div: function(x, y) { return x / y; },
+            version: 0.01,
+        });
+    }();
+}).call(this);
+```
+
+Similarly, the simplified implementation makes add() and div() available directly:
+
+```javascript
+(function(){
+    this.add = function(x, y) { return x + y; },
+    this.div = function(x, y) { return x / y; },
+    this.ver = 0.01,
+}).call(this);
+```
+
+### Unit testing JS
+
+Would prefer to use QUnit as the syntax is similar to Python's unittest and Java's
+ junit, but there isn't a decent Visual Code extenstion for it.  However, it's
+ in-browser support is pretty substantial so it may be worth another look. Of the
+ alternatives, Jasmine had the least external dependencies.
+
 ## Asset Revisioning
 
 The default behaviour for gulp-revall may incorrectly replace text with revisioned
