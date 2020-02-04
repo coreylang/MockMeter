@@ -123,7 +123,7 @@ input{
 			<th ROWSPAN=2 class="label2 color-p1" style="text-align: center">Display</th>
 			<th ROWSPAN=2 class="label2 color-p2" style="text-align: center">Poll</th>
 			<th ROWSPAN=2 class="label2 color-p2" style="text-align: center">Display</th>
-			<th><button onclick="addFieldScaling();">Insert Row</button></th>
+			<th><button onclick="addFieldScaling();">Add Scaling</button></th>
 		</tr>
 	</thead>
 	<tbody id="tablebodyScalings"></tbody>
@@ -150,7 +150,8 @@ input{
 			<th class="label2">Scaling</th>
 			<th class="label2">Phase</th>
 			<th class="label2">Modifier</th>
-			<th><button onclick="addFieldMeasurement();">Insert Row</button></th>
+			<th class="label2">Rows</th>
+			<th><button onclick="addFieldMeasurement();">Add Measurement</button></th>
 		</tr>
 	</thead>
 	<tbody id="tablebodyMeasurements"></tbody>
@@ -160,6 +161,7 @@ input{
 			<td>enter name</td>
 			<td>select scaling method</td>
 			<td COLSPAN=2>select optional LEDs to illuminate</td>
+			<td>select row span</td>
 		</tr>
 	</tfoot>
 
@@ -255,7 +257,8 @@ function onReaderLoad(event){
 						nm: sct,
 						scl: obj.measurements[sct][0],
 						phs: obj.measurements[sct][1],
-						nxa: obj.measurements[sct][2]
+						nxa: obj.measurements[sct][2],
+						row: obj.measurements[sct][3]
 					}
 					measureFormat.push(everyObject);
 					//console.log(obj.scalings[scl][0][0]);
@@ -364,7 +367,7 @@ function specialFormat(){
 		//console.log(slpoff_from_points(scr.flexscaling));
 		//msrmnt.push(scr.measurement);
 		msrmnt[scr.measurement.nm] = [];
-		msrmnt[scr.measurement.nm].push(scr.measurement.scl, scr.measurement.phs, scr.measurement.nxa);
+		msrmnt[scr.measurement.nm].push(scr.measurement.scl, scr.measurement.phs, scr.measurement.nxa, scr.measurement.row);
 	}
 	
 	obj.measurements = msrmnt;
@@ -441,7 +444,7 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
 
 			var deleteRowBox = document.createElement("input");
 			deleteRowBox.setAttribute("type", "button");
-			deleteRowBox.setAttribute("value", "Delete Row");
+			deleteRowBox.setAttribute("value", "Delete");
 			deleteRowBox.setAttribute("onclick", "SomeDeleteRowFunction(this);");
 			deleteRowBox.setAttribute("class", "button");
 			deleteRowBox.setAttribute("style", "width: 85px !important;");
@@ -522,17 +525,22 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
 			modifier.setAttribute('style', 'width: 100%');  
 			fillSelect(modifier, ["none", "min", "max", "avg"]);
 
+			var disprows = document.createElement("select");
+			disprows.setAttribute("name", "row");
+			disprows.setAttribute('class', "row");
+			disprows.setAttribute('style', 'width: 100%');  
+			fillSelect(disprows, ["one", "two", "three"]);
 
 			var deleteRowBox = document.createElement("input");
 			deleteRowBox.setAttribute("type", "button");
-			deleteRowBox.setAttribute("value", "Delete Row");
+			deleteRowBox.setAttribute("value", "Delete");
 			deleteRowBox.setAttribute("onclick", "SomeDeleteRowFunction(this);");
 			deleteRowBox.setAttribute("class", "button");
 			deleteRowBox.setAttribute("style", "width: 85px !important;");
 			
 
 			currentRow.setAttribute("measurement", true);
-			currentRow.measurement = {nm:"", scl:getNamesFromScaling()[0], phs:"none", nxa:"none"}
+			currentRow.measurement = {nm:"", scl:getNamesFromScaling()[0], phs:"none", nxa:"none", row:1}
 			
 			var currentCell = currentRow.insertCell(-1);
 			name.onblur = update_measurement_onblur(currentRow);
@@ -550,6 +558,10 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
 			modifier.onblur = update_measurement_onblur(currentRow);
 			currentCell.appendChild(modifier);
 
+			currentCell = currentRow.insertCell(-1);
+			disprows.onblur = update_measurement_onblur(currentRow);
+			currentCell.appendChild(disprows);
+			
 			currentCell = currentRow.insertCell(-1);
 			currentCell.appendChild(deleteRowBox);
 
@@ -643,7 +655,7 @@ function parse_vars(data, source) {
 					
 			var deleteButton = document.createElement("input");
 			deleteButton.setAttribute("type", "button");
-			deleteButton.setAttribute("value", "Delete Row");
+			deleteButton.setAttribute("value", "Delete");
 			deleteButton.setAttribute("onclick", "SomeDeleteRowFunction(this);");
 			deleteButton.setAttribute("class", "button");
 			deleteButton.setAttribute("style", "width: 85px !important; padding.right: 10px;");
@@ -706,6 +718,7 @@ function parse_vars(data, source) {
 		sr.appendChild(innerSelect(sr, "scl", getNamesFromScaling())); //***********list of scalings
 		sr.appendChild(innerSelect(sr, "phs", ["none", "A", "B", "C", "AB", "BC", "CA"]));
 		sr.appendChild(innerSelect(sr, "nxa", ["none", "min", "max", "avg"]));
+		sr.appendChild(innerSelect(sr, "row", ["one", "two", "three"]));
 		
 		
 		
@@ -713,7 +726,7 @@ function parse_vars(data, source) {
 					
 			var deleteButton = document.createElement("input");
 			deleteButton.setAttribute("type", "button");
-			deleteButton.setAttribute("value", "Delete Row");
+			deleteButton.setAttribute("value", "Delete");
 			deleteButton.setAttribute("onclick", "SomeDeleteRowFunction(this);");
 			deleteButton.setAttribute("class", "button");
 			deleteButton.setAttribute("style", "width: 85px !important; padding.right: 10px;");

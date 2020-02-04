@@ -37,12 +37,13 @@
             "additionalProperties": {
                 "title": "Measurement Name",
                 "type": "array",
-                "maxItems": 3,
+                "maxItems": 4,
                 "minItems": 1,
                 "items": [
                     {"type": "string", "title": "Scaling Name", "description": "Enter a name from the defined scalings."},
                     {"enum": ["none", "A", "B", "C", "AB", "BC", "CA", null], "title": "Phase LED", "default": "none"},
-                    {"enum": ["none", "min", "max", "avg", null], "title": "Min/Max/Avg LED", "default": "none"}
+                    {"enum": ["none", "min", "max", "avg", null], "title": "Min/Max/Avg LED", "default": "none"},
+                    {"enum": ["one", "two", "three", null], "title": "Number of display rows", "default": "one"}
                 ]
             }
         }
