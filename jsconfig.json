@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+      "module": "commonjs",
+      "target": "es6"
+    },
+    "include": ["web_pages/*", "web_pages/**"],
+    "exclude": ["**/bld/*", "**/cgi/*", "**/bld/json", "**/static/*"]
+}
