@@ -45,6 +45,13 @@ this.slpoff_from_points = function (points) {
 		xfr.min = x2;
 		xfr.max = x1;
 	}
+
+	// determine type
+	if ((xfr.max > 65335) || (xfr.min < -65535)) {
+		xfr.typ = "i32";
+	} else {
+		xfr.typ = "i16"
+	}
 	return xfr;
 }
 

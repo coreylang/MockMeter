@@ -417,25 +417,25 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
 			
 			var p1poll = document.createElement("input");
 			p1poll.setAttribute("name", "x1");
-			p1poll.setAttribute('maxlength', 6);
+			p1poll.setAttribute('maxlength', 12);
 			p1poll.setAttribute('class', 'point-input');
 			p1poll.setAttribute('placeholder', '0');
 			
 			var p1show = document.createElement("input");
 			p1show.setAttribute("name", "y1");
-			p1show.setAttribute('maxlength', 6);
+			p1show.setAttribute('maxlength', 12);
 			p1show.setAttribute('class', 'point-input seven-seg');
 			p1show.setAttribute('placeholder','0.0');
 			
 			var p2poll = document.createElement("input");
 			p2poll.setAttribute("name", "x2");
-			p2poll.setAttribute('maxlength', 6);
+			p2poll.setAttribute('maxlength', 12);
 			p2poll.setAttribute('class', 'point-input');
 			p2poll.setAttribute('placeholder', '1000');
 			
 			var p2show = document.createElement("input");
 			p2show.setAttribute("name", "y2");
-			p2show.setAttribute('maxlength', 6);
+			p2show.setAttribute('maxlength', 12);
 			p2show.setAttribute('class', 'point-input seven-seg');
 			p2show.setAttribute('placeholder','212.0');
 	  
@@ -645,10 +645,10 @@ function parse_vars(data, source) {
 		sr.setAttribute('flexscaling', true);   // for queryselect
 		sr.flexscaling = pts;
 		sr.appendChild(inner(sr, "nm", 31));
-		sr.appendChild(inner(sr, "x1", 6, "color-p1", "point-input"));
-		sr.appendChild(inner(sr, "y1", 6, "color-p1", "point-input seven-seg"));
-		sr.appendChild(inner(sr, "x2", 6, "color-p2", "point-input"));
-		sr.appendChild(inner(sr, "y2", 6, "color-p2", "point-input seven-seg"));
+		sr.appendChild(inner(sr, "x1", 12, "color-p1", "point-input"));
+		sr.appendChild(inner(sr, "y1", 12, "color-p1", "point-input seven-seg"));
+		sr.appendChild(inner(sr, "x2", 12, "color-p2", "point-input"));
+		sr.appendChild(inner(sr, "y2", 12, "color-p2", "point-input seven-seg"));
 		
 		
 		//Delete button

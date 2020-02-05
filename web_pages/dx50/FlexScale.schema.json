@@ -23,7 +23,7 @@
                     "maxItems": 2,
                         "items": [
                         {"type": "number", "title": "Polled Value"},
-                        {"type": "string", "maxLength": 6, "title": "Displayed Value"}
+                        {"type": "string", "maxLength": 12, "title": "Displayed Value"}
                     ]
                 }
             }
