@@ -49,6 +49,7 @@ this.slpoff_from_points = function (points) {
 	// determine type
 	if ((xfr.max > 65335) || (xfr.min < -65535)) {
 		xfr.typ = "i32";
+		xfr.slp *= Math.pow(10, xfr.dec);
 	} else {
 		xfr.typ = "i16"
 	}
@@ -58,6 +59,7 @@ this.slpoff_from_points = function (points) {
 // Convert JSON-parsed data from server to Scaling object
 this.points_from_slpoff = function (slpoff) {
 	var xfr = slpoff;
+	if (xfr.typ == "i32") xfr.slp /= Math.pow(10, xfr.dec);
 
 	x1 = xfr.min;
 	y1 = (x1 * xfr.slp + xfr.off).toFixed(xfr.dec);
