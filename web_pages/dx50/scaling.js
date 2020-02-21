@@ -24,6 +24,10 @@ this.slpoff_from_points = function (points) {
 			if (xfr.dec != dp_from_pt(points.y2)) {
 				throw "Decimal points do not match";
 			}
+			if (xfr.dec > 4) {
+				xfr.dec = 4
+				throw "Decimal points max is 4";
+			}
 	} catch (error) {
 			console.log(error);
 	}
