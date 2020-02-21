@@ -252,7 +252,7 @@ function onReaderLoad(event){
 				counter = 0;
 				for (var sct of measurementNames) {
 					
-					everyObject= 
+					everyObject= //TODO: rewrite
 					{
 						nm: sct,
 						scl: obj.measurements[sct][0],
@@ -260,6 +260,7 @@ function onReaderLoad(event){
 						nxa: obj.measurements[sct][2],
 						row: obj.measurements[sct][3]
 					}
+					if (everyObject.row === undefined) everyObject.row="one";
 					measureFormat.push(everyObject);
 					//console.log(obj.scalings[scl][0][0]);
 					//counter = counter+1;
@@ -529,7 +530,7 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
 			disprows.setAttribute("name", "row");
 			disprows.setAttribute('class', "row");
 			disprows.setAttribute('style', 'width: 100%');  
-			fillSelect(disprows, ["one", "two", "three"]);
+			fillSelect(disprows, ["one", "two"]);
 
 			var deleteRowBox = document.createElement("input");
 			deleteRowBox.setAttribute("type", "button");
@@ -540,7 +541,7 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
 			
 
 			currentRow.setAttribute("measurement", true);
-			currentRow.measurement = {nm:"", scl:getNamesFromScaling()[0], phs:"none", nxa:"none", row:1}
+			currentRow.measurement = {nm:"", scl:getNamesFromScaling()[0], phs:"none", nxa:"none", row:"one"}
 			
 			var currentCell = currentRow.insertCell(-1);
 			name.onblur = update_measurement_onblur(currentRow);
@@ -718,7 +719,7 @@ function parse_vars(data, source) {
 		sr.appendChild(innerSelect(sr, "scl", getNamesFromScaling())); //***********list of scalings
 		sr.appendChild(innerSelect(sr, "phs", ["none", "A", "B", "C", "AB", "BC", "CA"]));
 		sr.appendChild(innerSelect(sr, "nxa", ["none", "min", "max", "avg"]));
-		sr.appendChild(innerSelect(sr, "row", ["one", "two", "three"]));
+		sr.appendChild(innerSelect(sr, "row", ["one", "two"]));
 		
 		
 		
@@ -760,6 +761,7 @@ function parse_vars(data, source) {
 	var measurement_lst = JSON.parse(data).measurements;	
 	
 	for (scl of measurement_lst) {
+			if (!("row" in scl)) scl["row"] = "one";
 			tb.appendChild(createMeasurementRow(scl));	
 	}
 }
