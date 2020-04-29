@@ -13,6 +13,12 @@ collection of responses from differently optioned Mx50's.
 
 ## Installation
 
+### Setup development machine first time
+
+Will probably want `npm install --global gulp-cli`
+
+### Setup for each project
+
 Recommend installation into a clean Python virtual environment.  Assuming Python,
 pip, and git are installed on the system, then pip's [VCS support](https://pip.pypa.io/en/latest/reference/pip_install/#vcs-support) can be used.  This
 will insure that the required library dependencies are resolved.  Use the following
