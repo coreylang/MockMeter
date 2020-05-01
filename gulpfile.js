@@ -152,7 +152,13 @@ function clean(cb) {
 }
 
 function callMktfs(cb) {
-    return execFile('/projects/mqx/tools/mktfs.exe',[blddir, path.join(tfsdir,'tfs_data.c')], cb)
+    const mktfs_path = '/projects/mqx/tools/mktfs.exe'
+    if (fs.existsSync(mktfs_path)) {  // TODO: will sync cause a problem?
+        return execFile(mktfs_path, [blddir, path.join(tfsdir,'tfs_data.c')], cb)
+    } else {
+        console.log(chalk.redBright('ERROR: mktfs.exe not found'));
+        cb();
+    }
 }
 
 function createManifest() {
