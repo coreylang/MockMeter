@@ -224,58 +224,10 @@ function onReaderLoad(event){
 			
 			//getting json from file, parsing and validating it
 			obj = JSON.parse(event.target.result);
-
-
 			var valid = tv4.validate(obj, jsonSchema);
-
-
 			if(valid == true){ // file is valid
-			
-				//convert to scaling objects 
-				scalingNames = Object.getOwnPropertyNames(obj.scalings);
-				//console.log(scalingNames[0]);
-				
-				slpoff = [];
-				for (var scl of scalingNames) {
-					slpoff.push(slpoff_from_points(new Scaling(scl, [[obj.scalings[scl][0][0], obj.scalings[scl][0][1]], [obj.scalings[scl][1][0], obj.scalings[scl][1][1]]])));
-					//console.log(obj.scalings[scl][0][0]);
-				}
-				
-				obj.scalings = slpoff;
-				
-				
-				//same but with measurements
-				measurementNames = Object.getOwnPropertyNames(obj.measurements);
-				//console.log(measurementNames[0]);
-				
-				measureFormat = [];
-				counter = 0;
-				for (var sct of measurementNames) {
-					
-					everyObject= //TODO: rewrite
-					{
-						nm: sct,
-						scl: obj.measurements[sct][0],
-						phs: obj.measurements[sct][1],
-						nxa: obj.measurements[sct][2],
-						row: obj.measurements[sct][3]
-					}
-					if (everyObject.row === undefined) everyObject.row="one";
-					measureFormat.push(everyObject);
-					//console.log(obj.scalings[scl][0][0]);
-					//counter = counter+1;
-				}
-				
-				
-				obj.measurements = measureFormat;
-
-				
-				payload = JSON.stringify(obj);
-
 				//create tbody
-				parse_vars(payload);
-				
-				
+				parse_vars(firmware_json_from(event.target.result));
 			} else{
 				alert("Invalid Json file: "+tv4.error.message+" on "+tv4.error.dataPath);
 				console.log(tv4.error);
@@ -779,42 +731,11 @@ function serialize() {
 			jsonSchema = {};
 			jsonSchema = data;
 			
-			var valid = tv4.validate(specialFormat(), jsonSchema);
-
-
+			obj = specialFormat();
+			var valid = tv4.validate(obj, jsonSchema);
 			if(valid == true){ // file is valid
 			
-				
-				jsonData = {};
-	
-				// Build a list of each scaling row in the table
-				var scaling_tbl = id('scaling_tbl');
-				var scaling_lst = scaling_tbl.querySelectorAll("[flexscaling]");
-
-				// Convert the format of each scaling and serialize the list of scalings
-				scl = [];
-				for (scr of scaling_lst) {
-					//console.log(slpoff_from_points(scr.flexscaling));
-					scl.push(slpoff_from_points(scr.flexscaling));
-				}
-				
-				jsonData.scalings = scl;
-				
-				
-				
-				// Build a list of each measurement row in the table
-				var measurement_tbl = id('measurement_tbl');
-				var measurement_lst = measurement_tbl.querySelectorAll("[measurement]");
-
-				// Convert the format of each measurement and serialize the list of scalings
-				msrmnt = [];
-				for (scr of measurement_lst) {
-					//console.log(slpoff_from_points(scr.flexscaling));
-					msrmnt.push(scr.measurement);
-				}
-				
-				jsonData.measurements = msrmnt;
-				var payload = JSON.stringify(jsonData);
+				var payload = firmware_json_from(JSON.stringify(obj))
 
 				var formdata = new FormData();
 				formdata.append("flex", payload);

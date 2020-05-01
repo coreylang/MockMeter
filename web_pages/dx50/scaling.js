@@ -72,4 +72,40 @@ this.points_from_slpoff = function (slpoff) {
 
 	return new this.Scaling(xfr.nm, [[x1, y1], [x2, y2]]);
 }
+
+// Convert user JSON to backend JSON
+this.firmware_json_from = function (user_json) {
+	obj = JSON.parse(user_json);	// TODO: redundant parse in caller
+
+	//convert to scaling objects 
+	scalingNames = Object.getOwnPropertyNames(obj.scalings);
+
+	slpoff = [];
+	for (var scl of scalingNames) {
+		slpoff.push(this.slpoff_from_points(new this.Scaling(scl, [[obj.scalings[scl][0][0], obj.scalings[scl][0][1]], [obj.scalings[scl][1][0], obj.scalings[scl][1][1]]])));
+		//console.log(obj.scalings[scl][0][0]);
+	}
+	obj.scalings = slpoff;
+
+	//same but with measurements
+	measurementNames = Object.getOwnPropertyNames(obj.measurements);
+
+	measureFormat = [];
+	counter = 0;
+	for (var sct of measurementNames) {
+
+		everyObject = //TODO: rewrite
+		{
+			nm: sct,
+			scl: obj.measurements[sct][0],
+			phs: obj.measurements[sct][1],
+			nxa: obj.measurements[sct][2],
+			row: obj.measurements[sct][3]
+		}
+		if (everyObject.row === undefined) everyObject.row = "one";
+		measureFormat.push(everyObject);
+	}
+	obj.measurements = measureFormat;
+	return JSON.stringify(obj);
+}
 }).call(this);
