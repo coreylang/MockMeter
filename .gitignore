@@ -147,3 +147,5 @@ python_venv/*
 web_pages_*/
 web_pages/*/static/
 web_pages/*/json/*.json
+web_pages/*/bld/manifest.json
+web_pages/*/bld/rev.json
