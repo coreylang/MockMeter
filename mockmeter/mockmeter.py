@@ -105,7 +105,7 @@ class StaticsApp(object):
     `cgi_path`  location of captured CGI responses as a pathlib.Path object
 
     """
-    def _fetch_cgi_resource(self, payload: dict, fn_append: str = ''):
+    def _fetch_cgi_resource(self, payload: dict, fn_append: str = '', binary: bool = False):
         """ Return resource from disk if it exists, otherwise forward the request 
         to a physical meter.  Responses to forwarded requests are then captured
         as a local file for future use.  File names are resolved with the request
@@ -121,7 +121,7 @@ class StaticsApp(object):
             str(fn_append))
         ip = cherrypy.request.app.config['device']['ipaddress']
         if fn.exists():
-            return fn.open(mode='rb')
+            return fn.open(mode=('rb' if binary else 'rt'))
         elif ip:
             cherrypy.log('Will serve from live meter for {}'.format(fn))
             source = urlunsplit((cherrypy.request.scheme, ip,
@@ -154,12 +154,12 @@ class StaticsApp(object):
     def testerror(self):
         raise cherrypy.HTTPError(500)
 
-    @cherrypy.expose
+    @cherrypy.expose(['d650.cfg'])
     @cherrypy.tools.response_headers(headers=[('Content-Type','application/octet-stream')])
     @cherrypy.tools.allow(methods=['GET'])
     def m650_cfg(self, *args, **kwargs):
-        """ Handle m650.cfg with a Content-Type header """
-        return self._fetch_cgi_resource({'data':kwargs})
+        """ Handle d650.cfg, m650.cfg with a Content-Type header """
+        return self._fetch_cgi_resource({'data':kwargs}, binary=True)
 
     @cherrypy.expose(['modbus.cgi', 'dnp.cgi'])
     @cherrypy.tools.response_headers(headers=[('Content-Type','text/plain')])
@@ -207,8 +207,8 @@ class StaticsApp(object):
             return static_cgi
         else:
             cgi = cgi.splitlines()
-            cgi[0] = b'1' if states['pending_changes'] else b'0'
-            cgi = b'\n'.join(cgi)
+            cgi[0] = '1' if states['pending_changes'] else '0'
+            cgi = '\n'.join(cgi)
             return(cgi)
 
     @cherrypy.expose
