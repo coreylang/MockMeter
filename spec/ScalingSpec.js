@@ -3,12 +3,17 @@ describe("Scaling", function() {
     
     it("convert to slpoff from points", function() {
         result=s.slpoff_from_points( new s.Scaling("testname",[[0,"0.0"],[1,"1.0"]]) );
-        expect(result).toEqual({dec: 1, max: 1, min: 0, nm: "testname", off: 0, sgn: false, slp:1});
+        expect(result).toEqual({dec: 1, max: 1, min: 0, nm: "testname", off: 0, sgn: false, slp: 1, typ: "i16"});
     })
 
     it("convert to points from slpoff", function() {
         result = s.points_from_slpoff({dec: 1, max: 1, min: 0, nm: "testname", off: 0, sgn: false, slp:1})
         expect(result).toEqual(new s.Scaling("testname",[[0,"0.0"],[1,"1.0"]]));
+    })
+
+    it("detects 32-bit conversion necessary", function() {
+        result=s.slpoff_from_points( new s.Scaling("testname",[[0,"0.0"],[65536,"1.0"]]) );
+        expect(result.typ).toEqual("i32");
     })
 
     const test_points =  {
