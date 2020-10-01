@@ -718,6 +718,14 @@ function parse_vars(data, source) {
 	}
 }
 
+function validate(jsonData, jsonSchema) {
+	if (tv4.validate(jsonData, jsonSchema)) {
+		return true
+	} else {
+		throw "Invalid Json file: "+tv4.error.message+" on "+tv4.error.dataPath;
+	}
+}
+
 function serialize() {
 	
 
@@ -732,11 +740,17 @@ function serialize() {
 			jsonSchema = data;
 			
 			obj = specialFormat();
-			var valid = tv4.validate(obj, jsonSchema);
-			if(valid == true){ // file is valid
-			
+			try {
+				var valid = validate(obj, jsonSchema);
 				var payload = firmware_json_from(JSON.stringify(obj))
+			} catch (error) {
+				error += "\nFix and press Apply"
+				alert(error)
+				console.log(error)
+				valid = false
+			}
 
+			if(valid == true){ // file is valid
 				var formdata = new FormData();
 				formdata.append("flex", payload);
 
@@ -750,18 +764,8 @@ function serialize() {
 					}
 				};
 				xhr.send(formdata);
-				
-			} else{
-				alert("Invalid Json file: "+tv4.error.message+" on "+tv4.error.dataPath);
-				console.log(tv4.error);
 			}
-					
-
-			
 		})
-	
-	
-
 	}
 	
 

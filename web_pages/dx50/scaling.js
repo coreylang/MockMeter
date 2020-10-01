@@ -19,17 +19,13 @@ this.slpoff_from_points = function (points) {
 	}
 
 	// establish number of decimal places
-	try {
-			xfr.dec = dp_from_pt(points.y1);
-			if (xfr.dec != dp_from_pt(points.y2)) {
-				throw "Decimal points do not match";
-			}
-			if (xfr.dec > 4) {
-				xfr.dec = 4
-				throw "Decimal points max is 4";
-			}
-	} catch (error) {
-			console.log(error);
+	xfr.dec = dp_from_pt(points.y1);
+	if (xfr.dec != dp_from_pt(points.y2)) {
+		throw "Decimal points in Display for '"+xfr.nm+"' must match";
+	}
+	if (xfr.dec > 4) {
+		xfr.dec = 4
+		throw "Decimal points in Display for '"+xfr.nm+"' must <= 4 ";
 	}
 
 	x1 = Number(points.x1);
@@ -82,8 +78,10 @@ this.firmware_json_from = function (user_json) {
 
 	slpoff = [];
 	for (var scl of scalingNames) {
-		slpoff.push(this.slpoff_from_points(new this.Scaling(scl, [[obj.scalings[scl][0][0], obj.scalings[scl][0][1]], [obj.scalings[scl][1][0], obj.scalings[scl][1][1]]])));
-		//console.log(obj.scalings[scl][0][0]);
+		slpoff.push(this.slpoff_from_points(new this.Scaling(scl, [
+			[obj.scalings[scl][0][0], obj.scalings[scl][0][1]], 
+			[obj.scalings[scl][1][0], obj.scalings[scl][1][1]]
+		])));
 	}
 	obj.scalings = slpoff;
 
