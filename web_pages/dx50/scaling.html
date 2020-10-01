@@ -223,21 +223,18 @@ function onReaderLoad(event){
 			jsonSchema = data;
 			
 			//getting json from file, parsing and validating it
-			obj = JSON.parse(event.target.result);
-			var valid = tv4.validate(obj, jsonSchema);
-			if(valid == true){ // file is valid
-				//create tbody
+			try {
+				validate(JSON.parse(event.target.result), jsonSchema);
 				parse_vars(firmware_json_from(event.target.result));
-			} else{
-				alert("Invalid Json file: "+tv4.error.message+" on "+tv4.error.dataPath);
-				console.log(tv4.error);
+			} catch (error) {
+				error += "\nFix file and re-open"
+				alert(error);
+				console.log(error);
 			}
-					
 			//Unload file input
 			document.getElementById('jsonFile').value = "";
 			
 		})
-			
 	}
 
 
@@ -255,37 +252,28 @@ function saveFile() {
 			jsonSchema = {};
 			jsonSchema = data;
 			
-			var valid = tv4.validate(specialFormat(), jsonSchema);
-
+			obj = specialFormat();
+			try {
+				var valid = validate(obj, jsonSchema);
+				firmware_json_from(JSON.stringify(obj)); // for decimal pt validation
+				var payload = JSON.stringify(obj, null, ' ');
+			} catch (error) {
+				error += "\nFix and re-save"
+				alert(error);
+				console.log(error);
+				valid = false;
+			}
 
 			if(valid == true){ // file is valid
-			
-				
-					var payload = JSON.stringify(specialFormat(), null, ' ');
-					
 					payload = payload.replace(/\[\n\s+\"/g, '["');
 					payload = payload.replace(/\"\,\n\s+\"/g, '", "');
 					payload = payload.replace(/\"\n\s+/g, '"');
 					payload = payload.replace(/\,\n\s\s\s\s\"/g, ', "');
 					payload = payload.replace(/\[\n\s+/g, '[');
 					payload = payload.replace(/\[\[/g, '[\n   \[');
-
-
 					download(payload, 'scalings.json','application/json');
-				
-				
-			} else{
-				alert("Invalid Json file: "+tv4.error.message+" on "+tv4.error.dataPath);
-				console.log(tv4.error);
 			}
-					
-
-			
 		})
-	
-	
-
-
 }
 
 
@@ -744,7 +732,7 @@ function serialize() {
 				var valid = validate(obj, jsonSchema);
 				var payload = firmware_json_from(JSON.stringify(obj))
 			} catch (error) {
-				error += "\nFix and press Apply"
+				error += "\nFix entry and press Apply"
 				alert(error)
 				console.log(error)
 				valid = false
