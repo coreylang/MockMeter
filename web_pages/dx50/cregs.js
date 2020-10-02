@@ -25,6 +25,21 @@ var db_names = ["Phase Current",
 var getsAllClasses_list  = ["Analog Inputs", "Binary Inputs"];
 var getsDeadband_list    = ["Analog Inputs"];
 
+/**
+ * Filter entries from cscreens.cgi where an entry is from a row of the form
+ * dbidx:?:db name.  Call it active if name doesn't match something like 'User ..'
+ * @param {*} t_list - array composed of [dbidx,?,dbname]
+ * @returns {boolean}
+ */
+function active_user_measurement_for_cscreens(t_list) {
+    return (String(t_list[2]).match(/^User \d{1,3}$/) == null);
+}
+try {
+    module.exports = {active_user_measurement_for_cscreens}
+} catch {
+    // ignore
+}
+
 function filterCat(inp) {
 
     function model_has_item(dbIdx) {

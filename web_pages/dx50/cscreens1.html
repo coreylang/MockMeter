@@ -41,6 +41,7 @@ function parse_vars(data) {
 	
 	while(parsed[j] != "///") {
 		t_list = parsed[j++].split(":");
+		if (!active_user_measurement_for_cscreens(t_list)) continue;
 		m1.options[m1.options.length] = new Option(t_list[2], t_list[0]);
 		m2.options[m2.options.length] = new Option(t_list[2], t_list[0]);
 		m3.options[m3.options.length] = new Option(t_list[2], t_list[0]);

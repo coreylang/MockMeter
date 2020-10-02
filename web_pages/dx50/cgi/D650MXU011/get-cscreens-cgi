@@ -1,8 +1,8 @@
 0
 0
-0
-3
-169:0:NONE
+1
+2
+229:0:NONE
 0:0:RMS Volts Aux
 1:0:RMS Volts A
 2:0:RMS Volts B
@@ -149,4 +149,64 @@
 166:0:Avg. Volts
 167:0:Avg. Amps
 168:0:Avg. Phs-Phs Volt
+169:0:User 0
+170:0:User 1
+171:0:User 2
+172:0:User 3
+173:0:User 4
+174:0:User 5
+175:0:User 6
+176:0:User 7
+177:0:User 8
+178:0:User 9
+179:0:User 10
+180:0:User 11
+181:0:User 12
+182:0:User 13
+183:0:User 14
+184:0:User 15
+185:0:User 16
+186:0:User 17
+187:0:User 18
+188:0:User 19
+189:0:User 20
+190:0:User 21
+191:0:User 22
+192:0:User 23
+193:0:User 24
+194:0:User 25
+195:0:User 26
+196:0:User 27
+197:0:User 28
+198:0:User 29
+199:0:User 30
+200:0:User 31
+201:0:User 32
+202:0:User 33
+203:0:User 34
+204:0:User 35
+205:0:User 36
+206:0:User 37
+207:0:User 38
+208:0:User 39
+209:0:User 40
+210:0:User 41
+211:0:User 42
+212:0:User 43
+213:0:User 44
+214:0:User 45
+215:0:User 46
+216:0:User 47
+217:0:User 48
+218:0:User 49
+219:0:User 50
+220:0:User 51
+221:0:User 52
+222:0:User 53
+223:0:User 54
+224:0:User 55
+225:0:User 56
+226:0:User 57
+227:0:User 58
+228:0:User 59
 ///

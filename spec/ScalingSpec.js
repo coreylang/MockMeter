@@ -49,3 +49,34 @@ describe("Scaling", function() {
         });
     });
 });
+
+describe("CRegs", function() {
+    var s = require('../web_pages/dx50/cregs.js');
+
+    describe("filter for custom screens", ()=>{
+        it("allows Volts A", ()=>{
+            expect(s.active_user_measurement_for_cscreens([0,0,"Volts A"])).toBeTrue()
+        });
+        it("allows Volts User 1", ()=>{
+            expect(s.active_user_measurement_for_cscreens([0,0,"Volts User 1"])).toBeTrue()
+        });
+        it("allows User1", ()=>{
+            expect(s.active_user_measurement_for_cscreens([0,0,"User1"])).toBeTrue()
+        });
+        it("blocks User 1", ()=>{
+            expect(s.active_user_measurement_for_cscreens([0,0,"User 1"])).toBeFalse()
+        });
+        it("blocks User 11", ()=>{
+            expect(s.active_user_measurement_for_cscreens([0,0,"User 11"])).toBeFalse()
+        });
+        it("blocks User 111", ()=>{
+            expect(s.active_user_measurement_for_cscreens([0,0,"User 111"])).toBeFalse()
+        });
+        it("allows User 1111", ()=>{
+            expect(s.active_user_measurement_for_cscreens([0,0,"User 1111"])).toBeTrue()
+        });
+        it("allows User 1A", ()=>{
+            expect(s.active_user_measurement_for_cscreens([0,0,"User 1A"])).toBeTrue()
+        });
+    });
+});
