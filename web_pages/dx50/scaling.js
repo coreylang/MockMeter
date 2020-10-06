@@ -21,11 +21,11 @@ this.slpoff_from_points = function (points) {
 	// establish number of decimal places
 	xfr.dec = dp_from_pt(points.y1);
 	if (xfr.dec != dp_from_pt(points.y2)) {
-		throw "Decimal points in Display for '"+xfr.nm+"' must match";
+		throw "Decimal points in Display for '"+xfr.nm+"' must match.";
 	}
 	if (xfr.dec > 4) {
 		xfr.dec = 4
-		throw "Decimal points in Display for '"+xfr.nm+"' must <= 4 ";
+		throw "Decimal points in Display for '"+xfr.nm+"' must <= 4. ";
 	}
 
 	x1 = Number(points.x1);
@@ -71,7 +71,7 @@ this.points_from_slpoff = function (slpoff) {
 
 // Convert user JSON to backend JSON
 this.firmware_json_from = function (user_json) {
-	obj = JSON.parse(user_json);	// TODO: redundant parse in caller
+	var obj = JSON.parse(user_json);	// TODO: redundant parse in caller
 
 	//convert to scaling objects 
 	scalingNames = Object.getOwnPropertyNames(obj.scalings);

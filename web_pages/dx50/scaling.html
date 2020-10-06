@@ -227,7 +227,7 @@ function onReaderLoad(event){
 				validate(JSON.parse(event.target.result), jsonSchema);
 				parse_vars(firmware_json_from(event.target.result));
 			} catch (error) {
-				error += "\nFix file and re-open"
+				error += "\nFix file and re-open."
 				alert(error);
 				console.log(error);
 			}
@@ -258,7 +258,7 @@ function saveFile() {
 				firmware_json_from(JSON.stringify(obj)); // for decimal pt validation
 				var payload = JSON.stringify(obj, null, ' ');
 			} catch (error) {
-				error += "\nFix and re-save"
+				error += "\nFix and re-save."
 				alert(error);
 				console.log(error);
 				valid = false;
@@ -732,7 +732,7 @@ function serialize() {
 				var valid = validate(obj, jsonSchema);
 				var payload = firmware_json_from(JSON.stringify(obj))
 			} catch (error) {
-				error += "\nFix entry and press Apply"
+				error += "\nFix entry and press Apply."
 				alert(error)
 				console.log(error)
 				valid = false
