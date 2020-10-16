@@ -11,6 +11,7 @@ pg.hdr = '<div id="Header"><div id="Left">' +
 			'<li><a href="status.html"><span>Status</span></a></li>' +
 			'<li><a href="contact.html"><span>Contact</span></a></li>' +
 		'</ul>' +
+		'<div style="text-align:right"><input id="builtinctrl" type="checkbox"><label for="builtinctrl">Show builtins</label></div>' +
 		'<div id="printNice" style="display:none; text-align:right" onclick="print();"><a href="#">printer friendly</a></div>' +
 		'<div id="logout" style="display:none; text-align:right" ><a href="/logout.cgi">Log Out</a></div>' +
 	'</div>';
@@ -27,11 +28,35 @@ pg.contact = '<h2>Bitronics, LLC</h2>' +
 	'<br>' +
 	'<a href="http://www.novatechweb.com/bitronics" target="_blank">http://www.novatechweb.com/bitronics</a>';
 
+function builtin_filter_enabled() {
+	return (sessionStorage.getItem('builtinstate') != 'true')
+}
+
+function apply_builtin_filter() {
+	console.debug('builtin filter state is', sessionStorage.getItem('builtinstate'));
+	for (x of document.querySelectorAll('.builtinitem')) {
+		if (builtin_filter_enabled()) {
+			x.style.display = 'none'
+		} else {
+			x.style.display = 'block'
+		}
+	}
+}
 
 function populate(actv)
 {
 	id("Content").innerHTML = pg.hdr.replace(actv, actv+'\" class=\"active');
 	id("footer").innerHTML = pg.ftr;
+
+	var builtinctrl = document.querySelector('input[id="builtinctrl"]');
+	var builtinstate = sessionStorage.getItem('builtinstate');
+	
+	builtinctrl.checked = (builtinstate == 'true')
+	builtinctrl.addEventListener('change', ()=> {
+		sessionStorage.setItem('builtinstate', builtinctrl.checked)
+		apply_builtin_filter();
+	})
+	apply_builtin_filter();
 }
 
 function put_info(lbl, data) {
