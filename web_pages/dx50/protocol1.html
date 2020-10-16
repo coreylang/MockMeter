@@ -54,6 +54,7 @@
 		<td class="label">DNP3</td>
 	</tr>
 </table>
+<div class="builtinitem">
 <h3>Modbus Protocol Scaling</h3>
 <table cellspacing="0" border="0">
 	<tr>
@@ -112,6 +113,7 @@
 		</td>
 	</tr>
 </table>
+</div>
 <h3>Modbus Session</h3>
 <table cellspacing="0" border="0">
 	<tr>
@@ -130,8 +132,8 @@
 		<td class="label5">Register Set</td>
 		<td class="form">
 		  <select name="mpli" id="mpli" onchange="vwedit()">
-			  <option value='1'>BiLF16</option>
-			  <option value='2'>BiLF12</option>
+			  <option value='1' class="builtinitem">BiLF16</option>
+			  <option value='2' class="builtinitem">BiLF12</option>
 			  <option value='3'>TUC</option>
 		  </select>
 		</td>
@@ -203,6 +205,7 @@
 		<td class="label">DNP3</td>
 	</tr>
 </table>
+<div class="builtinitem">
 <h3>DNP3 Protocol Scaling</h3>
 <table cellspacing="0" border="0">
 	<tr>
@@ -261,6 +264,7 @@
 		</td>
 	</tr>
 </table>
+</div>
 <h3>DNP Session</h3>
 <table cellspacing="0" border="0">
 	<tr>
@@ -452,11 +456,11 @@
 		<p id="success"><b>BiLF set applied to list!</b><br></p>
 		<p id="mnu_btns">
 		<input type="button" name="clr_btn" value="Clear Page" onclick="clr();"/>
-		<input type="button" name="bilf_btn" id="bilf_btn" value="Use BiLF List" onclick="useBilf();"/>
+		<input type="button" name="bilf_btn" id="bilf_btn" value="Use BiLF List" onclick="useBilf();" class="builtinitem"/>
 		<input type="button" name="clrall_btn" id="clrall_btn" value="Clear All" onclick="clrAllTypes();"/>
 		</p>
 		<div id="c0e"><a class="label8">Class 0 Enable &nbsp;</a><input type="text" id="c0e_val" size="6" maxlength="5" value="3" /><br>
-		<input type="button" name="set_btn" value="Set BiLF" onclick="setMask();"/>
+		<input type="button" name="set_btn" value="Set BiLF" onclick="setMask();" class="builtinitem"/>
 		<input type="button" name="cncl_btn" value="Cancel" onclick="show_btns();"/></div>
 	</td>
 	<td>&nbsp;</td>

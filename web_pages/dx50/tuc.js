@@ -501,6 +501,7 @@ function loadAsync(url, callBackOk, callBackFail) {
 
 
 var NEWO_RESERVED = 144;
+var FLEX_MEASURE_00 = 169;
 
 
 var modbusDBNames = [

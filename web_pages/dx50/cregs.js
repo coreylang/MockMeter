@@ -43,15 +43,19 @@ try {
 function filterCat(inp) {
 
     function model_has_item(dbIdx) {
-        if(dbIdx == NEWO_RESERVED || dbIdx >= 2048)
-            return true;
-
-        // TODO: should be protocol specific
-        for(var j=0; j<dnpModelMode.length; j++) {
-            if(dbIdx == dnpModelMode[j])
-                return true;
+        if (builtin_filter_enabled()) {
+            if (dbIdx == NEWO_RESERVED) console.log('NEWO')
+            return (dbIdx >= FLEX_MEASURE_00 && dbIdx < 2048);
+        } else {
+            if(dbIdx == NEWO_RESERVED || dbIdx >= 2048) return true;
+    
+            // TODO: should be protocol specific
+            for(var j=0; j<dnpModelMode.length; j++) {
+                if(dbIdx == dnpModelMode[j])
+                    return true;
+            }
+            return false;
         }
-        return false;
     }
 
     var action = (function() {inp.lists[type].vec.splice(i--,1);});
@@ -59,7 +63,7 @@ function filterCat(inp) {
     for(var type=0; type<inp.lists.length; type++) {
         for(var i=0; i<inp.lists[type].vec.length; i++) {
             if(!model_has_item(inp.lists[type].vec[i].dbIdx)) {
-                console.log("filterCat removed", inp.lists[type].vec[i])
+                // console.log("filterCat removed", inp.lists[type].vec[i])
                 action();
             }
         }
@@ -114,6 +118,9 @@ function populate_dnp_type_list(show_noedit) {
     for(var type=0; type<col.lists.length; type++) {
         if(col.lists[type].vec.length > 0)
             dnp_t.options[dnp_t.options.length] = new Option(col.lists[type].desc, type);
+    }
+    if (dnp_t.options.length == 0) {    // dont leave with an empty selector
+        dnp_t.options[0] = new Option("Empty", 0)
     }
 }
     
