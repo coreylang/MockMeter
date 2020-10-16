@@ -36,9 +36,10 @@ function apply_builtin_filter() {
 	console.debug('builtin filter state is', sessionStorage.getItem('builtinstate'));
 	for (x of document.querySelectorAll('.builtinitem')) {
 		if (builtin_filter_enabled()) {
+			x.setAttribute('saved_style', x.style.display)
 			x.style.display = 'none'
 		} else {
-			x.style.display = 'block'
+			if (x.hasAttribute('saved_style')) x.style.display = x.getAttribute('saved_style')
 		}
 	}
 }
