@@ -68,7 +68,8 @@ function populate_table()
 
 	while( parsed[j] ) {
 		t_list = parsed[j++].split(":");
-		table += '<tr><td class="label3">'+t_list[1]+
+		table += (t_list[0] <= 54 /*vaux scr */) ? '<tr class="builtinitem">' : '<tr>'
+		table += '<td class="label3">'+t_list[1]+
 		'<\/td><td class="label6"><input type="checkbox" name="ena" value="'+t_list[0]+'" '+
 		(t_list[2]=="1"?"checked":"")+' onclick="mouseOut('+ k +')" \/><\/td>';
 		if(is_triple_display) table += '<td class="label6"><input type="radio" name="lft" '+
@@ -84,6 +85,7 @@ function populate_table()
 	}
 	table = table + "<\/table>";
 	id("fill_in").innerHTML = table;
+	apply_builtin_filter();
 
 	var pId;
 	var r = id("scrn_tab").rows;

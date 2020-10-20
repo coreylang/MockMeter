@@ -42,6 +42,7 @@ function parse_vars(data) {
 	while(parsed[j] != "///") {
 		t_list = parsed[j++].split(":");
 		if (!active_user_measurement_for_cscreens(t_list)) continue;
+		if (builtin_filter_enabled() && t_list[0] < FLEX_MEASURE_00) continue;
 		m1.options[m1.options.length] = new Option(t_list[2], t_list[0]);
 		m2.options[m2.options.length] = new Option(t_list[2], t_list[0]);
 		m3.options[m3.options.length] = new Option(t_list[2], t_list[0]);
@@ -276,7 +277,7 @@ function populate_table() {
 		{
 		for(var i=0; i<ord.lists[type].vec.length; i++) 
 			{
-			if(ord.lists[type].vec[i].dbIdx != 144)
+			if(ord.lists[type].vec[i].dbIdx != NEWO_RESERVED)
 				idx_list.splice(idx++, 0, ord.lists[type].vec[i].dbIdx);
 			}
 		}
