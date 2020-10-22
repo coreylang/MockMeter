@@ -28,8 +28,8 @@ var getsDeadband_list    = ["Analog Inputs"];
 /**
  * Filter entries from cscreens.cgi where an entry is from a row of the form
  * dbidx:?:db name.  Call it active if name doesn't match something like 'User ..'
- * @param {*} t_list - array composed of [dbidx,?,dbname]
- * @returns {boolean}
+ * @param {*} t_list array composed of [dbidx,?,dbname]
+ * @returns {boolean} true if measurement should be used
  */
 function active_user_measurement_for_cscreens(t_list) {
     return (String(t_list[2]).match(/^User \d{1,3}$/) == null);
@@ -72,6 +72,14 @@ function filterCat(inp) {
     return inp;
 }
 
+/**
+ * Filter an order against a catalog where each Array(n) is of form  
+ * `{address: dd, desc: "", serdes: [], type: "", vec: Array(i)}`  
+ * where each Array(i) is collection of objects using items from serdes as keys, e.g.  
+ * `[{dbIdx: 2070, calcType: 79}, {dbIdx: 5, calcType 37}, ...]`  
+ * @param {*} inp {name: "", version: "", lists: Array(n)}
+ * @param {*} cat {name: "", version: "", lists: Array(n)}
+ */
 function filterOrd(inp, cat) {
 
     var reserved = {
@@ -105,11 +113,21 @@ function filterOrd(inp, cat) {
                 }
             }
         );
-        inp.lists[type].vec = filteredlist;
+        if (filteredlist.every(item=>{return comparable_of(item)==comparable_of(reserved)})) {
+            inp.lists[type].vec = new Array;
+            console.log("filterOrd returning empty")
+        } else {
+            inp.lists[type].vec = filteredlist;
+        }
     }
     return inp;
 }
-                
+try {
+    module.exports = {filterOrd}
+} catch {
+    // ignore
+}
+
 function populate_dnp_type_list(show_noedit) {
     var dnp_t = id("dnp_t");
     var point;

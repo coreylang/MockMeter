@@ -79,4 +79,40 @@ describe("CRegs", function() {
             expect(s.active_user_measurement_for_cscreens([0,0,"User 1A"])).toBeTrue()
         });
     });
+
+    describe("filter orders", ()=>{
+        
+        NEWO_RESERVED = 144
+        function buildit(regmap) {
+            vec = new Array
+            for (reg of regmap) {
+                if (reg[0]==NEWO_RESERVED) {
+                    vec.push({'dbIdx':NEWO_RESERVED, 'calcType':0, classMask:0, deadband:0})
+                } else {
+                    vec.push({'dbIdx': reg[0], 'calcType': reg[1]})
+                }
+            }
+            return {'lists': [{'vec': vec}]}
+        }
+        console.log(s.filterOrd.reserved)
+
+        it("preserves order items in catalog", ()=>{
+            expect(s.filterOrd(
+                buildit([[1,1],[2,2]]),
+                buildit([[3,3],[2,2],[1,1]])
+            )).toEqual(buildit([[1,1],[2,2]]))
+        })
+        it("filters order items not in catalog", ()=>{
+            expect(s.filterOrd(
+                buildit([[1,1],[4,4]]),
+                buildit([[3,3],[2,2],[1,1]])
+            )).toEqual(buildit([[1,1],[NEWO_RESERVED, 0]]))
+        })
+        it("truncates an empty order", ()=>{
+            expect(s.filterOrd(
+                buildit([[5,5],[4,4]]),
+                buildit([[3,3],[2,2],[1,1]])
+            )).toEqual(buildit([]))
+        })
+    })
 });
