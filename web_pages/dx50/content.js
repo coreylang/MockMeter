@@ -16,7 +16,7 @@ pg.hdr = '<div id="Header"><div id="Left">' +
 		'<div id="logout" style="display:none; text-align:right" ><a href="/logout.cgi">Log Out</a></div>' +
 	'</div>';
 
-pg.ftr = 'Copyright &copy; 2019 Bitronics, LLC. All rights reserved.';
+pg.ftr = 'Copyright &copy; 2020 Bitronics, LLC. All rights reserved.';
 
 pg.contact = '<h2>Bitronics, LLC</h2>' +
 	'<br>' +
