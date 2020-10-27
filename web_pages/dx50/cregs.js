@@ -43,19 +43,15 @@ try {
 function filterCat(inp) {
 
     function model_has_item(dbIdx) {
-        if (builtin_filter_enabled()) {
-            if (dbIdx == NEWO_RESERVED) console.log('NEWO')
-            return (dbIdx >= FLEX_MEASURE_00 && dbIdx < 2048);
-        } else {
-            if(dbIdx == NEWO_RESERVED || dbIdx >= 2048) return true;
-    
-            // TODO: should be protocol specific
-            for(var j=0; j<dnpModelMode.length; j++) {
-                if(dbIdx == dnpModelMode[j])
-                    return true;
-            }
-            return false;
+        if(dbIdx == NEWO_RESERVED || dbIdx >= 2048)
+            return true;
+
+        // TODO: should be protocol specific
+        for(var j=0; j<dnpModelMode.length; j++) {
+            if(dbIdx == dnpModelMode[j])
+                return true;
         }
+        return false;
     }
 
     var action = (function() {inp.lists[type].vec.splice(i--,1);});
@@ -146,8 +142,6 @@ function populate_dnp_type_list(show_noedit) {
 function show_plist() {
     var ses = 0;
 
-    id("builtinctrl").onchange = function() {show_plist();}
-    id("builtinctrl").disabled = false;
     delete dnpOrder;
 
     // populates dnpOrder
@@ -194,8 +188,6 @@ function show_plist_load_fail() {
     }
 
 function show_regset() {
-    id("builtinctrl").onchange = function() {show_regset();}
-    id("builtinctrl").disabled = false;
     delete mbOrder;
     var ses = id("mpli").value;  // range is 1:n
     loadAsync ("mbOrder_" + ses + ".js", show_regset_1, show_regset_load_fail);
@@ -304,7 +296,8 @@ function populate_menus() {
     
     menu2.options[menu2.options.length] = new Option("End of list", 999);
     menu2.options[menu2.options.length-1].style.color = '#aaa';
-	preFilter2 = menu2.cloneNode(true);  // Preserve menu2
+    preFilter2 = menu2.cloneNode(true);  // Preserve menu2
+    if (builtin_filter_enabled()) remove_builtins_from_menu();
 }
 
 function get_suffix(calcType) {
@@ -400,7 +393,7 @@ function right() {
     }
 
 	// Clear filtering for correct menu indexing
-	if(searchStr1 != "")
+	if(searchStr1 != "" || builtin_filter_enabled())
 		restore_menu(1);
 	if(searchStr2 != "")
 		restore_menu(2);
@@ -428,7 +421,7 @@ function right() {
 	preFilter2 = menu2.cloneNode(true);  // Preserve menu2
 	
 	// Reapply filtering
-	if(searchStr1 != "")
+	if(searchStr1 != "" || builtin_filter_enabled())
 		filterMenu(null,1);
 	if(searchStr2 != "")
 		filterMenu(null,2);
@@ -448,7 +441,7 @@ function left() {
 	var idx;
     
 	// Clear filtering for correct menu indexing
-	if(searchStr1 != "")
+	if(searchStr1 != "" || builtin_filter_enabled())
 		restore_menu(1);
 	if(searchStr2 != "")
 		restore_menu(2);
@@ -496,7 +489,7 @@ function left() {
 	preFilter2 = menu2.cloneNode(true);  // Preserve menu2
 	
 	// Reapply filtering
-	if(searchStr1 != "")
+	if(searchStr1 != "" || builtin_filter_enabled())
 		filterMenu(null,1);
 	if(searchStr2 != "")
 		filterMenu(null,2);
@@ -776,8 +769,6 @@ function pad(number, length) {
 }
 
 function edit_regs() {
-    // disable builtin toggle while editing
-    id("builtinctrl").disabled = true;
     var sel = id("dnp_t").value;
     populate_dnp_type_list(false);
     id("dnp_t").value = sel;
@@ -909,7 +900,6 @@ function addResvd() {
 }
 
 function go_next() {
-    id("builtinctrl").disabled = false;
     var sel = id("dnp_t").value;
     populate_dnp_type_list(true);
     id("dnp_t").value = sel;
@@ -987,7 +977,8 @@ function filterMenu(e, m)
 		{
 		id("up").disabled = (searchStr == "")?false:true;
 		id("down").disabled = (searchStr == "")?false:true;
-		}
+        }
+    if((m == 1) && builtin_filter_enabled()) remove_builtins_from_menu();
 }
 
 function clrSearch(m)
@@ -1020,6 +1011,15 @@ function saveSelections(menu)
     }
 
     return selArr;
+}
+
+function remove_builtins_from_menu() {
+    var menu = id("menu1");
+    for ( var i=(menu.length-1); i>=0; i--) {
+        var dbIdx = menu.options[i].value
+        if (!(dbIdx >= FLEX_MEASURE_00 && dbIdx < 2048))
+            menu.options[i] = null;
+    }
 }
 
 function restore_menu(m)

@@ -25,9 +25,12 @@
 		populate("settings.html");
         // avoid multiple protocol.cgi requests from
         //   nested upload_target iframe's 'src="#"' phrase
-        if(window.name!="upload_target")
-            sendRequest("protocol", 0);
-        }
+		if(window.name!="upload_target") sendRequest("protocol", 0);
+		id("builtinctrl").onchange = function() {
+			restore_menu(1); 
+			filterMenu(null, 1);
+		}
+	}
 
     window.onload = load_once;  // equiv to setTimeout(load_once, 0);
     </script>
