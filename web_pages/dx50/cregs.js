@@ -146,6 +146,8 @@ function populate_dnp_type_list(show_noedit) {
 function show_plist() {
     var ses = 0;
 
+    id("builtinctrl").onchange = function() {show_plist();}
+    id("builtinctrl").disabled = false;
     delete dnpOrder;
 
     // populates dnpOrder
@@ -192,6 +194,8 @@ function show_plist_load_fail() {
     }
 
 function show_regset() {
+    id("builtinctrl").onchange = function() {show_regset();}
+    id("builtinctrl").disabled = false;
     delete mbOrder;
     var ses = id("mpli").value;  // range is 1:n
     loadAsync ("mbOrder_" + ses + ".js", show_regset_1, show_regset_load_fail);
@@ -772,6 +776,8 @@ function pad(number, length) {
 }
 
 function edit_regs() {
+    // disable builtin toggle while editing
+    id("builtinctrl").disabled = true;
     var sel = id("dnp_t").value;
     populate_dnp_type_list(false);
     id("dnp_t").value = sel;
@@ -903,6 +909,7 @@ function addResvd() {
 }
 
 function go_next() {
+    id("builtinctrl").disabled = false;
     var sel = id("dnp_t").value;
     populate_dnp_type_list(true);
     id("dnp_t").value = sel;
