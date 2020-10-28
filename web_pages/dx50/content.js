@@ -33,7 +33,6 @@ function builtin_filter_enabled() {
 }
 
 function apply_builtin_filter() {
-	console.debug('builtin filter state is', sessionStorage.getItem('builtinstate'));
 	for (x of document.querySelectorAll('.builtinitem')) {
 		if (builtin_filter_enabled()) {
 			x.setAttribute('saved_style', x.style.display)
