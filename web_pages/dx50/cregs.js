@@ -34,11 +34,6 @@ var getsDeadband_list    = ["Analog Inputs"];
 function active_user_measurement_for_cscreens(t_list) {
     return (String(t_list[2]).match(/^User \d{1,3}$/) == null);
 }
-try {
-    module.exports = {active_user_measurement_for_cscreens}
-} catch {
-    // ignore
-}
 
 function filterCat(inp) {
 
@@ -117,11 +112,6 @@ function filterOrd(inp, cat) {
         }
     }
     return inp;
-}
-try {
-    module.exports = {filterOrd}
-} catch {
-    // ignore
 }
 
 function populate_dnp_type_list(show_noedit) {
@@ -944,6 +934,20 @@ function print() {
     }
 }
 
+/**
+ * Remove built in measurements from the menu representing the catalog.
+ * 
+ * `menu` is an Array of Options with value attribute representing db index
+ */
+function remove_builtins_from_menu() {
+    var menu = id("menu1");
+    for ( var i=(menu.length-1); i>=0; i--) {
+        var dbIdx = menu.options[i].value
+        if (!(dbIdx >= FLEX_MEASURE_00 && dbIdx < 2048))
+            menu.options[i] = null;
+    }
+}
+
 function filterMenu(e, m)
 {
 	if(m == null || m < 1 || m > 2)
@@ -1013,15 +1017,6 @@ function saveSelections(menu)
     return selArr;
 }
 
-function remove_builtins_from_menu() {
-    var menu = id("menu1");
-    for ( var i=(menu.length-1); i>=0; i--) {
-        var dbIdx = menu.options[i].value
-        if (!(dbIdx >= FLEX_MEASURE_00 && dbIdx < 2048))
-            menu.options[i] = null;
-    }
-}
-
 function restore_menu(m)
 {
 	if(m == null || m < 1 || m > 2 || ord==null)
@@ -1078,4 +1073,14 @@ function restoreSelections(menu, selArr)
 		}
 	
 	return 0;
+}
+
+try {
+    module.exports = {
+        active_user_measurement_for_cscreens,
+        filterOrd,
+        remove_builtins_from_menu,
+    }
+} catch {
+    // ignore
 }

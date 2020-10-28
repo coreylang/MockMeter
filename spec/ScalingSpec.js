@@ -94,7 +94,6 @@ describe("CRegs", function() {
             }
             return {'lists': [{'vec': vec}]}
         }
-        console.log(s.filterOrd.reserved)
 
         it("preserves order items in catalog", ()=>{
             expect(s.filterOrd(
@@ -115,4 +114,38 @@ describe("CRegs", function() {
             )).toEqual(buildit([]))
         })
     })
+
+    describe("remove builtins from menu", ()=>{
+        
+        FLEX_MEASURE_00 = 169;
+        id = ()=>{}
+
+        beforeEach( ()=>{
+            // not nearly the same as what the DOM provides
+            // TODO: is there better way to work with DOM dependent JS?
+            m1 = {
+                options: new Array(
+                    {text: "builtin meas", value:  100},
+                    {text: "flex meas",    value:  200},
+                    {text: "private meas", value: 3000},
+                ),
+                length: 3
+            }
+            id = jasmine.createSpy('idSpy', id).and.returnValue(m1)
+        })
+
+        it("returns only flex meas", ()=>{
+            expect(s.remove_builtins_from_menu()).nothing()
+            // TODO: there must be a better way to check this like xunit style
+            expect(m1).toEqual({
+                options: new Array(
+                    null,
+                    {text: "flex meas",    value:  200},
+                    null,
+                ),
+                length: 3
+            })
+        })
+    })
+
 });
