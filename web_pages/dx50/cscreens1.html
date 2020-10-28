@@ -32,6 +32,9 @@ function parse_vars(data) {
 	var m1 = id("meas1");
 	var m2 = id("meas2");
 	var m3 = id("meas3");
+	m1.options.length = 0;
+	m2.options.length = 0;
+	m3.options.length = 0;
 
 	if(parsed[j++]=="1") id("logout").style.display = 'block';
 	var protocol = parsed[j++];
@@ -64,10 +67,10 @@ function parse_vars(data) {
 	}
 
 	getDbList(protocol, 0, ptype);
-	if(screens[0] == null)
+	if(screens[0] == null) {
 		id("entry").style.display = 'block';
-	else
-		id("summary").style.display = 'block';
+		id("summary").style.display = 'none';
+	}
 
     msg_reset_if_pending(pending_changes);
 	
@@ -430,6 +433,9 @@ function stopUpload(success, fname)
 function load_once() {
 	populate("settings.html");
 	makeRequest(nc("cscreens.cgi"), null);
+	id("builtinctrl").onchange = function() {
+			makeRequest(nc("cscreens.cgi"), null); 
+	}
 }
 
 window.onload=load_once;
@@ -487,7 +493,7 @@ window.onload=load_once;
 <a class="elem" style="color:#999;">Note: Settings are saved to IED upon clicking the "Apply" button on next page.</a>
 </div>
 
-<div id="summary" style="display:none;">
+<div id="summary" style="display:block;">
 <!--form action="http:cscreens_submit.cgi" method="POST" name="myform" id="myform"-->
 <table id="scrn_tab" cellspacing="0" border="0" >
 	<tr>
