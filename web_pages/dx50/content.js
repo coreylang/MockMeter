@@ -11,7 +11,7 @@ pg.hdr = '<div id="Header"><div id="Left">' +
 			'<li><a href="status.html"><span>Status</span></a></li>' +
 			'<li><a href="contact.html"><span>Contact</span></a></li>' +
 		'</ul>' +
-		'<div style="text-align:right"><input id="builtinctrl" type="checkbox"><label for="builtinctrl">Show built-in settings</label></div>' +
+		'<div style="text-align:right"><input id="builtinctrl" type="checkbox"><label for="builtinctrl">Show Bitronics meter settings</label></div>' +
 		'<div id="printNice" style="display:none; text-align:right" onclick="print();"><a href="#">printer friendly</a></div>' +
 		'<div id="logout" style="display:none; text-align:right" ><a href="/logout.cgi">Log Out</a></div>' +
 	'</div>';

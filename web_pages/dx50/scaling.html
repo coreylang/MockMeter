@@ -47,27 +47,20 @@ input[type="file"] {
 	.color-p2 {
 		background-color:lightsteelblue;
 	}
-	
-	
-	html {
-  -ms-overflow-style: -ms-autohiding-scrollbar;
-}
-	
+	.color-w1 {
+		background-color: #fff;
+	}
  
-.fixed_header{
-/*    width: 100%;*/
-/*    table-layout: fixed;*/
-	border-collapse: collapse;
+.fixed_header {
+  height:  220px;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
-.fixed_header tbody{
-  overflow: auto;
-  height: 170px;
-  display: block;
-}
-
-.fixed_header thead, .fixed_header tfoot{
-  display: block;
+.fixed_header th {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
 }
 
 .fixed_header tfoot td {
@@ -77,15 +70,21 @@ input[type="file"] {
 	color: gray;
 }
 
-td input{
+.fixed_header td input, .fixed_header td select{
 	width: 115px !important;
 }
 
 .fixed_header th, .fixed_header td {
-	width: 126px !important;
+  width: 126px !important;
   padding: 3px;
-  text-align: left;
+  /* text-align: left; */
 }
+
+/* .fixed_header {
+  border: 1px solid #ccc;
+  border-collapse: collapse;
+} */
+
 	</style>
 
 
@@ -111,18 +110,21 @@ td input{
 
 <h2>Scalings</h2>
 
-<table class="fixed_header" id="scaling_tbl" cellspacing="0" border="0">
+<div class="fixed_header">
+<table id="scaling_tbl" cellspacing="0">
 	<thead>
 		<tr>
-			<th ROWSPAN=2 class="label2">Name</th>
-			<TH COLSPAN=2 class="label2 color-p1" style="text-align: left">Point 1</TH>
-			<TH COLSPAN=2 class="label2 color-p2" style="text-align: left">Point 2</TH>
+			<th class="label2 color-w1"></th>
+			<th class="label2 color-p1" COLSPAN=2 style="text-align: center">Point 1</th>
+			<th class="label2 color-p2" COLSPAN=2 style="text-align: center">Point 2</th>
+			<th class="label2 color-w1"></th>
 		</tr>
 		<tr>
-			<th ROWSPAN=2 class="label2 color-p1" style="text-align: center">Poll</th>
-			<th ROWSPAN=2 class="label2 color-p1" style="text-align: center">Display</th>
-			<th ROWSPAN=2 class="label2 color-p2" style="text-align: center">Poll</th>
-			<th ROWSPAN=2 class="label2 color-p2" style="text-align: center">Display</th>
+			<th class="label2 color-w1">Name</th>
+			<th class="label2 color-p1 fh-row2" style="text-align: center">Polled</th>
+			<th class="label2 color-p1 fh-row2" style="text-align: center">Displayed</th>
+			<th class="label2 color-p2 fh-row2" style="text-align: center">Polled</th>
+			<th class="label2 color-p2 fh-row2" style="text-align: center">Displayed</th>
 			<th><button onclick="addFieldScaling();">Add Scaling</button></th>
 		</tr>
 	</thead>
@@ -137,21 +139,22 @@ td input{
 		</tr>
 	</tfoot>
 </table>
+</div>
 
-<hr style="width: 100%;">
 <br/><br/>
 
 <h2>Measurements</h2>
 
-<table class="fixed_header" id="measurement_tbl" cellspacing="0" border="0">
+<div class="fixed_header">
+<table id="measurement_tbl" cellspacing="0">
 	<thead>
 		<tr>
-			<th class="label2">Name</th>
-			<th class="label2">Scaling</th>
-			<th class="label2">Phase</th>
-			<th class="label2">Modifier</th>
-			<th class="label2">Rows</th>
-			<th><button onclick="addFieldMeasurement();">Add Measurement</button></th>
+			<th class="label2 color-w1">Name</th>
+			<th class="label2 color-w1">Scaling</th>
+			<th class="label2 color-w1">Phase</th>
+			<th class="label2 color-w1">Modifier</th>
+			<th class="label2 color-w1">Rows</th>
+			<th class="label2 color-w1"><button onclick="addFieldMeasurement();">Add Measurement</button></th>
 		</tr>
 	</thead>
 	<tbody id="tablebodyMeasurements"></tbody>
@@ -166,10 +169,7 @@ td input{
 	</tfoot>
 
 </table>
-
-
-
-<hr style="width: 100%;">
+</div>
 
 <p style=" width:100%; text-align: left; margin-bottom: 0px; display:inline-block;">
 	<button style="margin-right: 10%;" onclick="saveFile();">Save to File</button>
