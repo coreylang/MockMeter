@@ -16,10 +16,10 @@ exposed handlers.
 
 sample_flex = {
     "scalings": [
-        {"nm": "flex scale", "dec":0,"sgn":True,"slp":1,"off":0,"min":0,"max":1 }
+        {"nm":"pass through","dec":0,"sgn":True,"slp":1,"off":0,"min":-1000,"max":1000,"typ":"i16"}
     ],
-    "measurements": [
-        {"nm": "flex measurement", "scl": "flex scale", "phs": "none", "nxa": "none"}
+    "measurements":[
+        {"nm":"measurement","scl":"pass through","phs":"none","nxa":"none","row":"one"}
     ]
 }
 
