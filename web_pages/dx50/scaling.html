@@ -132,7 +132,7 @@ input[type="file"] {
 	<tfoot>
 		<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
 		<tr>
-			<td>enter name</td>
+			<td>enter a name</td>
 			<td colspan=2>enter a polled value and its display format</td>
 			<td colspan=2>enter a second pair of values</td>
 			<td></td>
@@ -161,7 +161,7 @@ input[type="file"] {
 	<tfoot>
 		<tr><td></td><td></td><td></td><td></td><td></td></tr>
 		<tr>
-			<td>enter name</td>
+			<td>enter a name</td>
 			<td>select scaling method</td>
 			<td COLSPAN=2>select optional LEDs to illuminate</td>
 			<td>select row span</td>
@@ -360,13 +360,13 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
 			p1poll.setAttribute("name", "x1");
 			p1poll.setAttribute('maxlength', 12);
 			p1poll.setAttribute('class', 'point-input');
-			p1poll.setAttribute('placeholder', '0');
+			p1poll.setAttribute('placeholder', '-1000');
 			
 			var p1show = document.createElement("input");
 			p1show.setAttribute("name", "y1");
 			p1show.setAttribute('maxlength', 12);
 			p1show.setAttribute('class', 'point-input seven-seg');
-			p1show.setAttribute('placeholder','0.000');
+			p1show.setAttribute('placeholder','-1.000');
 			
 			var p2poll = document.createElement("input");
 			p2poll.setAttribute("name", "x2");
