@@ -192,7 +192,8 @@ function show_regset_1 (request) {
     col = desCollection (mbCat16);
     listLimits[0] = getLength(col);
     col = filterCat(col);
-    ord = filterOrd(desCollection (mbOrder), col);
+    // filter order if its not Bilf12 e.g. dropdown==2 (there's no catalog for 12)
+    ord = (id("mpli").value != 2) ? filterOrd(desCollection(mbOrder),col) : desCollection(mbOrder);
 
     if(id("mpli").value > 2) {
         id("edit_btn").disabled = false;

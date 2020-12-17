@@ -84,7 +84,8 @@ function fileupload_status_clear() {
 function loadMBIndices(request)
 	{
 	eval (request.responseText);    // JSON sets mbOrder
-	ord = filterOrd(desCollection (mbOrder), filterCat(desCollection(mbCat16)));
+    // ord = filterOrd(desCollection (mbOrder), filterCat(desCollection(mbCat16)));
+    ord = desCollection(mbOrder);
 	populate_table();
 	}
 	
@@ -94,7 +95,8 @@ function loadMBFail() {alert("can't load Modbus register set");}
 function loadDNPIndices(request)
 	{
 	eval (request.responseText);    // JSON sets mbOrder
-	ord = filterOrd(desCollection (dnpOrder),  filterCat(desCollection(dnpCatalog)));
+    // ord = filterOrd(desCollection (dnpOrder),  filterCat(desCollection(dnpCatalog)));
+    ord = desCollection(dnpOrder);
 	populate_table();
 	}
 	
