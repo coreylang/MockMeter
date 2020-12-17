@@ -775,7 +775,7 @@ function serialize() {
 }
 
 function setMask() {
-    var ses = 0;
+    var ses;
     var isModbus = document.getElementsByName("mprt")[0].checked;
 
 	function c0Invalid(val) {
@@ -793,6 +793,7 @@ function setMask() {
 
     if(isModbus) {
         // filter spec order as a catalog
+        ses = id("mpli").value;
         ord = filterCat(desCollection (mbBilf16));
         ord.name = "mbOrder_" + ses;
     }
@@ -802,6 +803,7 @@ function setMask() {
 			return;
 		}
         // filter spec order as a catalog
+        ses = 0;
         ord = filterCat(desCollection (dnpBilf));
         ord.name = "dnpOrder_" + ses;
     }
