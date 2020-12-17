@@ -464,7 +464,7 @@ window.SomeDeleteRowFunction = function SomeDeleteRowFunction(o) {
 			modifier.setAttribute("name", "nxa");
 			modifier.setAttribute('class', "nxa");
 			modifier.setAttribute('style', 'width: 100%');  
-			fillSelect(modifier, ["none", "min", "max", "avg"]);
+			fillSelect(modifier, ["none", "max", "avg", "min"]);
 
 			var disprows = document.createElement("select");
 			disprows.setAttribute("name", "row");
@@ -658,7 +658,7 @@ function parse_vars(data, source) {
 		sr.appendChild(innerInput(sr, "nm", 31));
 		sr.appendChild(innerSelect(sr, "scl", getNamesFromScaling())); //***********list of scalings
 		sr.appendChild(innerSelect(sr, "phs", ["none", "A", "B", "C", "AB", "BC", "CA"]));
-		sr.appendChild(innerSelect(sr, "nxa", ["none", "min", "max", "avg"]));
+		sr.appendChild(innerSelect(sr, "nxa", ["none", "max", "avg", "min"]));
 		sr.appendChild(innerSelect(sr, "row", ["one", "two"]));
 		
 		
