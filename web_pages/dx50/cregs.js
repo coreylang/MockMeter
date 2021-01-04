@@ -1001,7 +1001,7 @@ function clrSearch(m)
 		id("up").disabled = false;
 		id("down").disabled = false;
 		}
-
+    if((m == 1) && builtin_filter_enabled()) remove_builtins_from_menu();
 }
 
 function saveSelections(menu)
