@@ -24,9 +24,8 @@ pg.contact = '<h2>Bitronics, LLC</h2>' +
 	'Bethlehem, PA 18017<br>' +
 	'USA<br>' +
 	'+1.610.997.5100<br>' +
-	'<a href="mailto:bitronics@novatechweb.com">bitronics@novatechweb.com</a><br>' +
 	'<br>' +
-	'<a href="http://www.novatechweb.com/bitronics" target="_blank">http://www.novatechweb.com/bitronics</a>';
+	'<a href="https://www.novatechautomation.com/products/bitronics-power-measurement" target="_blank">https://www.novatechautomation.com/products/bitronics-power-measurement</a>';
 
 function builtin_filter_enabled() {
 	return (sessionStorage.getItem('builtinstate') != 'true')
