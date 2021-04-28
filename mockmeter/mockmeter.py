@@ -221,6 +221,20 @@ class StaticsApp(object):
         else:
             return self._fetch_cgi_resource({'data':kwargs})
 
+    @cherrypy.expose
+    @cherrypy.tools.allow(methods=['GET', 'POST'])
+    def get_csv_cgi(self, *args, start=None, end=None, **kwargs):
+        # only capturing start,end args then passing thru
+        if start or end:
+            from datetime import datetime, timezone
+            szBeg = datetime.fromtimestamp(int(start)/1000, tz=timezone.utc)
+            szEnd = datetime.fromtimestamp(int(  end)/1000, tz=timezone.utc)
+            print('='*20)
+            print(f'start: {start} -> {szBeg.isoformat()}')
+            print(f'  end: { end } -> {szEnd.isoformat()}')
+            print('='*20)
+
+        return self._fetch_cgi_resource({'data':kwargs})
 
 # Custom dispatcher for precompressed (gz) static files
 class PrecompressedDispatcher(Dispatcher):
