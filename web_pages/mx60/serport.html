@@ -1,0 +1,448 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Serial Port - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+<script>
+//<!--
+var min = 1;
+var max = 2;
+var FN_DISPLAY = '1';
+var FN_SCADA   = '2';
+var set_arr = [ ["rtw",,],
+				["tfp",,],
+				["tbp", ,],
+				["drtw",,],
+				["dtfp",,],
+				["dtbp",,] ];
+var sWarn = "Only one serial port may be used as a display.";
+
+function parse_vars(data) {
+	var parsed = data.split( "\n" );
+	var j=0, k=0;
+	
+	check_pending(parsed[k++]);
+	var has_ex_ser = parsed[k++];
+	var has_dport  = parsed[k++];
+	id("mode").value = parsed[k++];
+	id("baud").value = parsed[k++];
+	id("parity").value = parsed[k++];
+	document.getElementsByName("rfc")[parsed[k++]^1].checked = 'true';
+    id("pfn").value = parsed[k++];
+	if(parsed[k++]=="1") {id("logout").style.display = 'block';}
+	var smode = parsed[k++];
+	var is_ppx = parsed[k++];
+
+	for(var i=0; i<6; ++i) {
+		var f = id(set_arr[i][0]);
+		f.innerHTML = '<input type="text" name="'+set_arr[i][0]+'" size="6" maxlength="5" value="'+parsed[k++]+'" />';
+	}
+
+	if(parsed[k++] == "1") 
+		id("cen").checked = true;
+	else
+		id("cen").checked = false;
+	
+	if(parsed[k++] == "1") 
+		id("dcen").checked = true;
+	else
+		id("dcen").checked = false;
+	
+	id("dfn").value = parsed[k++];
+	id("dbaud").value = parsed[k++];
+	id("dparity").value = parsed[k++];
+	document.getElementsByName("drfc")[parsed[k++]^1].checked = 'true';
+	
+	for(i=0; i<3; ++i) {
+		set_arr[i][min] = parsed[k];
+		set_arr[i+3][min] = parsed[k++];		
+		set_arr[i][max] = parsed[k];
+		set_arr[i+3][max] = parsed[k++];
+	}
+	
+	if(is_ppx=="1")
+	    {
+		id("prtfn").style.display = 'block';
+		id("srl_hdr").innerHTML = "Extended Serial Port";
+	    }
+	if(has_ex_ser=="1")
+		id("pesp").style.display = 'block';
+	if(has_dport=="1")
+		id("disp").style.display = 'block';
+	if(smode=="6") {
+		id("mode").value = 1;
+		id("mode").options[0].disabled = true;
+	}	
+	show_232485(id("mode").value);
+	show_cfg(id("pfn").value,"show_pc");
+	show_cfg(id("dfn").value,"show_dpc");
+	if(document.getElementsByName("drfc")[0].checked == true)
+		display_div('show_dcts');
+}
+
+function validate(f) {
+	var invalid = false;
+
+	for(var i=0; i<f.elements.length; i++) {
+		var k = f.elements[i];
+		for(var j=0;j<set_arr.length;j++) {
+			if(k.name == set_arr[j][0]) {
+				if( Number(k.value) < set_arr[j][min]
+				 || Number(k.value) > set_arr[j][max]
+				 || isNaN(k.value) ) {
+					id(set_arr[j][0]).innerHTML = '<input type="text" name="'+set_arr[j][0]+'" size="6" maxlength="5" value="'+k.value+'" /><b><a class="err_msg">Value must be within the range of '+set_arr[j][min]+' to '+set_arr[j][max]+'<\/a><\/b>';
+					id(set_arr[j][0]).className = "error";
+					invalid = true;
+				}
+				else {
+					id(set_arr[j][0]).innerHTML = '<input type="text" name="'+set_arr[j][0]+'" size="6" maxlength="5" value="'+k.value+'" />';
+					id(set_arr[j][0]).className = "success_msg";
+				}
+			}
+		}
+	}
+
+	if(id("pfn").value == FN_DISPLAY && id("dfn").value == FN_DISPLAY)
+	{
+		id("pfn_tbl").className = "error";
+		id("dfn_tbl").className = "error";
+		id("swrn").innerHTML = sWarn;
+		id("dwrn").innerHTML = sWarn;
+		invalid = true;
+	}
+	else
+	{
+		id("pfn_tbl").className = "success_msg";
+		id("dfn_tbl").className = "success_msg";
+		id("swrn").innerHTML = "";
+		id("dwrn").innerHTML = "";
+	}
+
+	if(invalid==true) {
+		alert("Please correct the red highlighted fields and resubmit.");
+		return false;
+	} else {
+		return true;
+	}
+}
+
+function show_cfg(val,tid) {
+	DisableConfig(val,tid);
+	if(tid=='show_dpc')
+	{
+		if(val==FN_DISPLAY)
+			display_div("show_dstatic");
+		else
+			hide_div("show_dstatic");
+	}
+	
+}
+
+function show_232485(p) {
+	if(p=="0") // 232
+	{
+	//	id("show_fc").style.display = 'block';
+		if(document.getElementsByName("rfc")[0].checked == true)
+			display_div('show_cts');
+		if(document.selection) // IE
+			id("txt").outerHTML=id("txt").outerHTML.replace(/TXEN/g,"RTS");
+		else
+			id("txt").innerHTML=id("txt").innerHTML.replace(/TXEN/g,"RTS");
+	}
+	else if(p=="1") //485
+	{
+	//	id("show_fc").style.display = 'none';
+		hide_div('show_cts');
+		if(document.selection)
+			id("txt").outerHTML=id("txt").outerHTML.replace(/RTS/g,"TXEN");
+		else // IE
+			id("txt").innerHTML=id("txt").innerHTML.replace(/RTS/g,"TXEN");
+	}
+}
+
+function DisableConfig(val,tid) {
+	if(val==FN_SCADA || (val==FN_DISPLAY && tid=='show_pc'))
+		display_div(tid);
+	else
+		hide_div(tid);
+	if(id("pfn").value == FN_DISPLAY && id("dfn").value == FN_DISPLAY)
+	{
+		if(tid=="show_dpc")
+			id("dwrn").innerHTML = sWarn;
+		else if(tid=="show_pc")
+			id("swrn").innerHTML = sWarn;
+		id("dwrn").className = "reset_msg";
+		id("swrn").className = "reset_msg";
+	}
+	else
+	{
+		id("dwrn").innerHTML = "";
+		id("swrn").innerHTML = "";
+	}
+}
+
+
+function display_div(section) {
+	id(section).style.display = 'block';
+}
+function hide_div(section) {
+	id(section).style.display = 'none';
+}
+
+function load_once() {
+	populate("settings.html");
+	makeRequest(nc("serport.cgi"), null);
+}
+
+window.onload=load_once;
+//-->
+</script>
+	
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+
+<div id="trail"><a href="settings.html">Settings</a> / Serial Port</div>
+<div id="message"></div>
+<form action="http:serport_submit.cgi" method="POST" name="serport" onSubmit="return validate(this);">
+
+<div id="pesp" style="display:none;">
+<h2 class='topheader' id="srl_hdr">Serial Port</h2>
+<div class="fbox" style="width:402px;text-align:left;">
+<h4 class='topheader'>Serial Port Configuration</h4>
+<div id="prtfn" style="display:none;">
+<table cellspacing="0" border="0" id="pfn_tbl">
+	<tr>
+		<td class="label15">Port Function</td>
+		<td class="form">
+			<select name="pfn" id="pfn" onchange="show_cfg(this.value,'show_pc');">
+				<option value='1'>Display</option>
+				<option value='2'>SCADA</option>
+				<option value='255'>Disabled</option>
+			</select>		
+		</td>
+	</tr>
+	<tr><td id="swrn" colspan=2></td></tr>
+</table></div>
+<div id="show_pc" style="display:none;">
+<br>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">Serial Port Mode</td>
+		<td class="form">
+			<select name="mode" id="mode" onchange="show_232485(this.value)">
+				<option value='0'>RS232</option>
+				<option value='1'>RS485</option>
+			</select>		
+		</td>
+	</tr>
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">Baud Rate</td>
+		<td class="form">
+			<select name="baud" id="baud">
+				<option value='0'>9600</option>
+				<option value='1'>19200</option>
+				<option value='2'>38400</option>
+				<option value='3'>57600</option>
+				<option value='4'>115200</option>
+			</select>		
+		</td>
+	</tr>
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">Parity</td>
+		<td class="form">
+			<select name="parity" id="parity">
+				<option value='0'>NONE</option>
+				<option value='1'>ODD</option>
+				<option value='2'>EVEN</option>
+				<option value='3'>MARK (1)</option>
+				<option value='4'>SPACE (0)</option>
+			</select>		
+		</td>
+	</tr>
+</table><br>
+<h4 class='topheader' style="padding-left:20px">TX Output Control</h4>
+<table cellspacing="0" border="0" id="txt">
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">min RX-to-RTS Delay</td>
+		<td class="tb_labeln"><div id="rtw"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">RTS-to-TX Delay</td>
+		<td class="tb_labeln"><div id="tfp"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">RTS holdup after TX</td>
+		<td class="tb_labeln"><div id="tbp"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+</table>
+<div id="show_cts" style="display:none;">
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">CTS Input Enable</td>
+		<td class="form"><input type="checkbox" name="cen" id="cen" /></td>
+	</tr>
+</table></div><br>
+<div id="show_fc" style="display:none;">
+<h4 class='topheader' style="padding-left:20px">RS232 Hardware Flow Control</h4>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label3">RTS - Modem or Ext RS232/485 Converter</td>
+		<td class="tb_labeln"><input type="radio" name="rfc" value="1" onclick="display_div('show_cts');"/></td>
+	</tr>
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label3">RTR - Null Modem</td>
+		<td class="tb_labeln"><input type="radio" name="rfc" value="0" onclick="hide_div('show_cts');"/></td>
+	</tr>	
+</table></div>
+</div></div></div>
+
+<div id="disp" style="display:none;">
+<h2 class='topheader'>Display Serial Port</h2>
+<div class="fbox" style="width:402px;text-align:left;">
+<h4 class='topheader'>Serial Port Configuration</h4>
+<table cellspacing="0" border="0" id="dfn_tbl">
+	<tr>
+		<td class="label15">Port Function</td>
+		<td class="form">
+			<select name="dfn" id="dfn" onchange="show_cfg(this.value,'show_dpc');">
+				<option value='1'>Display</option>
+				<option value='2'>SCADA</option>
+				<option value='255'>Disabled</option>
+			</select>
+		</td>
+	</tr>
+	<tr><td id="dwrn" colspan=2></td></tr>
+</table>
+<div id="show_dstatic" style="display:none;"><br>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">Serial Port Mode</td>
+		<td class="elem" style="color:#999;">RS232 (fixed)</td>
+	</tr>
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">Baud Rate</td>
+		<td class="elem" style="color:#999;">19200 (fixed)</td>
+	</tr>
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">Parity</td>
+		<td class="elem" style="color:#999;">NONE (fixed)</td>
+	</tr>
+</table></div>
+<div id="show_dpc" style="display:none;">
+<br>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">Serial Port Mode</td>
+		<td class="elem" style="color:#999;">RS232 (fixed)</td>
+	</tr>
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">Baud Rate</td>
+		<td class="form">
+			<select name="dbaud" id="dbaud">
+				<option value='0'>9600</option>
+				<option value='1'>19200</option>
+				<option value='2'>38400</option>
+				<option value='3'>57600</option>
+				<option value='4'>115200</option>
+			</select>		
+		</td>
+	</tr>
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">Parity</td>
+		<td class="form">
+			<select name="dparity" id="dparity">
+				<option value='0'>NONE</option>
+				<option value='1'>ODD</option>
+				<option value='2'>EVEN</option>
+				<option value='3'>MARK (1)</option>
+				<option value='4'>SPACE (0)</option>
+			</select>		
+		</td>
+	</tr>
+</table><br>
+<h4 class='topheader' style="padding-left:20px">TX Output Control</h4>
+<table cellspacing="0" border="0" id="txt">
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">min RX-to-RTS Delay</td>
+		<td class="tb_labeln"><div id="drtw"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">RTS-to-TX Delay</td>
+		<td class="tb_labeln"><div id="dtfp"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">RTS holdup after TX</td>
+		<td class="tb_labeln"><div id="dtbp"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+</table>
+<div id="show_dcts" style="display:none;">
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label15">CTS Input Enable</td>
+		<td class="form"><input type="checkbox" name="dcen" id="dcen" /></td>
+	</tr>	
+</table></div><br>
+<div style="display:none;">
+<h4 class='topheader' style="padding-left:20px; display:none;">RS232 Hardware Flow Control</h4>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label3">RTS - Modem or Ext RS232/485 Converter</td>
+		<td class="tb_labeln"><input type="radio" name="drfc" value="1" onclick="display_div('show_dcts');"/></td>
+	</tr>
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="label3">RTR - Null Modem</td>
+		<td class="tb_labeln"><input type="radio" name="drfc" value="0" onclick="hide_div('show_dcts');"/></td>
+	</tr>	
+</table></div>
+</div></div></div>
+
+<br>
+<br>
+<a href="lrsa_stats.cgi">Serial Port Diagnostics</a><br>
+<br>
+<br>
+
+
+<input class="submit" type="submit" name="SaveSettings" value="Apply"/><br>
+</form>
+<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return get_resp()">
+<input type="hidden" name="dflt" id="dflt" value="Serial"/>
+<input type="submit" name="restore" value="Restore Defaults" /></form>
+
+</div>
+<div class="pagebox"><div id="footer"></div></div>
+</body></html>

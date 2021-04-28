@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Data - Bitronics Web Server</title> 
+    <link rel="stylesheet" type="text/css" href="site.css">
+    <link rel="stylesheet" type="text/css" href="css_tab.css">
+    <script src="request.js"></script>
+    <script src="data.js"></script>
+	<script src="content.js"></script>
+    <link rel="icon" href="favicon.ico">
+<script>
+//<!--
+var doSend = true;
+var old_time = new Date();
+var new_time = new Date();
+var first_load = true;
+var mset;
+var time;
+var mname = 0;
+var unit = 1;
+
+//                          B   A   P   A   V	P
+//                          A   D   P   M   L	T
+//       sec name   COL_NO  S   V   X   P   T	S
+var mset_tab = [
+        ["iv_tab",  1,      1,  1,  1,  1,  0,	1 ],
+        ["iv_tab",  2,      1,  1,  1,  0,  1,	1 ],
+        ["iv_tab",  3,      1,  1,  1,  0,  1,	1 ],
+        ["iv_tab",  4,      1,  1,  1,  0,  1,	1 ],
+        ["i_r",     -1,     1,  1,  1,  0,  0,	1 ],
+        ["pwr",     -1,     1,  1,  1,  0,  0,	1 ],
+        ["vtr",     -1,     1,  1,  1,  0,  1,	1 ],
+        ["ctr",     -1,     1,  1,  1,  1,  0,	1 ],
+        ["frq",     0,      1,  1,  1,  0,  0,	1 ],
+        ["frq",     1,      1,  1,  1,  0,  0,	1 ],
+        ["frq",     2,      1,  1,  1,  0,  0,	1 ],
+        ["snc",	   -1,		0,  0,  1,  0,  0,	0 ],
+        ["pt",     -1,      0,  0,  1,  0,  0,	1 ],
+        ["mt",     -1,      0,  0,  1,  0,  0,	1 ],
+        ["pfc",    -1,      0,  0,  0,  0,  0,	1 ]];
+
+var name_tab = [
+        ["vlt_a",   ""],
+        ["vlt_b",   ""],
+        ["vlt_c",   ""],
+        ["vlt_label", "Volts"],
+        ["amp_a",   ""],
+        ["amp_b",   ""],
+        ["amp_c",   ""],
+        ["amp_r",   ""],
+        ["amp_label", "Amps"],
+        ["vlt_ab", ""],
+        ["vlt_bc", ""],
+        ["vlt_ca", ""],
+        ["vll_label", "Volts"],
+        ["w_a", ""],
+        ["w_b", ""],
+        ["w_c", ""],
+        ["w_t", ""],
+        ["w_label", "Watts"],
+		["wt_lbl", "Watts"],
+        ["var_a", ""],
+        ["var_b", ""],
+        ["var_c", ""],
+        ["var_t", ""],
+        ["var_label", "VARs"],
+		["vart_lbl", "VARs"],
+        ["va_a", ""],
+        ["va_b", ""],
+        ["va_c", ""],
+        ["va_t", ""],
+        ["va_label", "VAs"],
+		["vat_lbl", "VAs"],
+        ["pf_a", ""],
+        ["pf_b", ""],
+        ["pf_c", ""],
+        ["pf_t", ""],
+		["freq", ""],
+        ["kwh_pos", ""],
+        ["kwh_neg", ""],
+        ["varh_lag", ""],
+        ["varh_lead", ""],
+        ["vt_scale", ""],
+        ["ct_scale", ""],
+        ["psv", ""],
+        ["health", ""],
+        ["hbeat", ""],
+        ["ptDoor", ""],
+        ["meterTemp", ""],
+        ["pkflt_a",   ""],
+        ["pkflt_b",   ""],
+        ["pkflt_c",   ""]];
+
+
+var has_ps_mon = 0;
+var PhsA = "";
+var PhsB = "";
+var PhsC = "";
+
+function parse_vars(data) {
+    var j=0, i;
+    var parsed = data.split( "\n" );
+    var pending_changes =   parsed[j++];
+    mset = Number(parsed[j++]) + 2;
+	var elem = parsed[j++];
+    
+    for(i=0; i<name_tab.length; ++i, ++j) {
+        id(name_tab[i][mname]).innerHTML = parsed[j] + name_tab[i][unit];
+    }
+	old_time = new_time;
+
+	set_health(id("health"), id("health").innerHTML);
+
+	var hasTrending = parsed[j++];
+	
+   //  derived from CGI_SEND_NUM(read_ps_pca_id()); (> 32)
+	has_ps_mon = parsed[j];
+	
+	hb_new = Number(id("hbeat").innerHTML);
+
+    msg_reset_if_pending(pending_changes);
+
+    if(first_load == false)
+        return;
+
+    first_load = false;	
+    
+
+    for(i=0; i<mset_tab.length; i++) {
+        if(mset_tab[i][1] >= 0) {
+            if(mset_tab[i][mset] == 0) {
+                if(mset_tab[i][1] >= 0) {
+                    show_hide_column(mset_tab[i][0], mset_tab[i][1], mset_tab[i][mset]);
+                }
+                else {
+                    id(mset_tab[i][0]).style.display = 'none';
+                }
+            }
+        }
+        else {
+            if(mset_tab[i][mset] == 0) {
+                id(mset_tab[i][0]).style.display = 'none';
+            }
+        }
+    }
+		
+	if(elem == "0") { // if in 2-Element mode...
+		if(mset == 6)
+			show_hide_column("iv_tab",0,0);		
+		id("pwr_tab").style.display = 'none';
+		show_hide_column("iv_tab", 2, 0);
+	}
+	
+	if(hasTrending == "1")
+		id("trlog").style.display = '';
+	
+    doSend = true;
+    id("mncnt").style.display = 'block';
+    
+    // Display PS voltage?
+	if(has_ps_mon == "1")
+		id("psmon").style.display = 'block';
+		
+	//Display cabinet door if a 100A input PPX II or a poletop M661.
+	if(id("ptDoor").innerHTML == "NA")
+		id("pt").style.display = 'none';
+
+	if(id("meterTemp").innerHTML == "NA")
+		id("mt").style.display = 'none';
+		
+	id("PhsA").innerHTML = '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'Phase A';
+	id("PhsB").innerHTML = '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'Phase B';
+	id("PhsC").innerHTML = '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + 'Phase C';
+}
+
+function loop() {
+
+    if(doSend) {
+        doSend = false;
+        makeRequest(nc("data.cgi"), null);
+    }
+    setTimeout(function(){check_status(http_request, 0);}, 249);
+	checkConnection();
+
+    new_time = new Date();
+    time = ((new_time - old_time)/1000);
+    id("polls").innerHTML = time.toFixed(3);
+	
+    setTimeout("loop()", 1000);
+}
+
+function load_once() {
+	populate("data.html");
+	loop();
+}
+
+window.onload=load_once;
+window.onunload=http_request.abort;
+//-->
+</script>
+</head>
+<body id="tab1">
+<div id="Content"></div>
+
+<div id="mncnt" class="pagebox" style="display:none;">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="message"></div>
+<div id="LostCon" class="fbox" style="visibility:hidden;background-color:#fcc;"><a><b>Connection Lost!</b></a></div>
+<h2>Live Data View</h2>
+
+<ul id="tabnav"> 
+    <li class="tab1"><a href="data.html">Instantaneous</a></li> 
+    <li class="tab2"><a href="data2.html">Demands</a></li> 
+	<li class="tab3"><a href="data3.html">Vector Diagram</a></li>
+	<li class="tab4" id="snc"><a href="data4.html">Synchronizing</a></li>
+	<li class="tab5" id="trlog" style="display:none;"><a href="data5.html">Trend Log</a></li>
+</ul>
+
+<table id="iv_tab">
+    <tr>
+        <td class="tb_label"></td>
+        <td class="tb_header"><div id="amp_label" align="center">Amps</div></td>
+        <td class="tb_header"><div id="vlt_label" align="center">Volts</div></td>
+        <td class="tb_labeln"></td>
+        <td class="tb_header"><div id="vll_label" align="center">Volts</div></td>
+    </tr>
+    <tr>
+        <td class="tb_label">Phase A</td>
+        <td class="tb_elem"><div id="amp_a"></div></td>
+        <td class="tb_elem"><div id="vlt_a"></div></td>
+        <td class="tb_labeln">A-B</td>
+        <td class="tb_elem"><div id="vlt_ab"></div></td>
+    </tr>
+    <tr>
+        <td class="tb_label">Phase B</td>
+        <td class="tb_elem"><div id="amp_b"></div></td>
+        <td class="tb_elem"><div id="vlt_b"></div></td>
+        <td class="tb_labeln">B-C</td>
+        <td class="tb_elem"><div id="vlt_bc"></div></td>
+    </tr>
+    <tr>
+        <td class="tb_label">Phase C</td>
+        <td class="tb_elem"><div id="amp_c"></div></td>
+        <td class="tb_elem"><div id="vlt_c"></div></td>
+        <td class="tb_labeln">C-A</td>
+        <td class="tb_elem"><div id="vlt_ca"></div></td>
+    </tr>
+    <tr id="i_r">
+        <td class="tb_label">Residual</td>
+        <td class="tb_elem"><div id="amp_r"></div></td>
+        <td class="tb_elem"></td>
+    </tr>
+</table>
+<br>
+<div id="pwr">
+<table id="pwr_tab">
+    <tr>
+        <td class="tb_label"></td>
+        <td class="tb_header"><div id="w_label" align="center">Watts</div></td>
+        <td class="tb_header"><div id="var_label" align="center">VARs</div></td>
+        <td class="tb_header"><div id="va_label" align="center">VAs</div></td>
+        <td class="tb_header"><div align="center">PF</div></td>
+    </tr>
+    <tr>
+        <td class="tb_label"><div align="left">Phase A</div></td>
+        <td class="tb_elem"><div id="w_a"></div></td>
+        <td class="tb_elem"><div id="var_a"></div></td>
+        <td class="tb_elem"><div id="va_a"></div></td>
+        <td class="tb_elem"><div id="pf_a"></div></td>
+    </tr>
+    <tr>
+        <td class="tb_label"><div align="left">Phase B</div></td>
+        <td class="tb_elem"><div id="w_b"></div></td>
+        <td class="tb_elem"><div id="var_b"></div></td>
+        <td class="tb_elem"><div id="va_b"></div></td>
+        <td class="tb_elem"><div id="pf_b"></div></td>
+    <tr>
+        <td class="tb_label"><div align="left">Phase C</div></td>
+        <td class="tb_elem"><div id="w_c"></div></td>
+        <td class="tb_elem"><div id="var_c"></div></td>
+        <td class="tb_elem"><div id="va_c"></div></td>
+        <td class="tb_elem"><div id="pf_c"></div></td>
+    </tr>
+</table><br>
+<table id="tot_tab">
+    <tr>
+        <td class="tb_label"></td>
+        <td class="tb_header"><div id="wt_lbl" align="center">Watts</div></td>
+        <td class="tb_header"><div id="vart_lbl" align="center">VARs</div></td>
+        <td class="tb_header"><div id="vat_lbl" align="center">VAs</div></td>
+        <td class="tb_header"><div align="center">PF</div></td>
+    </tr>
+    <tr>
+        <td class="tb_label"><div align="left">Total</div></td>
+        <td class="tb_elem"><div id="w_t"></div></td>
+        <td class="tb_elem"><div id="var_t"></div></td>
+        <td class="tb_elem"><div id="va_t"></div></td>
+        <td class="tb_elem"><div id="pf_t"></div></td>
+    </tr>
+</table>
+<table id="frq">
+    <tr>
+        <td class="label15"></td>
+        <td class="tb_header">&nbsp;</td>
+        <td class="label2">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="label15">Frequency</td>
+        <td class="tb_elem"><div id="freq"></div></td>
+	</tr>
+</table>
+<table id="nrg_tab">
+    <tr>
+        <td class="label15"></td>
+        <td class="tb_header">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="label15">Energy Used (+kWh)</td>
+        <td class="tb_elem"><div id="kwh_pos"></div></td>
+    </tr>
+    <tr>
+        <td class="label15">Energy Produced (-kWh)</td>
+        <td class="tb_elem"><div id="kwh_neg"></div></td>
+    </tr>
+    <tr>
+        <td class="label15">Energy Lag (+kVARh)</td>
+        <td class="tb_elem"><div id="varh_lag"></div></td>
+    </tr>
+    <tr>
+        <td class="label15">Energy Lead (-kVARh)</td>
+        <td class="tb_elem"><div id="varh_lead"></div></td>
+    </tr>
+</table>
+<br>
+</div>
+<table id="ratio_tab">
+    <tr>
+        <td class="label15"></td>
+        <td class="tb_header" width="100">&nbsp;</td>
+    </tr>
+    <tr id="vtr">
+        <td class="label15">VT Scaling</td>
+        <td class="tb_elem" width="100"><div id="vt_scale"></div></td>
+    </tr>
+    <tr id="ctr">
+        <td class="label15">CT Scaling</td>
+        <td class="tb_elem" width="100"><div id="ct_scale"></div></td>
+    </tr>
+</table>
+<!-- Start of new for pole top, look for end down below -->
+<div id="psmon" style="display:none;">
+<table>
+	<tr>
+		<td class="label15"></td>
+        <td class="tb_header">&nbsp;</td>
+		<td class="label2">&nbsp;</td>
+			<td class="label6">&nbsp;</td>
+			<td class="label5"></td>
+		<td class="tb_header">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="label15">Power Supply Voltage</td>
+        <td class="tb_elem"><div id="psv"></div></td>
+		<td class="label2">&nbsp;Volts</td>
+		<td class="label6">&nbsp;</td>
+    </tr>
+</table>
+</div>	
+<table id="frq">
+    <tr>
+        <td class="label15"></td>
+        <td class="tb_header">&nbsp;</td>
+        <td class="label2">&nbsp;</td>
+		<td class="label6">&nbsp;</td>
+		<td class="label15"></td>
+        <td class="tb_header">&nbsp;</td>
+    </tr>
+	<tr>
+        <td class="label15">Time Between Polls</td>
+        <td class="tb_elem"><div id="polls"></div></td>
+        <td class="label2">&nbsp;sec</td>
+	</tr>
+	<tr>
+        <td class="label15">Heartbeat</td>
+        <td class="tb_elem"><div id="hbeat"></div></td>
+	</tr>
+</table>
+<table id="pt">
+	<tr>
+        <td class="label15">Cabinet Door</td>
+        <td class="tb_elem" width="78"><div id="ptDoor"></div></td>
+	</tr>	
+</table>
+<table id="mt">
+	<tr>
+        <td class="label15">Meter Temperature</td>
+        <td class="tb_elem" width="78"><div id="meterTemp"></div></td>
+        <td class="label2">&nbsp;&deg;C</td>
+	</tr>	
+</table>
+<table id="pfc">
+    <tr>
+        <td class="label15">Peak Fault Current (Amps)</td>
+    </tr>
+    <tr>
+        <td class="label15"><div id="PhsA"></div></td>
+        <td class="tb_elem" width="78"><div id="pkflt_a"></div></td>
+    </tr>
+    <tr>
+        <td class="label15"><div id="PhsB"></div></td>
+        <td class="tb_elem" width="78"><div id="pkflt_b"></div></td>
+    </tr>
+    <tr>
+        <td class="label15"><div id="PhsC"></div></td>
+        <td class="tb_elem" width="78"><div id="pkflt_c"></div></td>
+    </tr>
+<!-- End of new for pole top, look for start up below -->
+<table id="ht">
+    <tr>
+        <td class="label15"></td>
+        <td class="tb_header">&nbsp;</td>
+        <td class="label2">&nbsp;</td>
+    </tr>
+	<tr>
+        <td class="label15">Health</td>
+        <td class="tb_elem"><div id="health"></div></td>
+		<td id="err_box"></td>
+    </tr>
+</table>
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body></html>

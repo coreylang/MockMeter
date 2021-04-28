@@ -1,0 +1,893 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Protocol - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	<script src="tuc.js"></script>
+	<script src="protocol.js"></script>
+	<script src="request.js"></script>
+	<script src="cregs.js"></script>
+	<script src="dnpCatalog.js"></script>
+	<script src="dnpBilf.js"></script>
+	<script src="mbCat16.js"></script>
+	<script src="mbBilf16.js"></script>
+    <script src="load.js"></script>
+	<script src="catalogNames.js"></script>
+	<script src="calcTypeNamesOptimal.js"></script>
+	<script src="calcTypeNamesPrimary.js"></script>
+	<script src="mbModelMode.js"></script>
+	<script src="dnpModelMode.js"></script>
+	<script src="content.js"></script>
+    <!--
+	<script src="mbBilf12.js"></script>
+    -->
+
+    <script>
+    function load_once() {
+        populate("settings.html");
+        sendRequest("protocol", 0);
+        }
+
+    function do_serCollectionSubmit () {
+        //console.log("do_serCollectionSubmit");
+        serialize ();
+        startUpload ();
+        id('back_btn').value='< BACK';
+        id('myform').submit();
+        }
+
+    // onload for primary window object only; skip for iframe(s)
+    if (window.parent == self) {
+        // page reload kills any setTimeout();
+        window.onload = load_once;
+        }
+    </script>
+</head>
+<body>
+<div id="Content"></div>
+<div class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="trail"><a href="settings.html">Settings</a> / Protocol</div>
+<div id="message"></div>
+
+<div id="modbus" style="display:none;">
+<form action="mod_submit.cgi" method="POST" id="mform" onSubmit="return validate(this);" >
+<h2>Device Protocol Configuration</h2><br>
+<table>
+	<tr>
+		<td class="label4">Protocol</td>
+		<td class="label"><input type="radio" name="mprt" onClick="sendRequest('modbus',0);"/></td>
+		<td class="label">Modbus</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td class="label"><input type="radio" name="mprt" onClick="sendRequest('dnp',0);"/></td>
+		<td class="label">DNP3</td>
+	</tr>
+</table>
+<h3>Modbus Protocol Scaling</h3>
+<table>
+	<tr>
+		<td class="label4">Scaling</td>
+		<td class="label"><input type="radio" name="mscl" id="mscl" value="off" onClick="en_scl('m', true)"/></td>
+		<td class="label4">Optimal Resolution</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td class="label"><input type="radio" name="mscl" value="on" onClick="en_scl('m', false)"/></td>
+		<td class="label4">Primary Units</td>
+	</tr>
+</table>
+<table id="moscl">
+	<tr>
+		<td class="label5">Volt scaling</td>
+		<td class="form">
+		  <select name="mesc" id="mesc" style="width: 85px;">
+			  <option value='0'>150 V</option>
+			  <option value='1'>750 V</option>
+			  <option value='2' disabled>24 V</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Watt scaling</td>
+		<td class="form">
+		  <select name="mwsc" id="mwsc" style="width: 85px;">
+			  <option value='0'>1500 W</option>
+			  <option value='1'>10000 W</option>
+		  </select>
+		</td>
+	</tr>
+</table>
+<table id="mscale" style="display:none;">
+	<tr>
+		<td class="label5">Amps per count</td>
+		<td class="form">
+		  <select name="misc" id="misc" style="width: 85px;">
+			  <option value='-4'>1.0e-4</option>
+			  <option value='-3'>0.001</option>
+			  <option value='-2'>0.010</option>
+			  <option value='-1'>0.100</option>
+			  <option value='0'>1.000</option>
+			  <option value='1'>10.00</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Volts per count</td>
+		<td class="form">
+		  <select name="mvsc" id="mvsc" style="width: 85px;">
+			  <option value='-2'>0.010</option>
+			  <option value='-1'>0.100</option>
+			  <option value='0'>1.000</option>
+			  <option value='1'>10.00</option>
+			  <option value='2'>100.0</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Watts per count</td>
+		<td class="form">
+		  <select name="mpsc" id="mpsc" style="width: 85px;">
+			  <option value='-2'>0.010</option>
+			  <option value='-1'>0.100</option>
+			  <option value='0'>1.000</option>
+			  <option value='1'>10.00</option>
+			  <option value='2'>100.0</option>
+			  <option value='3'>1000.</option>
+			  <option value='4'>1.0e4</option>
+			  <option value='5'>1.0e5</option>
+			  <option value='6'>1.0e6</option>
+			  <option value='7'>1.0e7</option>
+			  <option value='8'>1.0e8</option>
+			</select>
+		</td>
+	</tr>
+</table>
+<h3>Modbus Session</h3>
+<table>
+	<tr>
+		<td class="label5">Session</td>
+		<td class="form">
+		<select name="mses" id="mses" onchange="sendRequest('modbus',this.value)">
+			  <option value='0'>1</option>
+		</select>
+		</td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Type</td>
+		<td class="form">
+		  <select name="mtyp" id="mtyp"
+            onchange="ena_form(this.value, 'mform')">
+          </select>
+		</td>
+		<td id="mwrn"></td>
+	</tr>
+</table>
+<table>
+	<tr>
+		<td class="label5">Slave Address</td>
+		<td class="form"><div id="msla"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Register Set</td>
+		<td class="form">
+		  <select name="mpli" id="mpli" onchange="vwedit()">
+			  <option value='1'>BiLF16</option>
+			  <option value='2'>BiLF12</option>
+			  <option value='3'>TUC1</option>
+			  <option value='4'>TUC2</option>
+		  </select>
+		</td>
+		<td><input type="button" id="ve_btn" value="View Registers" onclick="show_regset();"></td>
+	</tr>
+	<tr>
+		<td class="label5">Tag Register</td>
+		<td class="form"><div id="mtgr"></div></td>
+        <td></td>
+	</tr>	
+	<tr>
+		<td class="label5">Receive Frame Timeout</td>
+		<td class="form"><div id="mrft"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+</table>
+<div id="tcp">
+<table>
+	<tr>
+		<td><h3>TCP/IP</h3></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td class="label5">Master IP Address</td>
+		<td class="form"><div id="mmIP"></div></td>
+	</tr>
+	<tr>
+		<td class="label5">IED Listen Port</td>
+		<td class="form"><div id="mmPt"></div></td>
+	</tr>
+</table>
+</div>
+<div id="serial">
+<table>
+    <tbody>
+	<tr>
+		<td><h3>Serial</h3></td>
+		<td></td>
+		<td></td>
+	</tr>
+    </tbody>
+    <tbody>
+	<tr id="ict_row" style="display:none;">
+		<td class="label5">Inter-Character Timeout</td>
+		<td class="form"><div id="mict"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>	
+    </tbody>
+	<tbody id="dlm_blk" style="display:none">
+	<tr>
+		<td class="label5">Delimiter 1</td>
+		<td class="form"><div id="mdl1"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Delimiter 2</td>
+		<td class="form"><div id="mdl2"></div></td>
+        <td></td>
+	</tr>
+	</tbody>
+</table>
+</div>
+<h3>Legacy Adaptation</h3>
+<table>
+	<tr>
+		<td class="label5">Max Holding Regs to Read</td>
+		<td class="form"><div id="mmhr"></div></td>
+	</tr>
+	<tr>
+		<td class="label5">Max Holding Regs to Write</td>
+		<td class="form"><div id="mmhw"></div></td>
+	</tr>
+</table><br>
+<input class="submit" type="submit" name="msubmit" id="msubmit" value="Apply"/>
+</form>
+<form action="restore.cgi" method="POST" id="mod_dflts" onclick="rstor();" onsubmit="return confirm_restore('Modbus')">
+<input type="hidden" name="dflt" value="Modbus"/>
+<input type="hidden" name="ses" id="rmses" />
+<input type="submit" name="mrestore" value="Restore Session Defaults" onclick="restore='sesn';" /><br>
+<input type="submit" name="mrestore" value="Restore All Modbus Defaults" onclick="restore='all';" />
+</form>
+</div>
+<div id="dnp" style="display:none;">
+<form action="dnp_submit.cgi" method="POST" id="dform" onSubmit="return validate(this);" >
+<h2>Device Protocol Configuration</h2><br>
+<table>
+	<tr>
+		<td class="label4">Protocol</td>
+		<td class="label"><input type="radio" name="dprt" onClick="sendRequest('modbus',0)"/></td>
+		<td class="label">Modbus</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td class="label"><input type="radio" name="dprt" onClick="sendRequest('dnp',0)"/></td>
+		<td class="label">DNP3</td>
+	</tr>
+</table>
+<h3>DNP3 Protocol Scaling</h3>
+<table>
+	<tr>
+		<td class="label4">Scaling</td>
+		<td class="label"><input type="radio" name="dscl" id="dscl" value="off" onClick="en_scl('d', true)"/></td>
+		<td class="label4">Optimal Resolution</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td class="label"><input type="radio" name="dscl" value="on" onClick="en_scl('d', false)"/></td>
+		<td class="label4">Primary Units</td>
+	</tr>
+</table>
+<table id="doscl">
+	<tr>
+		<td class="label5">Volt scaling</td>
+		<td class="form">
+		  <select name="desc" id="desc" style="width: 85px;">
+			  <option value='0'>150 V</option>
+			  <option value='1'>750 V</option>
+			  <option value='2' disabled>24 V</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Watt scaling</td>
+		<td class="form">
+		  <select name="dwsc" id="dwsc" style="width: 85px;">
+			  <option value='0'>1500 W</option>
+			  <option value='1'>10000 W</option>
+		  </select>
+		</td>
+	</tr>
+</table>
+<table id="dscale" style="display:none;">
+	<tr>
+		<td class="label5">Amps per count</td>
+		<td class="form">
+		  <select name="disc" id="disc" style="width: 85px;">
+			  <option value='-4'>1.0e-4</option>
+			  <option value='-3'>0.001</option>
+			  <option value='-2'>0.010</option>
+			  <option value='-1'>0.100</option>
+			  <option value='0'>1.000</option>
+			  <option value='1'>10.00</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Volts per count</td>
+		<td class="form">
+		  <select name="dvsc" id="dvsc" style="width: 85px;">
+			  <option value='-2'>0.010</option>
+			  <option value='-1'>0.100</option>
+			  <option value='0'>1.000</option>
+			  <option value='1'>10.00</option>
+			  <option value='2'>100.0</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Watts per count</td>
+		<td class="form">
+		  <select name="dpsc" id="dpsc" style="width: 85px;">
+			  <option value='-2'>0.010</option>
+			  <option value='-1'>0.100</option>
+			  <option value='0'>1.000</option>
+			  <option value='1'>10.00</option>
+			  <option value='2'>100.0</option>
+			  <option value='3'>1000.</option>
+			  <option value='4'>1.0e4</option>
+			  <option value='5'>1.0e5</option>
+			  <option value='6'>1.0e6</option>
+			  <option value='7'>1.0e7</option>
+			  <option value='8'>1.0e8</option>
+		  </select>
+		</td>
+	</tr>
+</table>
+<h3>DNP Session</h3>
+<table>
+	<tr>
+		<td class="label5">Session</td>
+		<td class="form">
+		<select name="dses" id="dses" onchange="sendRequest('dnp',this.value)">
+			  <option value='0'>1</option>
+		  </select>
+		</td>
+		<td><input type="button" id="pl_btn" value="Edit Points List" onclick="show_plist();"></td>
+	</tr>
+</table>
+<table>
+	<tr>
+		<td class="label5">Type</td>
+		<td class="form">
+		  <select name="dtyp" id="dtyp"
+            onchange="ena_form(this.value, 'dform')">
+          </select>
+		</td>
+		<td id="dwrn"></td>
+	</tr>
+	<tr>
+		<td class="label5">IED (Source)</td>
+		<td class="form"><div id="src"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Master (Destination)</td>
+		<td class="form"><div id="dst"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Tag Register</td>
+		<td class="form"><div id="tgr"></div></td>
+        <td></td>
+	</tr>	
+</table>
+<div id="tcpip"><table>
+	<tr>
+		<td class="label5">Master IP Address</td>
+		<td class="form"><div id="mIP"></div></td>
+	</tr>
+	<tr>
+		<td class="label5">IED Listen Port</td>
+		<td class="form"><div id="mPt"></div></td>
+	</tr>
+</table></div><br>
+<table id="elbat">
+<tr><td><input class="submit" type="submit" name="dsubmit" value="Apply"/></td>
+<td class="reset_btn"><input type="button" name="adv_btn" id="adv_btn" value="Advanced" onclick="javascript:hide_adv();"></td>
+</tr></table>
+<div id="d_adv">
+<table>
+	<tr>
+		<td class="label5">Tag Register 1</td>
+		<td class="form"><div id="tg1"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Link Status Period</td>
+		<td class="form"><div id="lsP"></div></td>
+		<td class="label">seconds</td>
+	</tr>
+	<tr>
+		<td class="label5">Validate Source Address</td>
+		<td class="form"><div id="vSA"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Enable Self Address</td>
+		<td class="form"><div id="eSA"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Delete Oldest Event</td>
+		<td class="form"><div id="dOE"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Allow Operate</td>
+		<td class="form"><div id="alR"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Allow Time Set</td>
+		<td class="form"><div id="alT"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Set Needtime IIN</td>
+		<td class="form"><div id="sNT"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td><h3>Deadbands</h3></td>
+        <td></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Phase Current</td>
+		<td class="form"><div id="dpc"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Neutral Current</td>
+		<td class="form"><div id="dnc"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Voltages</td>
+		<td class="form"><div id="dvt"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Power Reactive</td>
+		<td class="form"><div id="dpr"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Power Actual</td>
+		<td class="form"><div id="dpa"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Frequency</td>
+		<td class="form"><div id="dfr"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Miscellaneous</td>
+		<td class="form"><div id="dms"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td><h3>Timeouts</h3></td>
+        <td></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Needtime</td>
+		<td class="form"><div id="ndT"></div></td>
+		<td class="label">minutes</td>
+	</tr>
+	<tr>
+		<td class="label5">Application Confirm</td>
+		<td class="form"><div id="apC"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+	<tr>
+		<td class="label5">Select</td>
+		<td class="form"><div id="slc"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+	<tr>
+		<td><h3>Unsolicited Response</h3></td>
+        <td></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">UR Enable</td>
+		<td class="form"><div id="uEN"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Enable Initial Null</td>
+        <td class="form"><div id="inN"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Class1 Count</td>
+		<td class="form"><div id="c1E"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Class1 Timeout</td>
+		<td class="form"><div id="c1T"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+	<tr>
+		<td class="label5">Class2 Count</td>
+		<td class="form"><div id="c2E"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Class2 Timeout</td>
+		<td class="form"><div id="c2T"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+	<tr>
+		<td class="label5">Class3 Count</td>
+		<td class="form"><div id="c3E"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Class3 Timeout</td>
+		<td class="form"><div id="c3T"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+	<tr>
+		<td class="label5">Max Retries</td>
+		<td class="form"><div id="mxR"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Retry Timeout</td>
+		<td class="form"><div id="rTO"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>	
+	<tr>
+		<td class="label5">Offline Timeout</td>
+		<td class="form"><div id="olT"></div></td>
+		<td class="label">seconds</td>
+	</tr>
+	</table>
+	<table>
+	<tr>
+		<td><h3>Default Variations</h3></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Binary Input</td>
+		<td class="form">
+		  <select name="o01" id="o01"  style="width: 200px;">
+			  <option value='1'>Packed format</option>
+			  <option value='2'>With flags</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Binary Input Event</td>
+		<td class="form">
+		  <select name="o02" id="o02" style="width: 200px;">
+			  <option value='1'>Without time</option>
+			  <option value='2'>With absolute time</option>
+			  <option value='3'>With relative time</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Binary Output</td>
+		<td class="form">
+		  <select name="o10" id="o10" style="width: 200px;">
+			  <option value='1'>Packed format</option>
+			  <option value='2'>With flags</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Binary Output Event</td>
+		<td class="form">
+		  <select name="o11" id="o11" style="width: 200px;">
+			  <option value='1'>Without time</option>
+			  <option value='2'>With time</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Counter</td>
+		<td class="form">
+		  <select name="o20" id="o20" style="width: 200px;">
+			  <option value='1'>32-bit</option>
+			  <option value='2'>16-bit</option>
+			  <option value='5'>32-bit without flag</option>
+			  <option value='6'>16-bit without flag</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Frozen Counter</td>
+		<td class="form">
+		  <select name="o21" id="o21" style="width: 200px;">
+			  <option value='1'>32-bit</option>
+			  <option value='2'>16 bit</option>
+			  <option value='5'>32-bit with time</option>
+			  <option value='6'>16-bit with time</option>
+			  <option value='9'>32-bit without flag</option>
+			  <option value='10'>16-bit without flag</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Frozen Counter Event</td>
+		<td class="form">
+		  <select name="o23" id="o23" style="width: 200px;">
+			  <option value='1'>32-bit</option>
+			  <option value='2'>16-bit</option>
+			  <option value='5'>32-bit with time</option>
+			  <option value='6'>16-bit with time</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Analog Input</td>
+		<td class="form">
+		  <select name="o30" id="o30" style="width: 200px;">
+			  <option value='1'>32-bit</option>
+			  <option value='2'>16-bit</option>
+			  <option value='3'>32-bit without flag</option>
+			  <option value='4'>16-bit without flag</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Analog Input Event</td>
+		<td class="form">
+		  <select name="o32" id="o32" style="width: 200px;">
+			  <option value='1'>32-bit</option>
+			  <option value='2'>16-bit</option>
+			  <option value='3'>32-bit with time</option>
+			  <option value='4'>16-bit with time</option>
+		  </select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label5">Analog Output Status</td>
+		<td class="form">
+		  <select name="o40" id="o40" style="width: 200px;">
+			  <option value='1'>32-bit</option>
+			  <option value='2'>16-bit</option>
+		  </select>
+		</td>
+	</tr>
+	</table>
+	<table>
+	<tr>
+		<td><h3>Transmit/Receive</h3></td>
+        <td></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Receive Fragment Size</td>
+		<td class="form"><div id="rFg"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Transmit Fragment Size</td>
+		<td class="form"><div id="tFg"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Receive Frame Size</td>
+		<td class="form"><div id="rFm"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Transmit Frame Size</td>
+		<td class="form"><div id="tFm"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Receive Frame Timeout</td>
+		<td class="form"><div id="rFT"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+	<tr>
+		<td class="label5">First Character Timeout</td>
+		<td class="form"><div id="fCT"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+	<tr>
+		<td class="label5">Link Confirm Mode</td>
+		<td class="form">
+		  <select name="lCM" id="lCM">
+			  <option value='0'>Never</option>
+			  <option value='1'>Sometimes</option>
+			  <option value='2'>Always</option>
+		  </select>
+		</td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Link Confirm Timeout</td>
+		<td class="form"><div id="lCT"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+	<tr>
+		<td class="label5">Link Retries</td>
+		<td class="form"><div id="lkR"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">Link Offline Poll Period</td>
+		<td class="form"><div id="olP"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+</table>
+<div id="tcpip_adv">
+<table>
+	<tr>
+		<td><h3>TCP/IP and UDP</h3></td>
+        <td></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">IP Connect Timeout</td>
+		<td class="form"><div id="iCT"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+	<tr>
+		<td class="label5">UDP Broadcast Address</td>
+		<td class="form"><div id="uIP"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">UDP Local Port</td>
+		<td class="form"><div id="lPt"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">UDP Destination Port</td>
+		<td class="form"><div id="dPt"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">UDP Initial Unsolicited Port</td>
+		<td class="form"><div id="uUP"></div></td>
+        <td></td>
+	</tr>
+	<tr>
+		<td class="label5">UDP Validate Address</td>
+		<td class="form"><div id="uVd"></div></td>
+        <td></td>
+	</tr>
+</table>
+</div><br>
+<input class="submit" type="submit" name="dsubmit" value="Apply"/>
+</div>
+</form>
+<form action="restore.cgi" method="POST" id="dnp_dflts" onclick="rstor();" onsubmit="return confirm_restore('DNP')">
+<input type="hidden" name="dflt" value="DNP"/>
+<input type="hidden" name="ses" id="rdses" />
+<input type="submit" name="drestore" value="Restore Session Defaults" onclick="restore='sesn';" /><br>
+<input type="submit" name="drestore" value="Restore All DNP Defaults" onclick="restore='all';" />
+</form>
+</div>
+
+<div id="regedit" style="display:none;">
+<div id="pointslist">
+<h2>DNP Points List Configuration</h2><br>
+<h3>DNP Type</h3>
+<select name="dnp_t" id="dnp_t" onchange="build_it();"></select><br><br>
+</div>
+<div id="regset">
+<h2>Modbus Register Configuration</h2><br>
+</div>
+<div id="order" style="display:none;">
+<table>
+<tr>
+	<td style="text-align:center">
+		<a class="label2">Available</a><br>
+		<select style="width: 260px" name="menu1" id="menu1" size="15" multiple></select><br>
+		<p align="center"><input type="button" onclick="slctAll();" value="Select All"><input type="button" onClick="right();" value=" >> "></p>
+		<p align="center">Filter: <input type="text" id="search1" placeholder="Measurement Name" maxlength="64" onKeyUp="filterMenu(event, 1);">
+		<input type="button" value="X" onclick="clrSearch(1);"></p>
+	</td>
+	<td style="text-align:center">
+		<a class="label2">Selected</a><br>
+		<select style="width: 300px" name="menu2" id="menu2" size="15" multiple ></select><br>
+		<p align="center"><input type="button" onClick="left()" value=" << " ></p>
+		<p align="center">Filter: <input type="text" id="search2" placeholder="Measurement Name" maxlength="64" onKeyUp="filterMenu(event, 2);">
+		<input type="button" value="X" onclick="clrSearch(2);"></p>
+	</td>
+	<td style="text-align:center">
+		<p align="center"><input type="button" id="up" onClick="move('up')" value="&#923;" ></p>
+		<p align="center"><input type="button" id="down" onClick="move('down')" value="V" ></p>
+	</td>	
+</tr>
+<tr>
+	<td style="text-align:center"><input type="button" name="resvd" value="Reserved >>" onclick="addResvd();"/></td>
+	<td style="text-align:center">
+		<p id="success"><b>BiLF set applied to list!</b><br></p>
+		<p id="mnu_btns"><input type="button" name="clr_btn" value="Clear" onclick="clr();"/>
+		<input type="button" name="bilf_btn" id="bilf_btn" value="Use BiLF List" onclick="useBilf();"/></p>
+		<div id="c0e"><a class="label8">Class 0 Enable &nbsp;</a><input type="text" id="c0e_val" size="6" maxlength="5" value="3" /><br>
+		<input type="button" name="set_btn" value="Set BiLF" onclick="setMask();"/>
+		<input type="button" name="cncl_btn" value="Cancel" onclick="show_btns();"/></div>
+	</td>
+	<td>&nbsp;</td>
+</tr>
+</table><br>
+
+<a class="elem" style="color:#999;">Note: Settings are saved to device upon clicking the "Apply" button on next page.</a>
+<a style="padding-left:495px;"><input type="button" name="cancl_btn" value="Cancel" onclick="(document.getElementsByName('mprt')[0].checked)?show_regset():show_plist();" />
+<input type="button" name="nxt_btn" value="Next >" onclick="go_next();"/><br></a>
+</div>
+
+<div id="finish" style="display:none;">
+<table id="header_tbl"></table>
+<table id="subheader">
+	<tr>
+		<td class="label6">&nbsp;</td>
+		<td class="label6" id="ena_filr">&nbsp;</td>
+		<td class="label12">&nbsp;</td>
+		<td class="label4">&nbsp;</td>
+		<td class="label7">0</td>
+		<td class="label7">1</td>
+		<td class="label7">2</td>
+		<td class="label7">3</td>
+		<td class="label7">&nbsp;</td>
+		<td class="label11">&nbsp;</td>
+	</tr>
+</table>
+<div id="tblDiv" style="height:300px; overflow:auto;">
+    <table id="tbl_content"></table>
+</div>
+
+<p><input type="button" name="edit_btn" id="edit_btn" value="Edit List" onclick="edit_regs();"/></p>
+<form action="serCollection.cgi" method="POST" id="myform" enctype="multipart/form-data" target="upload_target">
+<textarea id="serCollection" name="serCollection" style="display:none"></textarea>
+<iframe name="upload_target" style="display:none"></iframe>
+<div id="upbox" class="fbox">
+	<a id="f1_upload_process">Loading...
+        <br>
+        <img src="loader.gif" alt="loading">
+        <br>
+    </a>
+	<p id="upb_msg" align="center"></p>
+	<a id="f1_upload_form"></a>
+	<div style="text-align:left">
+      <input type="button" id="back_btn" value="Cancel" onclick="hideList();"/>
+	  <input type="button" id="serCollectionSubmit" value="Apply" onclick="auth_check(do_serCollectionSubmit);" />
+	  <input type="button" id="tucNext"  value="Next >" onclick="hideList();" style="visibility:hidden"/>
+	</div>
+</div>
+</form>
+</div>
+</div> <!-- end regedit -->
+
+</div> <!-- end pagebox -->
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>
+

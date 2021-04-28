@@ -1,0 +1,130 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Network - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+<script>
+//<!--
+var set_arr = ["ipaddress", "routerip", "subnet"];
+
+function parse_vars(data) {
+	var parsed = data.split( "\n" );
+	var k=0;
+	
+	check_pending(parsed[k++]);
+
+	id("hostname").innerHTML	= '<input type="text" name="hostname" size="32" maxlength="10" value="'+parsed[k++]+'"onKeyPress="return checkKey(event)"/>';
+	id("ipaddress").innerHTML = '<input type="text" name="ipaddress" size="32" maxlength="15" value="'+parsed[k++]+'"onKeyPress="return checkKey(event)" onblur="zero_ip(this)"/>';
+	id("routerip").innerHTML 	= '<input type="text" name="routerip" size="32" maxlength="15" value="'+parsed[k++]+'"onKeyPress="return checkKey(event)" onblur="zero_ip(this)"/>';
+	id("subnet").innerHTML	= '<input type="text" name="subnet" size="32" maxlength="15" value="'+parsed[k++]+'"onKeyPress="return checkKey(event)" onblur="zero_ip(this)"/>';
+	if(parsed[k]=="1") {id("logout").style.display = 'block';}
+}
+
+function load_once() {
+	populate("settings.html");
+	makeRequest(nc("network.cgi"), null);
+}
+
+function validate(f) {
+
+	function validate_addresses()
+	{
+			for(var i=0; i<f.elements.length; i++) {
+				var k = f.elements[i];
+				for(var j=0;j<3;j++) {
+						if(k.name==set_arr[j]) 
+						{
+							if(validate_ip(k.value)) 
+							{
+							id(set_arr[j]).className = "error";
+								return true;
+						}
+							else
+							{
+								id(set_arr[j]).innerHTML = '<input type="text" name="'+set_arr[j]+'" size="32" maxlength="15" value="'+k.value+'"onKeyPress="return checkKey(event)" onblur="zero_ip(this)"/>';
+							id(set_arr[j]).className = "success_msg";
+						}
+					}
+				}
+			}
+				return false;
+	}
+	
+	// First, check that all addresses are correctly formed.
+	var invalid = validate_addresses();
+
+	// Flag malformed addresses
+	if(invalid==true) {
+		alert("Please correct the red highlighted fields and resubmit.");
+		return false;
+	}
+	
+	var subnet = id("subnet").lastChild.value;
+	
+	// Next, check validity of subnet mask and cross-check with ip address
+	if(validate_subnet(subnet) == false || test_subnet() == false)
+	{
+		id("subnet").className = "error";
+		id("subnet").innerHTML = '<b><input type="text" name="subnet" size="32" maxlength="15" value="'+subnet+'"onKeyPress="return checkKey(event)" onblur="zero_ip(this)"/><a class="err_msg">Invalid subnet mask 0x'+ decToHexStr(str_to_int(subnet))+'<\/a><\/b>';
+		invalid = true;
+	}
+	else if(crosscheck_ip() == false)
+	{
+		id("ipaddress").className = "error";
+		var ipadr = id("ipaddress").lastChild.value;
+		id("ipaddress").innerHTML = '<b><input type="text" name="ipaddress" size="32" maxlength="15" value="'+ipadr+'"onKeyPress="return checkKey(event)" onblur="zero_ip(this)"/><a class="err_msg">Invalid host address on subnet<\/a><\/b>';
+		invalid = true;
+	}
+
+	if(invalid==true) {
+		alert("Please correct the red highlighted fields and resubmit.");
+		return false;
+	}
+	else
+		return true;
+}
+
+window.onload=load_once;
+//-->
+</script>
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="trail"><a href="settings.html">Settings</a> / Network</div>
+<div id="message"></div>
+<form action="http:network_submit.cgi" method="POST" name="myform" id="myform" onSubmit="return validate(this);" >
+<h2>Device Network Configuration</h2><br>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label20">Hostname</td>
+		<td class="form"><div id="hostname"></div></td>
+	</tr>
+	<tr>
+		<td class="label20">IP Address</td>
+		<td class="form"><div id="ipaddress"></div></td>
+	</tr>
+	<tr>
+		<td class="label20">Subnet Mask</td>
+		<td class="form"><div id="subnet"></div></td>
+	</tr>	
+	<tr>
+		<td class="label20">Router Address</td>
+		<td class="form"><div id="routerip"></div></td>
+	</tr>
+</table><br>
+
+<input class="submit" type="submit" name="Submit" value="Apply"/><br>
+</form>
+<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return get_resp()">
+<input type="hidden" name="dflt" id="dflt" value="Network"/>
+<input type="submit" name="restore" value="Restore Defaults" /></form>
+
+</div>
+<div class="pagebox"><div id="footer"></div></div>
+</body></html>

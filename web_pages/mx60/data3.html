@@ -1,0 +1,427 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Data - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="stylesheet" type="text/css" href="css_tab.css">
+	<script src="request.js"></script>
+	<script src="data.js"></script>
+	<script src="content.js"></script>
+	<script src="arrow.js"></script>
+	<link rel="icon" href="favicon.ico">
+<script>
+//<!--
+var doSend = true;
+var mset;
+var MNAME = 0;
+var UNITS = 1;
+var pi=Math.PI;
+var canvas;
+var context;
+var canvas2;
+var context2;
+var xc;
+var yc;
+var radius;
+var fontsize;
+var show_sync = true;
+var first_load=true;
+//									B	A	P	A	V	P
+//									A	D	P	M	L	T
+//						 sec name	S	V	X	P	T	S
+var		mset_tab =	[	["snc",		0,	0,	1,	0,	0,	0 ]	];
+
+function parse_vars(data) {
+	var i=0, j=0;
+	var parsed = data.split( "\n" );
+	var pending_changes = parsed[j++];
+	mset = Number(parsed[j++]) + 1;
+	var elem = parsed[j++];
+	var name_tab = [
+        ["vlt_a",   ""],
+        ["vlt_b",   ""],
+        ["vlt_c",   ""],
+        ["vph_a",   ""],
+        ["vph_b",   ""],
+        ["vph_c",   ""],
+        ["amp_a",   ""],
+        ["amp_b",   ""],
+        ["amp_c",   ""],
+        ["iph_a",   ""],
+        ["iph_b",   ""],
+        ["iph_c",   ""]		
+	];
+	
+	var Vrms = [0,0,0];
+	var Vrms_sec = [0,0,0];
+	var Vphase = [0,0,0];
+	var Irms = [0,0,0];
+	var Irms_sec = [0,0,0];
+	var Iphase = [0,0,0];
+	var Vcolor = ['red', 'blue', 'green'];
+	var Icolor = ['aqua', 'purple', 'gold'];
+	var Vlabel = ['Va', 'Vb', 'Vc'];
+	var Ilabel = ['Ia', 'Ib', 'Ic'];
+	var	ifs=Number(id("ifs").value);
+	var vfs=Number(id("vfs").value);
+	
+    for(i=0; i<name_tab.length; ++i, ++j) {
+        id(name_tab[i][MNAME]).innerHTML = parsed[j];
+	}
+
+	if(elem == 0)	// 2-Element mode uses line-to-line voltages
+	{
+		Vlabel[0] = 'Vab';
+		Vlabel[1] = 'Vbc';
+		Vlabel[2] = 'Vca';		
+    }
+
+	j=3;
+	for(i=0; i<3; ++i) {
+		Vrms[i] = parsed[j++];
+	}
+	
+	for(i=0; i<3; ++i) {
+		Vphase[i] = parsed[j++];
+	}
+	
+	for(i=0; i<3; ++i) {
+		Irms[i] = parsed[j++];
+	}
+
+	for(i=0; i<3; ++i) {
+		Iphase[i] = parsed[j++];
+	}
+	
+	for(i=0; i<3; ++i) {
+		Vrms_sec[i] = parsed[j++];
+	}
+	
+	for(i=0; i<3; ++i) {
+		Irms_sec[i] = parsed[j++];
+	}
+	
+	id("vlt_label").innerHTML = parsed[j++] + "Volts";
+	
+	hb_new = parsed[j++];
+	
+	var hasTrending = parsed[j];
+
+	if(first_load==true) {
+		first_load=false;
+		for(var i=0; i<mset_tab.length; i++) {
+			if(mset_tab[i][mset] == 1)
+				id(mset_tab[i][0]).style.display = '';
+		}
+		if(elem == 0)	// 2-Element mode uses line-to-line voltages
+		{
+			id("vla").innerHTML = "A-B";
+			id("vlb").innerHTML = "B-C";
+			id("vlc").innerHTML = "C-A";
+		}
+		var vmax = Math.max(Vrms_sec[0], Vrms_sec[1], Vrms_sec[2]);
+		for(i=id("vfs").options.length-1; i>=0; --i)
+		{
+			if(Number(id("vfs").options[i].value) > vmax)
+				id("vfs").options[i].selected = true;
+		}
+		var imax = Math.max(Irms_sec[0], Irms_sec[1], Irms_sec[2]);
+		for(i=id("ifs").options.length-1; i>=0; --i)
+		{
+			if(Number(id("ifs").options[i].value) > imax)
+				id("ifs").options[i].selected = true;
+		}
+		msg_reset_if_pending(pending_changes);
+	}
+	
+	if(show_sync) {
+		context2.clearRect(0,0,canvas.width,canvas.height);
+
+		for(i=0; i<3; ++i) { // Voltages
+			var ph_angle=-Vphase[i]*pi/180;
+			var x_pos=(Vrms_sec[i]*radius/vfs)*Math.cos(ph_angle)+xc;
+			var y_pos=(Vrms_sec[i]*radius/vfs)*Math.sin(ph_angle)+yc;
+			context2.lineWidth=Math.max(.02*radius,1);
+			drawArrow(context2,xc,yc,x_pos,y_pos,1,1,pi/8,.075*radius,Vcolor[i]);
+			context2.font = fontsize+"px Arial,'Arial;',sans-serif";
+			context2.fillStyle = Vcolor[i];
+			var theta = Math.atan((y_pos-yc)/(x_pos-xc));
+			x_off = 15*Math.cos(theta-pi/2);
+			y_off = 15*Math.sin(theta-pi/2);
+			context2.textBaseline='middle';
+			context2.textAlign='center';
+			context2.fillText(Vlabel[i],(x_pos+x_off),(y_pos+y_off));
+		}
+		
+		for(i=0; i<3; ++i) { // Currents
+			ph_angle=-Iphase[i]*pi/180;
+			x_pos=(Irms_sec[i]*radius/ifs)*Math.cos(ph_angle)+xc;
+			y_pos=(Irms_sec[i]*radius/ifs)*Math.sin(ph_angle)+yc;
+			drawArrow(context2,xc,yc,x_pos,y_pos,1,1,pi/8,.075*radius,Icolor[i]);
+			theta = Math.atan((y_pos-yc)/(x_pos-xc));
+			x_off = 15*Math.cos(pi/2+theta);
+			y_off = 15*Math.sin(pi/2+theta);
+			context2.fillStyle = Icolor[i];
+			context2.fillText(Ilabel[i],(x_pos+x_off),(y_pos+y_off));
+		}
+	}
+	
+	if(hasTrending == "1")
+		id("trlog").style.display = '';
+	
+	doSend = true;
+}
+
+function drawdiagram(ctx, xc, yc, radius)
+{
+	ctx.save();
+	ctx.beginPath();
+	ctx.strokeStyle='black';
+	ctx.arc(xc,yc,radius,0,2*pi,false);   
+	ctx.fillStyle='white';
+	ctx.fill();				  // fill first		
+	ctx.lineWidth=1;
+	ctx.stroke();			  // and then stroke
+	ctx.restore();
+}
+	
+function drawhash(ctx, xc, yc, radius, fontsize)
+{
+	CanvasRenderingContext2D.prototype.dashedLine = function (x1, y1, x2, y2, dashLen) {
+		if (dashLen == undefined) dashLen = 2;
+		this.moveTo(x1, y1);
+
+		var dX = x2 - x1;
+		var dY = y2 - y1;
+		var dashes = Math.floor(Math.sqrt(dX * dX + dY * dY) / dashLen);
+		var dashX = dX / dashes;
+		var dashY = dY / dashes;
+
+		var q = 0;
+		while (q++ < dashes) {
+			x1 += dashX;
+			y1 += dashY;
+			this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x1, y1);
+		}
+		this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
+	};
+
+	ctx.save();
+
+	ctx.beginPath();
+	ctx.moveTo(xc,yc);
+	
+	ctx.strokeStyle='black';
+	ctx.arc(xc,yc,Math.max(.03*radius,1),0,2*pi,false);
+	ctx.stroke();
+
+	// Thin hash marks
+	ctx.beginPath();
+	for(var ctr=0; ctr<60;ctr++){
+	  var angle=ctr*2*pi/60;
+	  var x1=(1.05*radius)*Math.cos(angle)+xc;
+	  var y1=(1.05*radius)*Math.sin(angle)+yc;
+	  var x2=(.95*radius)*Math.cos(angle)+xc;
+	  var y2=(.95*radius)*Math.sin(angle)+yc;
+	  ctx.moveTo(x1,y1);
+	  ctx.lineTo(x2,y2);
+	  ctx.lineWidth=1;
+	  ctx.stroke();
+	}
+
+	// Thicker hash marks
+	ctx.beginPath();
+	ctx.lineWidth=Math.max(.02*radius,1);
+	for(ctr=0; ctr<12;ctr++){
+	  angle=ctr*2*pi/12;
+	  x1=(1.05*radius)*Math.cos(angle)+xc;
+	  y1=(1.05*radius)*Math.sin(angle)+yc;
+	  x2=(.95*radius)*Math.cos(angle)+xc;
+	  y2=(.95*radius)*Math.sin(angle)+yc;
+	  ctx.moveTo(x1,y1);
+	  ctx.lineTo(x2,y2);
+	  ctx.stroke();
+	}
+
+	// degree labels
+	var hours=['0','-30','-60','-90','-120','-150','180','150','120','90','60','30'];
+	ctx.font = fontsize+"px Times,'Times New Roman',sans-serif";
+	ctx.textBaseline='middle';
+	ctx.fillStyle='black';
+	for(ctr=0;ctr<12;ctr++){
+		angle=ctr*2*pi/12;
+		var len=1.07*radius;
+		var x=len*Math.cos(angle)+xc-((1-Math.cos(angle))/2)*ctx.measureText(hours[ctr]).width;
+		var y=len*Math.sin(angle)+yc+fontsize/3*Math.sin(angle);
+		ctx.fillText(hours[ctr],x,y);
+	}
+	
+	// Draw dashed lines marking quadrants
+	  y1 = radius + yc;
+	  y2 = yc - radius;
+	  ctx.lineWidth=1;
+	  ctx.dashedLine(xc, y1, xc, y2, radius/25);
+	  x1 = radius + xc;
+	  x2 = xc - radius;
+	  ctx.dashedLine(x1, yc, x2, yc, radius/25);
+	  ctx.stroke();
+
+	ctx.restore();
+ }
+
+function loop() {
+
+	if(doSend) {
+		doSend = false;
+		makeRequest(nc("data3.cgi"), null);
+	}
+	setTimeout(function(){check_status(http_request, 0);}, 249);
+	checkConnection();
+	setTimeout("loop()", 250);
+}
+
+function load_once() {
+
+	if(isCanvasSupported())
+	{
+		id("sync").style.display = 'block';
+		canvas = id("myCanvas");
+		context = canvas.getContext("2d");
+		canvas2 = id("myCanvas2");
+		context2 = canvas2.getContext("2d");
+		xc=canvas.width/2 + canvas.width/50; 	    // x center of diagram
+		yc=canvas.height/2;      					// y center of diagram			
+		radius=Math.min(.85*xc,.85*yc); // size of the radius of the circle 
+		fontsize=radius/10;
+		drawdiagram(context, xc, yc, radius);
+		drawhash(context, xc, yc, radius, fontsize);
+	}
+	else
+	{
+		show_sync = false;
+		id("h5err").style.display = 'block';
+	}	
+	
+	populate("data.html");
+	loop();
+}
+
+window.onload=load_once;
+window.onunload=abort;
+//-->
+</script>
+
+</head>
+<body id="tab3">
+<div id="Content"></div>
+
+<div id="mncnt" class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="message"></div>
+<div id="LostCon" class="fbox" style="visibility:hidden;background-color:#fcc;"><a><b>Connection Lost!</b></a></div>
+<h2>Live Data View</h2>
+
+<ul id="tabnav"> 
+	<li class="tab1"><a href="data.html">Instantaneous</a></li> 
+	<li class="tab2"><a href="data2.html">Demands</a></li> 
+	<li class="tab3"><a href="data3.html">Vector Diagram</a></li>
+	<li class="tab4" id="snc" style="display:none;"><a href="data4.html">Synchronizing</a></li>
+	<li class="tab5" id="trlog" style="display:none;"><a href="data5.html">Trend Log</a></li>
+</ul>
+
+<div id="sync" style="display:none;">
+	<div style="position:relative; width:750px; height:500px">
+		<table style='margin-left:500px;'>
+			<tr>
+				<td class="tb_labeln"></td>
+				<td class="tb_header"><div id="amp_label">Amps</div></td>
+				<td class="tb_header"><div>Phase Angle</div></td>
+			</tr>
+			<tr>
+				<td class="tb_labeln" id="ila">A</td>
+				<td class="tb_elem" style="background-color:rgba(0,255,255,0.3)"><div id="amp_a"></div></td>
+				<td class="tb_elem" style="background-color:rgba(0,255,255,0.3)"><div id="iph_a"></div></td>
+			</tr>
+			<tr>
+				<td class="tb_labeln" id="ilb">B</td>
+				<td class="tb_elem" style="background-color:rgba(128,0,128,0.3)"><div id="amp_b"></div></td>
+				<td class="tb_elem" style="background-color:rgba(128,0,128,0.3)"><div id="iph_b"></div></td>
+			</tr>
+			<tr>
+				<td class="tb_labeln" id="ilc">C</td>
+				<td class="tb_elem" style="background-color:rgba(255,215,0,0.3)"><div id="amp_c"></div></td>
+				<td class="tb_elem" style="background-color:rgba(255,215,0,0.3)"><div id="iph_c"></div></td>
+			</tr>
+		</table><br>
+		<table style='margin-left:500px;'>
+			<tr>
+				<td class="tb_labeln"></td>
+				<td class="tb_header"><div id="vlt_label">Volts</div></td>
+				<td class="tb_header"><div>Phase Angle</div></td>
+			</tr>
+			<tr>
+				<td class="tb_labeln" id="vla">A</td>
+				<td class="tb_elem" style="background-color:rgba(255,0,0,0.3)"><div id="vlt_a"></div></td>
+				<td class="tb_elem" style="background-color:rgba(255,0,0,0.3)"><div id="vph_a"></div></td>
+			</tr>
+			<tr>
+				<td class="tb_labeln" id="vlb">B</td>
+				<td class="tb_elem" style="background-color:rgba(0,0,255,0.3)"><div id="vlt_b"></div></td>
+				<td class="tb_elem" style="background-color:rgba(0,0,255,0.3)"><div id="vph_b"></div></td>
+			</tr>
+			<tr>
+				<td class="tb_labeln" id="vlc">C</td>
+				<td class="tb_elem" style="background-color:rgba(0,255,0,0.3)"><div id="vlt_c"></div></td>
+				<td class="tb_elem" style="background-color:rgba(0,255,0,0.3)"><div id="vph_c"></div></td>
+			</tr>
+		</table>
+		<canvas id="myCanvas"
+		style="z-index: 1;
+		position:absolute;
+		left:0px;
+		top:0px;
+		" width="500" height="500">
+		</canvas>
+		<canvas id="myCanvas2"
+		style="z-index: 1;
+		position:absolute;
+		left:0px;
+		top:0px;
+		" width="500" height="500">
+		</canvas>
+		<table style='margin-left:500px; margin-top:250px;'>
+		<tr>
+			<td class="label4">Full scale Amps</td>
+			<td class="form">
+				<select id="ifs">
+					<option value='1'>1</option>
+					<option value='5' selected>5</option>
+					<option value='10'>10</option>
+					<option value='50'>50</option>
+					<option value='100'>100</option>
+					<option value='200'>200</option>
+				</select>
+			</td>
+		</tr>		
+		<tr>
+			<td class="label4">Full scale Volts</td>
+			<td class="form">
+				<select id="vfs">
+					<option value='10'>10</option>
+					<option value='100'>100</option>
+					<option value='150' selected>150</option>
+					<option value='300'>300</option>
+					<option value='750'>750</option>
+				</select>		
+			</td>
+		</tr>
+		</table>
+	</div>
+</div>
+<div id="h5err" style="display:none">
+	<br>
+	<div class="error"><a>Your browser does not support HTML5 and cannot display the vector diagram.</a></div>
+</div>
+</div>
+<div class="pagebox"><div id="footer"></div></div>
+</body></html>

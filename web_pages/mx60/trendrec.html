@@ -1,0 +1,679 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Trend Recorder - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+	<script src="arrow.js"></script>
+	<script src="load.js"></script>
+<script>
+//<!--
+var cfg = "";
+var RATE_MIN;
+var RATE_MAX;
+var NAME=0, MIN=1, MAX=2;
+var set_arr = [["rate", RATE_MIN, RATE_MAX]];
+var memSize;
+
+function parse_vars(data) {
+	function set_limits(arr, name, min, max)
+	{
+		for(var i=0; i<arr.length; i++)
+			{
+			if(arr[i][NAME]==name)
+				{
+				arr[i][MIN] = min;
+				arr[i][MAX] = max;
+				break;
+				}
+			}
+	};
+	
+	try{
+		cfg = JSON.parse(data);
+	}
+	catch(err) {
+    	id("message").innerHTML = "<a><b>Error retrieving configuration data from meter.</b></a>";
+    	id("message").className = "reset";
+    	return;
+	}
+    
+    var auth = Number(cfg.Header.auth);
+    check_pending(Number(cfg.Header.pending));
+    
+    if(auth)
+    	id("logout").style.display = 'block';
+	
+	RATE_MIN = cfg.Validation.rate_min;
+	RATE_MAX = cfg.Validation.rate_max;
+	set_limits(set_arr, "rate", RATE_MIN, RATE_MAX);
+	memSize = cfg.Header.memsize;
+	
+	populate_values(cfg);
+}
+
+function do_write_flash () {
+    var prompt = "Changes will be stored to flash.  Continue?";
+
+    if (ret = confirm(prompt))
+        startWrite();
+    }
+
+function do_trendrec_submit () {
+    serialize ();
+    if (validate ())
+        id("myform").submit();
+   }
+
+function do_dflts() {
+    var prompt =
+       "All settings on this page will be restored to factory defaults."
+     + "  Continue?";
+
+    if (confirm(prompt))
+        id("dflts").submit();
+    }
+
+
+
+
+function populate_values(pcfg)
+{
+	document.getElementsByName("trena")[Number(!pcfg.TR.Enable)].checked = true;
+	var stype = document.getElementsByName("interval");
+
+	for(i=0; i<stype.length; i++)
+		{
+		if(pcfg.TR.RateType == stype[i].value)
+			{
+			document.getElementsByName("interval")[i].checked = true;
+			break;
+			}
+		}
+	id("rate").innerHTML = '<input type="text" name="rate" size="6" maxlength="6" value="'+Number(pcfg.TR.Rate)+'" />';	
+	id("mtp").value = pcfg.TR.MeasType;
+	if(pcfg.Header != undefined)
+		{
+		id("esmp").innerHTML = "(" + Math.round(pcfg.Header.samp) + "x/sec)";
+		id("osmp").innerHTML = "(" + Math.round(pcfg.Header.samp)/2 + "x/sec)";
+		}
+	populate_menus(pcfg);
+	calc_wrap();
+}
+
+function get_idx(list, objName, idxName) {
+
+    for(var i=0; i < list.length; i++) {
+        if(list[i][objName] == idxName) {
+            return i;
+        }
+    }
+    return null;
+}
+
+function populate_menus(pcfg) {
+    var menu1 = id("menu1");
+    var menu2 = id("menu2");
+    var idx;
+
+    menu1.options.length = 0;
+    menu2.options.length = 0;
+
+    // populate menu1 from cfg
+    for (var j = 0;  j < cfg.MeasList.length;  j++) {   // for each vector entry...
+        menu1.options[menu1.options.length]
+          = new Option(cfg.MeasList[j].measDescr, j);
+        menu1.options[j].id = cfg.MeasList[j].measIdxName;
+    }
+
+	id("listmsg").innerHTML = "";
+	id("listmsg").className = "";
+
+    // populate menu2
+    for(j=0; j<pcfg.TR.Meas.length; j++) {
+   		idx = get_idx(cfg.MeasList, "measIdxName", pcfg.TR.Meas[j]);
+	    if(idx == null) {
+	    	id("listmsg").innerHTML += "<a><b>Invalid measurement found in measurement list: ";
+	    	id("listmsg").innerHTML += pcfg.TR.Meas[j] + "</b><br></a>";;
+	    	id("listmsg").className = "box_err";
+	    	continue;
+	    }
+    	menu2.options[menu2.options.length]
+		 = new Option(get_descr(cfg.MeasList, pcfg.TR.Meas[j]), idx);
+        menu2.options[menu2.options.length-1].id = pcfg.TR.Meas[j];
+        // Gray the item in the "Available" menu
+        menu1.options[idx].style.color = '#aaa';
+    }
+    id("nAvailable").innerHTML = menu1.length + " Available";
+    update_selected();
+    
+//    menu2.options[menu2.options.length] = new Option("End of list", 999);
+//    menu2.options[menu2.options.length-1].style.color = '#aaa';
+}
+
+function get_descr(list, name)
+{
+    if(list == null)
+        return "";
+    
+    for(var i=0; i<list.length; i++)
+    {
+        if(list[i].measIdxName == name)
+            return list[i].measDescr;
+    }
+    
+    return "";
+}
+
+function slctAll() {
+	var menu1 = id("menu1");
+
+	for(var i=0; i<menu1.length; ++i)
+		menu1.options[i].selected = true;
+}
+
+function clr() {
+    
+    if(menu2.options.length > 0) {
+        if(!confirm("This will clear your selected list. Continue?")) {
+            return;
+        }
+    }
+
+    menu2.options.length = 0;
+    for(var j=0; j<menu1.options.length; j++)
+    	menu1.options[j].style.color = 'black';
+    cfg.TR.Meas.length = 0;
+    update_selected();
+}
+
+
+function load_once() {
+	populate("settings.html");
+	makeRequest(nc("trendrec.cgi"), null);
+	if (window.File && window.FileReader && window.FileList && window.Blob) {
+		id('myfile').addEventListener('change', handleFileSelect, false);
+	}
+	else {
+		id('f1_upload_form').style.display = 'none';
+    	id("errmsg").innerHTML = "<a><b>Your browser does not support FileReader and cannot load files.</b><br></a>";
+    	id("errmsg").className = "box_err";
+	}
+
+}
+
+function clear_errors()
+{
+	var val;
+	for(var i=0; i<set_arr.length; i++) 
+	{
+		val = document.getElementsByName(set_arr[i][NAME])[0].value;
+		id(set_arr[i][NAME]).innerHTML = '<input type="text" name="'+set_arr[i][NAME]+'" size="6" maxlength="6" value="'+val+'"\/>';
+		id(set_arr[i][NAME]).className = "";		
+	}
+	
+	var stype = document.getElementsByName("interval");
+	for(i=0; i<stype.length; i++)
+	{
+		id(stype[i].value).innerHTML = "";
+		id(stype[i].value).className = "";		
+	}
+}
+
+function validate() {
+
+	var invalid = false;
+	var val;
+	clear_errors();
+
+	for(var i=0; i<set_arr.length; i++) {
+		val = document.getElementsByName(set_arr[i][NAME])[0].value;
+		if( isNaN(val)
+		 || Number(val) < set_arr[i][MIN] 
+		 || Number(val) > set_arr[i][MAX] 
+		 || Number(val) % 1 > 0) {
+			id(set_arr[i][NAME]).innerHTML = '<input type="text" name="'+set_arr[i][NAME]+'" size="6" maxlength="6" value="'+val+'"\/><b><a class="err_msg">Value must be an integer within the range of '+set_arr[i][MIN]+' to '+set_arr[i][MAX]+'<\/a><\/b>';
+			id(set_arr[i][NAME]).className = "error";
+			invalid = true;
+		}
+	}
+
+	var stype = document.getElementsByName("interval");
+	if( stype[0].checked == true && id("menu2").options.length > 65 )
+		{
+		id(stype[0].value).innerHTML = '<b><a class="err_msg">The maximum number of measurements at this interval is 65.<\/a><\/b>';
+		id(stype[0].value).className = "error";
+		invalid = true;
+		}
+	for(i=1; i<stype.length; i++)
+	{
+		if( stype[i].checked == true)
+		 {
+		 	if(id("menu2").options.length > 10 )
+		 	{
+				id(stype[i].value).innerHTML = '<b><a class="err_msg">The maximum number of measurements at this interval is 10.<\/a><\/b>';
+				id(stype[i].value).className = "error";
+				invalid = true;
+			}
+			else if(id("mtp").value != "Instantaneous")
+			{
+				id(stype[i].value).innerHTML = '<b><a class="err_msg">Measurement Type must be Instantaneous at this interval.<\/a><\/b>';
+				id(stype[i].value).className = "error";
+				invalid = true;				
+			}
+	 	}
+	}
+	
+	if(invalid==true) {
+		alert("Please correct the red highlighted fields and resubmit.");
+		return false;
+	} else {
+		id("demo_btn").style.display = "none";
+		id("f1_upload_process").style.display = "block";
+		id("progress").value = 0;
+		id("done").style.visibility = "hidden";
+		id("write2flash").style.visibility = "hidden";
+		id("errmsg").innerHTML = "";
+		id("errmsg").className = "";
+		id("filebox").style.backgroundColor = "#fff";
+		startUpload_to = setTimeout(function(){stopUpload(4);}, 20000);
+		return true;
+	}
+}
+
+function find_selected(menu) {
+    if(menu==null)
+        return -1;
+        
+    for(var i=0;i<menu.options.length; i++) {
+        if(menu.options[i].selected == true) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+function insertOption(x, text, value, before)
+{
+    var y=document.createElement('option');
+    y.text = text;
+    y.value = value;
+
+        try
+        {
+            x.add(y, before);
+        }
+        catch(ex)
+        {
+            x.add(y, before.index);
+        }
+
+}
+
+function right() {
+    var menu1 = id("menu1");
+    var menu2 = id("menu2");
+    var sel;
+    
+    for (var i=0; i<menu1.length ; i++){
+        if (menu1.options[i].selected == true 
+         && get_idx(menu2.options, "id", menu1.options[i].id) == null) {
+			
+			// Need to find where to insert the element
+			for(var j=0; j<menu2.options.length; j++)
+				if(Number(menu2.options[j].value) 
+				 > Number(menu1.options[i].value))
+					break;
+			
+            insertOption(menu2, menu1.options[i].text, 
+              menu1.options[i].value, menu2.options[j]);
+            menu1.options[i].style.color = '#aaa';
+            menu1.options[i].selected = false;
+            menu2.options[j].selected = true;
+            menu2.options[j].id = menu1.options[i].id;
+            cfg.TR.Meas.splice(j,0, cfg.MeasList[i].measIdxName);
+            sel = (i+1 < menu1.options.length)?(i+1):(menu1.options.length-1);
+        }
+    }
+    update_selected();
+    menu1.options[sel].selected = true;
+    calc_wrap();
+}
+
+function left() {
+    var menu1 = id("menu1");
+    var menu2 = id("menu2");
+
+    // For selected items in menu2 list, set their 
+    // corresponding items to black in menu1.
+    for (var i=0; i<menu2.options.length; i++){
+        if (menu2.options[i].selected == true ) {
+            for(j=0; j<cfg.MeasList.length; j++) {
+                if(cfg.MeasList[j].measIdxName == menu2.options[i].id) {
+                    menu1.options[j].style.color = 'black';
+                }
+            }
+        }
+    }
+
+    // Now remove all selected items from menu2 list
+    for ( i=(menu2.length-1); i>=0; i--) {
+        if (menu2.options[i].selected == true ) {
+            menu2.options[i] = null;
+            cfg.TR.Meas.splice(i,1);
+        }
+    }
+    menu1.focus();
+    update_selected();
+    calc_wrap();
+}
+
+function update_selected()
+{
+	id("nSelected").innerHTML = menu2.length + " Selected";
+}
+
+function serialize() {
+	if(document.getElementsByName("rate")[0].value == undefined)
+		{
+		id("upbox").innerHTML = "<a><b>Your browser does not support this feature.</b><br>";
+	  	id("upbox").style.backgroundColor = "#fcc";
+		return;
+		}
+	
+	cfg.TR.Enable = document.getElementsByName("trena")[0].checked == true;
+	cfg.TR.Rate = Number(document.getElementsByName("rate")[0].value);
+
+	if(document.getElementsByName("interval")[0].checked == true)
+		cfg.TR.RateType = "SecondsPerEntry";
+	else if(document.getElementsByName("interval")[1].checked == true)
+		cfg.TR.RateType = "EverySample";
+	else if(document.getElementsByName("interval")[2].checked == true)
+		cfg.TR.RateType = "EveryOther";
+	cfg.TR.MeasType = id("mtp").value;
+    var s = id("serCfg");
+    s.value = JSON.stringify(cfg.TR, null, 2);
+}
+
+function download(filename, text) {
+  try {
+	var fileData = [text];
+	blobObject = new Blob(fileData);
+	window.navigator.msSaveOrOpenBlob(blobObject, filename);
+	}
+	catch(err) {
+	  var element = document.createElement('a');  	
+	  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+	  element.setAttribute('download', filename);
+
+	  element.style.display = 'none';
+	  document.body.appendChild(element);
+
+	  try{ element.click(); }
+	  catch (e) 
+	  	{
+	  	id("file_dl").innerHTML = "<a><b>Your browser does not support this feature.</b><br>";
+	  	id("file_dl").style.backgroundColor = "#fcc";
+	  	return;
+	  	}
+
+	  document.body.removeChild(element);
+	}
+}
+
+function calc_wrap()
+{	var entries;
+	var seconds = 1;
+	
+	if(document.getElementsByName("interval")[1].checked == true)
+		entries = 60;
+	else if(document.getElementsByName("interval")[2].checked == true)
+		entries = 30;
+	else
+		{
+		entries = 1;
+		seconds = Number(document.getElementsByName("rate")[0].value);
+		}
+	
+	var recSize = 4*(menu2.options.length * (id("mtp")[0].selected?1:3) ) + 12;
+	var recsPerSec = entries/seconds;
+	var recsPerFlash = Math.floor(memSize/recSize);
+	var duration = recsPerFlash/recsPerSec;
+	var days = Math.floor(duration/(24*60*60));
+	var hours = Math.round(duration/(60*60)-days*24);
+	
+	id("days").innerHTML = days;
+	id("hours").innerHTML = hours;
+}
+
+function handleFileSelect(evt) {
+    var files = evt.target.files; // FileList object
+    var fcfg;
+
+	f = files[0];
+
+      var reader = new FileReader();
+      
+      id('upb_msg').innerHTML = "";
+      id('upbox').style.backgroundColor = '#fff';
+      clear_errors();
+
+      // Closure to capture the file information.
+      reader.onload = (function(theFile) {
+        return function(e) {
+        	id("errmsg").innerHTML = "";
+        	id("errmsg").className = "";
+        	id("filebox").style.backgroundColor = "#fff";
+
+			try{
+				fcfg = JSON.parse(e.target.result);
+			}
+			catch(err) {
+		    	id("errmsg").innerHTML = "<a><b>Syntax errors exist in file:</b><br>";
+		    	id("errmsg").innerHTML += err.message;
+		    	id("errmsg").innerHTML += "</a>";
+		    	id("errmsg").className = "box_err";
+		    	id("filebox").style.backgroundColor = "#fcc";
+		    	return;
+			}
+			if(keys_exist(fcfg)) {
+				cfg.TR = fcfg.TR;
+				populate_values(fcfg);
+				id("filebox").style.backgroundColor = "#e8fee4";
+				id("errmsg").className = "box_success";
+	            id("errmsg").innerHTML = "<a><b>Successfully Loaded Settings to Page</b><br>Please click the Apply button to save configuration to meter.</a>";
+			}
+			else {
+		    	id("errmsg").innerHTML = "<a><b>Expected configuration items not found in file.</b><br></a>";
+		    	id("errmsg").className = "box_err";
+		    	id("filebox").style.backgroundColor = "#fcc";
+			}
+        };
+      })(f);
+
+      // Read in the file as text.
+      reader.readAsText(f);
+ 	  calc_wrap();
+
+  }
+
+function keys_exist(pcfg) {
+	try {
+	  	if( pcfg.TR.Enable != undefined
+	  	&& pcfg.TR.RateType != undefined
+	  	 && pcfg.TR.Rate != undefined
+	  	 && pcfg.TR.Meas != undefined
+	  	 && pcfg.TR.MeasType != undefined)
+	  		return true;
+  	}
+  	catch(err)
+  	{
+		return false;
+	}
+	return false;
+  }
+
+
+function makeCSV()
+{
+	var fileContent = "11/04/16, 13:20:45.472, 0, 1968.411, 1969.128, 1964.831\n"
+					 +"11/04/16, 13:21:36.186, 0, 1970.024, 1967.409, 1969.338";
+
+	// Start file download.
+	download("trend.csv", fileContent);
+}
+
+
+// onload for primary window object only; skip for iframes
+if (window.parent == self) {
+    window.onload=load_once;
+    }
+//-->
+</script>
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox">
+  <noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="trail"><a href="settings.html">Settings</a> / Trend Recorder</div>
+<div id="message"></div>
+<h2>Trend Recorder Configuration</h2>
+<br>
+
+<h3>Load Settings from File</h3>
+<div>Select a json file.</div>
+<div id="filebox" class="fbox">
+	<p id="f1_upload_form" align="center"><br/>
+		<label>File:<input id="myfile" type="file" accept=".js,.json" size="30" max="51200"/></label>
+	</p>
+	<div id="errmsg"></div>
+	<div id="listmsg"></div>
+</div>
+<h3>Save Configuration to Computer</h3>
+Store trend configuration to computer.
+<div class="fbox" id="file_dl">
+<input type="button" id="cfg_btn" onclick="download('tr_cfg.json', JSON.stringify({'TR': cfg.TR }, null, '\t'));" value="Download File">
+</div>
+<br>
+
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label8">Recorder Enable</td>
+		<td class="form"><input type="radio" name="trena" value="true"/></td>
+	</tr>
+	<tr>
+		<td class="label8">Recorder Disable</td>
+		<td class="form"><input type="radio" name="trena" value="false"/></td>
+	</tr>
+</table><br>
+
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label8">Recording Interval</td>
+		<td class="label7"><input type="radio" name="interval" value="SecondsPerEntry" onchange="calc_wrap();"/></td>
+		<td class="label16">Seconds per Entry</td>
+		<td class="form"><div id="rate" onkeyup="calc_wrap();"></div><div id="SecondsPerEntry"></div></td>
+	</tr>
+	<tr>
+		<td class="label8">&nbsp;</td>
+		<td class="label7"><input type="radio" name="interval" value="EverySample" onchange="calc_wrap();"/></td>
+		<td class="label16">Every Sample <div id="esmp"></div></td>
+		<td class="form"><div id="EverySample"></div></td>
+	</tr>
+	<tr>
+		<td class="label8">&nbsp;</td>
+		<td class="label7"><input type="radio" name="interval" value="EveryOther" onchange="calc_wrap();"/></td>
+		<td class="label16">Every Other Sample <div id="osmp"></div></td>
+		<td class="form"><div id="EveryOther"></div></td>
+	</tr>
+</table><br>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label8">Measurement Type</td>
+		<td class="form">
+		  <select name="mtp" id="mtp" onchange="calc_wrap();">
+			  <option value="Instantaneous">Instantaneous</option>
+			  <option value="Min/Max/Avg">Min/Max/Average</option>
+		  </select>
+		</td>
+	</tr>
+</table><br>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label8">Measurement List</td>
+	</tr>
+</table>
+
+<table border="1" cellpadding="10" cellspacing="0" size="auto">
+<tr>
+	<td align="center">
+		<a id="nAvailable" class="label2">Available</a><br>
+		<select style="width: 280px" name="menu1" id="menu1" size="15" multiple></select><br>
+		<p align="center"><input type="button" onclick="slctAll();" value="Select All"><input type="button" onClick="right();" value=" >> "></p>
+	</td>
+	<td align="center">
+		<a id="nSelected" class="label2">Selected</a><br>
+		<select style="width: 310px" name="menu2" id="menu2" size="15" multiple ></select><br>
+		<p align="center" id="mnu_btns"><input type="button" onClick="left()" value=" << " >
+			<input type="button" name="clr_btn" value="Clear" onclick="clr();"/></p>
+	</td>
+</tr>
+</table><br>
+<table cellspacing="0" border="0">
+	<tr>
+		<!--td class="label8">&nbsp;</td-->
+		<td class="label19">Trend log will wrap in</td>
+		<td class="label13"><div id="days"></div></td>
+		<td class="label">&nbsp;days</td>
+		<td class="label13"><div id="hours"></div></td>
+		<td class="label">&nbsp;hours</td>
+	</tr>
+</table><br>
+
+<div id="f1_upload_process"  style="display:none; position:relative;">
+	<br>Saving to device...<br>
+	<progress id="progress" name="progress" value="0" max="100" style="width:150px"><img src="loader.gif" width="160" height="19"/></progress>&nbsp;<img src="check.png" id="done" style="visibility:hidden;" />
+	<form action="write_flash.cgi" method="POST" target="targ" id="write2flash"
+      style="visibility:hidden;" onsubmit="auth_check(do_write_flash);" >
+		<br>Writing to flash...<br/>
+        <img src="loader.gif" width="175" height="19"/>
+		<iframe id="targ" name="targ" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe>
+	</form>
+</div>
+
+<div id="demo_btn">
+  <div id="upbox" class="ubox">
+	<div id="upb_msg" style="textAlign:center;"></div>
+
+	<form action="trendrec_submit.cgi" enctype="multipart/form-data" method="POST" id="myform" target="upload_target">
+		<textarea id="serCfg" name="serCfg" style="display:none"></textarea>
+		<iframe name="upload_target" src="#" style="display:none"></iframe>
+		<input type="button" id="serCfgSubmit" value="Apply"
+          onclick="auth_check(do_trendrec_submit);" />
+	</form>
+
+    <form action="restore.cgi" method="POST" id="dflts">
+		<input type="hidden" name="dflt" id="dflt" value="TrendRec"/>
+		<input type="button" name="restore" value="Restore Defaults"
+          onclick="auth_check(do_dflts);" />
+		<!--input type="checkbox" id="commit" name="commit"/>
+          <a>&nbsp;Commit changes to flash memory</a-->
+	</form>
+
+  </div>
+</div>
+
+<div id="f1_upload_form" style="display:none;">
+    <div id="jbtn"></div>
+    <div id="sbtn"> </div>
+</div>
+<div id="write_process"></div>
+<div id="f1_upload_process"></div>
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body></html>

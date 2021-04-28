@@ -1,0 +1,203 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Resets - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+<script>
+//<!--
+//									B	A	P	A	V	P
+//									A	D	P	M	L	T
+//						 sec name	S	V	X	P	T	S
+var     mset_tab =	[	["amp",		1,	1,	1,	1,	0,	1 ],
+						["vlt",		0,	1,	1,	0,	1,	1 ],
+						["pwr",		0,	1,	1,	0,	0,	1 ],
+						["nrg",		1,	1,	1,	0,	0,	1 ], 
+						["pkflt",	0,	0,	0,	0,	0,	1 ] ];
+var     valid_set = ["kwh_pos", "kwh_neg", "varh_lag", "varh_lead", "vah"];
+
+function validate(f) {
+	var invalid = false;
+	for(var i=0; i < valid_set.length; ++i) {
+		id("nrg"+i).className = "";
+		id("err"+i).innerHTML = "";
+	}
+	
+    for(var i=0; i<f.elements.length; i++)
+	{
+		k = f.elements[i];
+		if(k.name=="Amps") {
+			if(k.checked == true)
+				var amp_var = k.value;
+		}
+        else if(k.name=="Volts") {
+			if(k.checked == true)
+				var vlt_var = k.value;
+		}
+        else if(k.name=="Power") {
+			if(k.checked == true)
+				var pwr_var = k.value;
+		}
+        else if(k.name=="Energy") {
+			if(k.checked == true) {
+				var nrg_var = k.value;
+				for(var j=0; j < valid_set.length; ++j) {
+					var v = id(valid_set[j]).value;
+					if(isNaN(v)) {
+						id("err"+j).innerHTML = '<b><a class="err_msg">Please enter numerical values only<\/a><\/b>';
+						id("nrg"+j).className = "error";
+						invalid = true;
+					}
+					else if(v < 0 || v > 4294967295) {
+						id("err"+j).innerHTML = '<b><a class="err_msg">Value must be within the range of 0 to 2^32.<\/a><\/b>';
+						id("nrg"+j).className = "error";
+						invalid = true;
+					}
+				}
+			}
+		}
+        else if(k.name=="Pkflt") {
+			if(k.checked == true)
+				var pkf_var = k.value;
+		}	
+	}
+
+	if(amp_var != "on" && vlt_var != "on" && pwr_var != "on" && nrg_var != "on" && pkf_var != "on")
+		return false;
+
+	if(invalid){
+		alert("Please correct the red highlighted fields and resubmit.");
+		return false;
+	}
+	else
+        return true;
+}
+
+function parse_vars(data) {
+	var parsed = data.split("\n");
+	check_pending(parsed[0]);
+	var mset = Number(parsed[1])+1;
+	
+	for(var i=0; i<mset_tab.length; i++) {
+		if(mset_tab[i][mset] == 1) {
+			id(mset_tab[i][0]).style.display = 'block';
+		}
+	}
+	
+	if(parsed[5]=="1")
+		id("logout").style.display = 'block';
+}
+
+function tgl_inp() {
+	var ena = !document.getElementsByName("Energy")[0].checked;
+	for(var i=0; i < valid_set.length; ++i)
+		id(valid_set[i]).disabled = ena;
+}
+
+function load_once() {
+	populate("resets.html");
+	get_pending();
+	tgl_inp();
+}
+
+window.onload=load_once;
+//-->
+</script>
+
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="message"></div>
+<h2>Device Resets</h2>
+<br>
+<form action="resets.cgi" method="POST" id="myform"
+    onSubmit="return validate(this);">
+<table cellspacing="0" border="0">
+	<tr id="amp" style="display:none;">
+		<td class="tb_label">Amps</td>
+		<td class="elem"><input type="checkbox" name="Amps" /></td>
+	</tr>
+	<tr id="vlt" style="display:none;">
+		<td class="tb_label">Volts</td>
+		<td class="elem"><input type="checkbox" name="Volts" /></td>	
+	</tr>
+	<tr id="pwr" style="display:none;">
+		<td class="tb_label">Power</td>
+		<td class="elem"><input type="checkbox" name="Power" /></td>
+	</tr>
+</table>
+<br>
+<table id="nrg" cellspacing="0" border="0" style="display:none;">
+	<tr>
+		<td class="tb_label">Energy</td>
+		<td class="label7"><input type="checkbox" name="Energy"
+            onclick="tgl_inp();" /></td>
+	</tr>
+    <tr>
+        <td class="tb_label"></td>
+        <td class="label7">&nbsp;</td>
+		<td class="label15"><a style="color:#999;">Reset-to-value (optional)</a></td>
+    </tr>
+    <tr id="nrg0">
+		<td class="tb_label">&nbsp;</td>
+		<td class="label7">&nbsp;</td>
+        <td class="label15">Energy Used (+kWh)</td>
+        <td><input class="label18" type="text" id="kwh_pos" name="kwh_pos" size="10" maxlength="10" /></td>
+		<td><div id="err0"></div></td>
+    </tr>
+    <tr id="nrg1">
+		<td class="tb_label">&nbsp;</td>
+		<td class="label7">&nbsp;</td>
+        <td class="label15">Energy Produced (-kWh)</td>
+        <td><input class="label18" type="text" id="kwh_neg" name="kwh_neg" size="10" maxlength="10" /></td>
+		<td><div id="err1"></div></td>
+    </tr>
+    <tr id="nrg2">
+		<td class="tb_label">&nbsp;</td>
+		<td class="label7">&nbsp;</td>
+        <td class="label15">Energy Lag (+kVARh)</td>
+        <td><input class="label18" type="text" id="varh_lag" name="varh_lag" size="10" maxlength="10" /></td>
+		<td><div id="err2"></div></td>
+    </tr>
+    <tr id="nrg3">
+		<td class="tb_label">&nbsp;</td>
+		<td class="label7">&nbsp;</td>
+        <td class="label15">Energy Lead (-kVARh)</td>
+        <td><input class="label18" type="text" id="varh_lead" name="varh_lead" size="10" maxlength="10" /></td>
+		<td><div id="err3"></div></td>
+    </tr>
+    <tr id="nrg4">
+		<td class="tb_label">&nbsp;</td>
+		<td class="label7">&nbsp;</td>
+        <td class="label15">Energy (kVAh)</td>
+        <td><input class="label18" type="text" id="vah" name="vah" size="10" maxlength="10" /></td>
+		<td><div id="err4"></div></td>
+    </tr>
+	<tr>
+		<td class="tb_label">&nbsp;</td>
+		<td class="label7">&nbsp;</td>
+		<td class="label12"><a style="color:#999;">Note: Leaving field blank resets measurement to 0.</a></td>
+	</tr>
+</table>
+<br>
+<table cellspacing="0" border="0">
+	<tr id="pkflt" style="display:none;">
+		<td class="tb_label">Peak Fault Current</td>
+		<td class="elem"><input type="checkbox" name="Pkflt" /></td>
+	</tr>
+</table>
+<br>
+<input class="submit" type="submit" name="Submit" value="Apply"/>
+</form>
+<br>
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>

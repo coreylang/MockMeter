@@ -1,0 +1,287 @@
+<!DOCTYPE HTML SYSTEM>
+<html>
+<head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>IED Status - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="shortcut icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="load.js"></script>
+	<script src="content.js"></script>
+	<script src="data.js"></script>
+	<script src="cregs.js"></script>
+<script>
+window.onload=load_once;
+
+var err_tab = [
+				[0, "Analog output calibration error"],
+				[2, "Gain calibration error"],
+				[4, "Phase calibration error"],
+				[12, "Firmware upgrade in progress"],
+				[13, "Measurements offline"],
+				[15, "Protocol configuration error"] ];
+
+var tsa_tab = [ [  0, "unknown"],
+				[ 31, "performance class unspecified"],
+                [  7, "10 ms (performance class T0)"],
+                [ 10, "1 ms (performance class T1)"],
+                [ 14, "100 us (performance class T2)"],
+                [ 16, "25 us (performance class T3)"],
+                [ 18, "10 us (performance class T4)"],
+                [ 20, "1 us (performance class T5)"] ];
+
+function show(f) {id(f).style.display="block";}
+
+function load_once() {
+	populate("status.html");
+	makeRequest(nc("status.cgi"), null);
+}
+
+function parse_vars(data) {
+	var parsed = data.split("\n");
+	var j=0;
+    var pending = parsed[j++];
+	
+	function get_tsa_idx(qflags)
+	{
+		for(var i=0; i<tsa_tab.length; i++)
+			if(Number(qflags & 0x1f) == tsa_tab[i][0])
+				return i;
+		return 0;
+	}
+
+	if(parsed[j++]=="1")
+		show("logout");
+    msg_reset_if_pending (pending);
+	
+	set_health(id("health"),  parsed[j++]);
+	
+	var has_61850 = Number(parsed[j++]);
+	var has_eip   = Number(parsed[j++]);
+	
+	if(has_61850)
+	{
+		id("status").innerHTML = parsed[j];
+		if(parsed[j++] == "Operational")
+		{
+			id("edtn").innerHTML  = parsed[j++];
+			id("iname").innerHTML = parsed[j++];
+			id("aname").innerHTML = parsed[j++];
+			id("ipadr").innerHTML = parsed[j++];
+			if(parsed[j++] == "mismatch")
+				id("ipadr").innerHTML += "&nbsp;&nbsp;&nbsp;(IP address found in CID file differs from actual address)";
+			id("dtset").innerHTML = parsed[j++] + " of " + parsed[j++] + " configured";
+			id("rcbst").innerHTML = parsed[j++] + " of " + parsed[j++] + " configured";
+			show("op_tabl");
+			var flags = Number(parsed[j++]);
+			id("tqf").innerHTML = "0x" + flags.toString(16);
+			id("lsk").innerHTML = ((flags & 0x80)!=0);
+			id("ckf").innerHTML = ((flags & 0x40)!=0);
+			id("cns").innerHTML = ((flags & 0x20)!=0);
+			id("tac").innerHTML = (flags&0x1f) + " => " + tsa_tab[get_tsa_idx(flags)][1];
+		}
+		else
+		{
+			id("resn").innerHTML = parsed[j++];
+			show("rs_tabl");
+			while(j<parsed.length && parsed[j]=="")
+					++j;
+			if(parsed[j++] == "mms.log")
+			{
+				show("start_log");
+				status_window.innerHTML = '<pre>';
+				while(j<parsed.length && parsed[j]=="")
+					++j;
+				for(var i=j; i< parsed.length; i++)
+					status_window.innerHTML += parsed[i] + '<br>';
+				status_window.innerHTML += '<\/pre>';
+			}
+		}
+		show("iec");
+	}
+	else if(has_eip)
+	{
+		var eip_ena = Number(parsed[j++]);
+		id("eVend").innerHTML = parsed[j++];
+		id("ePTyp").innerHTML = parsed[j++];
+		id("ePCod").innerHTML = parsed[j++];
+		id("ePNam").innerHTML = parsed[j++];
+		id("eRev").innerHTML  = parsed[j++] + "." + pad(parsed[j++], 3);
+		id("eSer").innerHTML  = parsed[j++];
+		show("eip");
+		if(eip_ena)
+		{
+			id("eip_status_r").innerHTML = "Running";
+			show("eip_info");
+		}
+		else
+		{
+			id("eip_status_nr").innerHTML = "Not running";
+			id("eip_resn").innerHTML = "Deselected by user option";
+			show("eip_nr");
+		}
+	}
+}
+
+</script>
+
+</head>
+<body>
+
+<div id="Content"></div>
+
+<div id="mncnt" class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="message"></div>
+<h2>Device Status</h2>
+<br>
+<div id="iec" style="display:none;">
+	<h3>IEC61850 Communications Interface</h3>
+	<br>
+	<table cellspacing="0" border="0">
+		<tr>
+			<td class="label19">Status</td>
+			<td class="elem"><div id="status"></div></td>
+		</tr>
+	</table>
+	<div id="op_tabl" style="display:none;"><h3>Server Summary</h3>
+	<table cellspacing="0" border="0">
+		<tr>
+			<td class="spacer">&nbsp;</td>
+			<td class="label19">IEC61850 Edition</td>
+			<td class="elem"><div id="edtn"></div></td>
+		</tr>
+		<tr>
+			<td class="spacer">&nbsp;</td>
+			<td class="label19">IED Name</td>
+			<td class="elem"><div id="iname"></div></td>
+		</tr>
+		<tr>
+			<td class="spacer">&nbsp;</td>
+			<td class="label19">AP Name</td>
+			<td class="elem"><div id="aname"></div></td>
+		</tr>
+		<tr>
+			<td class="spacer">&nbsp;</td>
+			<td class="label19">IP Address</td>
+			<td class="elem"><div id="ipadr"></div></td>
+		</tr>
+		<tr>
+			<td class="spacer">&nbsp;</td>
+			<td class="label19">Data Sets</td>
+			<td class="elem"><div id="dtset"></div></td>
+		</tr>
+		<tr>
+			<td class="spacer">&nbsp;</td>
+			<td class="label19">Report Control Blocks</td>
+			<td class="elem"><div id="rcbst"></div></td>
+		</tr>
+		<tr>
+			<td class="spacer">&nbsp;</td>
+			<td class="label19">Time Quality flags: </td>
+			<td class="elem"><div id="tqf"></div></td>
+		</tr>	
+	</table>
+	<table cellspacing="0" border="0">
+		<tr>
+			<td class="label">&nbsp;</td>
+			<td class="label19">LeapSecondsKnown: </td>
+			<td class="elem"><div id="lsk"></div></td>
+		</tr>
+		<tr>
+			<td class="label">&nbsp;</td>
+			<td class="label19">ClockFailure: </td>
+			<td class="elem"><div id="ckf"></div></td>
+		</tr>
+		<tr>
+			<td class="label">&nbsp;</td>
+			<td class="label19">ClockNotSynchronized: </td>
+			<td class="elem"><div id="cns"></div></td>
+		</tr>
+		<tr>
+			<td class="label">&nbsp;</td>
+			<td class="label19">TimeAccuracy (n): </td>
+			<td class="elem"><div id="tac"></div></td>
+		</tr>
+	</table>
+	</div>
+	<table cellspacing="0" border="0" id="rs_tabl" style="display:none;">
+		<tr>
+			<td class="label19">Reason</td>
+			<td class="elem"><div id="resn"></div></td>
+		</tr>
+	</table>
+	<br>
+	<div id="start_log" style="display:none;"><a class="label4">IEC61850 Startup Log</a>
+	<div id="status_window" name="status_window" style="width:500px;height:300px;overflow:scroll;border:1px solid #ccc;white-space:pre-wrap;"></div></div>
+</div>
+
+<div id="eip" style="display:none;">
+	<h3>EtherNet/IP Communications Interface</h3>
+	<br>
+	<div id="eip_info" style="display:none;">
+	<table cellspacing="0" border="0">
+		<tr>
+			<td class="label20">Status</td>
+			<td class="elem"><div id="eip_status_r"></div></td>
+		</tr>
+		<tr>
+			<td class="label20">Vendor ID</td>
+			<td class="elem"><div id="eVend"></div></td>
+		</tr>
+		<tr>
+			<td class="label20">Product Type</td>
+			<td class="elem"><div id="ePTyp"></div></td>
+		</tr>
+		<tr>
+			<td class="label20">Product Code</td>
+			<td class="elem"><div id="ePCod"></div></td>
+		</tr>
+		<tr>
+			<td class="label20">Product Name</td>
+			<td class="elem"><div id="ePNam"></div></td>
+		</tr>
+		<tr>
+			<td class="label20">Revision</td>
+			<td class="elem"><div id="eRev"></div></td>
+		</tr>
+		<tr>
+			<td class="label20">Serial Number</td>
+			<td class="elem"><div id="eSer"></div></td>
+		</tr>
+	</table>
+	</div>
+	<div id="eip_nr" style="display:none;">
+	<table cellspacing="0" border="0">
+		<tr>
+			<td class="label20">Status</td>
+			<td class="elem"><div id="eip_status_nr"></div></td>
+		</tr>
+		<tr>
+			<td class="label20">Reason</td>
+			<td class="elem"><div id="eip_resn"></div></td>
+		</tr>
+	</table>
+	</div>
+</div>
+
+<br>
+<h3>Health Status</h3>
+<table id="ht" cellspacing="0" border="0">
+    <tr>
+		<td class="spacer">&nbsp;</td>
+        <td class="tb_header">&nbsp;</td>
+        <td class="label2">&nbsp;</td>
+    </tr>
+	<tr>
+		<td class="spacer">&nbsp;</td>
+        <td class="tb_elem"><div id="health"></div></td>
+		<td id="err_box"></td>
+    </tr>
+</table>
+
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>

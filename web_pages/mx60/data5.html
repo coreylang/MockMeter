@@ -1,0 +1,532 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Data - Bitronics Web Server</title> 
+    <link rel="stylesheet" type="text/css" href="site.css">
+    <link rel="stylesheet" type="text/css" href="css_tab.css">
+    <link rel="stylesheet" type="text/css" href="pikaday.css">
+    <script src="request.js"></script>
+    <script src="data.js"></script>
+    <script src="content.js"></script>
+    <script src="load.js"></script>
+    <script src="pikaday.js"></script>
+    <link rel="icon" href="favicon.ico">
+<script>
+
+var dots = "";
+var csvText = "";
+var doSend = true;
+var getUpdate = true;
+var looptimer;
+var d0;
+var d1;
+var d0_loc;
+var d1_loc;
+var w;
+var startDate,
+    endDate,
+    updateStartDate = function() {
+        startPicker.setStartRange(startDate);
+        endPicker.setStartRange(startDate);
+        endPicker.setMinDate(startDate);
+    },
+    updateEndDate = function() {
+        startPicker.setEndRange(endDate);
+        startPicker.setMaxDate(endDate);
+        endPicker.setEndRange(endDate);
+    },
+    startPicker,
+    endPicker,
+    _startDate,
+    _endDate;
+    
+function clearMsgs()
+{
+    id("message").innerHTML = "";
+    id("message").className = "";
+    id("recd").innerHTML = "";
+    id("recd").className = "";
+    id("upb_msg").innerHTML = "";
+    id("upb_msg").className = "";
+    id("upbox").style.backgroundColor = "#fff";
+    id("dl_status").innerHTML = "Loading...";
+    startPicker.setDate(startDate);
+    endPicker.setDate(endDate);
+}
+
+function recRangeChecked()
+{
+    return document.getElementsByName("recs")[1].checked;
+}
+
+function parse_vars(data) 
+{
+    var cfg = "";
+    pos = 0;
+    
+    try{
+        cfg = JSON.parse(data);
+    }
+    catch(err) {
+        id("message").innerHTML = "<a><b>Error retrieving configuration data from meter.</b></a>";
+        id("message").className = "reset";
+        return;
+    }
+    
+    if(!window.Worker) 
+        {
+        id("recd").innerHTML = "<a><b>Your browser does not support this feature. Please use a newer browser.</b></a>";
+        id("recd").className = "reset";
+        id("recTbl").style.display = "none";
+        return;
+        }
+
+    if(cfg.Header == undefined)
+        {
+        id("message").innerHTML = "<a><b>Error retrieving configuration data from meter.</b></a>";
+        id("message").className = "reset";
+        }
+    else if(cfg.Header.message == "Trend Recorder is starting up")
+        {
+        id("recTbl").style.display = "none";
+        id("recd").innerHTML = "<a><b>" + cfg.Header.message + dots + "</b></a>";
+        setTimeout("wait_loop()", 1000);
+        }
+    else
+        {
+        looptimer = setTimeout("loop()", 5000);
+        if(cfg.Header.message != "")
+            {
+            id("upb_msg").innerHTML = "<a><b>" + cfg.Header.message + "</b></a>";
+            id("upb_msg").className = "box_err";
+            }
+        else
+            {
+            id("recd").innerHTML = "";
+            id("recd").className = "";
+            msg_reset_if_pending(Number(cfg.Header.pending));
+            }
+        }
+        
+    if(cfg.Header != undefined)
+    	{
+    	if(cfg.Header.mset == "2")
+    		id("snc").style.display = '';
+    	}
+        
+    if(cfg.metaData != undefined)
+        id("recTbl").style.display = "block";
+        
+    if( cfg.metaData.firstRec.time == 0xFFFFFFFF
+     || cfg.metaData.lastRec.time  == 0xFFFFFFFF) 
+        {
+        id("recd").innerHTML = "<a><b>Trend Log data not valid.</b></a>";
+        id("recd").className = "reset";
+        id("recTbl").style.display = 'none';
+        }
+    else if( cfg.metaData.firstRec.time == 0
+          && cfg.metaData.lastRec.time  == 0) 
+        {
+        id("recd").innerHTML = "<a><b>No records found in Trend Log.</b></a>";
+        id("recd").className = "";
+        id("recTbl").style.display = 'none';
+        }
+    else
+        {
+        d0 = new Date(0);
+        d1 = new Date(0);
+        d0.setUTCSeconds(cfg.metaData.firstRec.time);
+        d0.setUTCMilliseconds(cfg.metaData.firstRec.msec);
+        d1.setUTCSeconds(cfg.metaData.lastRec.time);
+        d1.setUTCMilliseconds(cfg.metaData.lastRec.msec);
+        d0loc = new Date(d0); d0loc.setMinutes(d0loc.getUTCMinutes()+d0loc.getTimezoneOffset());
+        d1loc = new Date(d1); d1loc.setMinutes(d1loc.getUTCMinutes()+d1loc.getTimezoneOffset());
+        id("first").innerHTML = d0.toUTCString();
+        id("last").innerHTML = d1.toUTCString();
+        id("nrec").innerHTML = cfg.metaData.nRec;
+        id("recTbl").style.display = 'block';
+        
+        if(startPicker == undefined)
+            startPicker = new Pikaday({
+                field: document.getElementById('start'),
+                minDate: d0loc,
+                maxDate: d1loc,
+                onSelect: function() {
+                    startDate = this.getDate();
+                    updateStartDate();
+                }
+            });
+        if(endPicker == undefined)
+            endPicker = new Pikaday({
+                field: document.getElementById('end'),
+                minDate: d0loc,
+                maxDate: d1loc,
+                onSelect: function() {
+                    endDate = this.getDate();
+                    updateEndDate();
+                }
+            });
+        
+        if(!recRangeChecked())
+            {
+            _startDate = new Date(d0loc.getTime());
+            _endDate = new Date(d1loc.getTime());
+            
+            id("sHrs").value = d0.getUTCHours();   lzero(id("sHrs"),0,23);
+            id("sMin").value = d0.getUTCMinutes(); lzero(id("sMin"),0,59);
+            id("sSec").value = d0.getUTCSeconds(); lzero(id("sSec"),0,59);
+            id("sMsc").value = d0.getUTCMilliseconds(); lzero(id("sMsc"),0,999);
+            id("eHrs").value = d1.getUTCHours();   lzero(id("eHrs"),0,23);
+            id("eMin").value = d1.getUTCMinutes(); lzero(id("eMin"),0,59);
+            id("eSec").value = d1.getUTCSeconds(); lzero(id("eSec"),0,59);
+            id("eMsc").value = d1.getUTCMilliseconds(); lzero(id("eMsc"),0,999);
+            setFields();
+            
+            startDate = _startDate;
+            updateStartDate();
+            startPicker.setDate(startDate);
+
+            endDate = _endDate;
+            updateEndDate();
+            endPicker.setDate(endDate);         
+            }
+        }
+
+    if( cfg.Records != undefined
+     && cfg.Header_Row != undefined)
+        {
+        csvText = "";
+        for(var i=0; i<cfg.Header_Row.length - 1; ++i)
+            csvText += cfg.Header_Row[i] + ","
+        csvText += cfg.Header_Row[i] + "\r\n";
+        for(i in cfg.Records)
+            {
+            d0 = new Date(0);
+            d0.setUTCSeconds(cfg.Records[i].seconds, cfg.Records[i].ms);
+            csvText += d0.getUTCMonth()+1 + "/" + 
+                       d0.getUTCDate() + "/" + 
+                       d0.getUTCFullYear() + ",";
+            csvText += d0.getUTCHours() + ":" + 
+                       pad(d0.getUTCMinutes(), 2) + ":" + 
+                       pad(d0.getUTCSeconds(), 2) + "." + 
+                       pad(d0.getUTCMilliseconds(), 3) + ",";
+            csvText += "0,";  // d0.getTimezoneOffset()/60 +
+            for(var j=0; j<cfg.Records[i].Measurements.length - 1; ++j)
+                csvText += cfg.Records[i].Measurements[j] + ",";
+            csvText += cfg.Records[i].Measurements[j] + "\r\n";
+            }
+            
+        var byteNumbers = new Uint8Array(csvText.length);
+
+        for (var i = 0; i < csvText.length; i++)
+            byteNumbers[i] = csvText.charCodeAt(i);
+
+        var blob = new Blob([byteNumbers], {type: "text/csv"});
+
+        // Construct the uri
+        var uri = URL.createObjectURL(blob);
+
+        try
+            {
+            navigator.msSaveBlob(blob, "trendlog.csv");
+            }
+        catch(err)
+            {
+            // Construct the <a> element
+            var link = document.createElement("a");
+            link.download = 'trendlog.csv';
+            link.href = uri;
+
+            document.body.appendChild(link);
+            link.click();
+
+            // Cleanup the DOM
+            document.body.removeChild(link);
+            delete link;
+            }
+        csvText = undefined;
+        blob = null;
+        getUpdate = true;
+        }
+}
+
+function buildDates()
+{
+    startDate.setUTCHours(id("sHrs").value);
+    startDate.setUTCMinutes(id("sMin").value);
+    startDate.setUTCSeconds(id("sSec").value);
+    startDate.setUTCMilliseconds(id("sMsc").value);
+    endDate.setUTCHours(id("eHrs").value);       
+    endDate.setUTCMinutes(id("eMin").value);     
+    endDate.setUTCSeconds(id("eSec").value);     
+    endDate.setUTCMilliseconds(id("eMsc").value);
+}
+
+
+function buildCSV()
+{
+    getUpdate = false;
+    clearMsgs();
+    clearTimeout(looptimer);
+    if( recRangeChecked() 
+     && !valid_timedate() )
+        return;
+    buildDates();
+    _startDate = startDate;
+    _endDate = endDate;
+
+    var sUTC = new Date(startDate.getTime());
+    var eUTC = new Date(endDate.getTime());
+    
+    sUTC.setMinutes(sUTC.getUTCMinutes()-sUTC.getTimezoneOffset());
+    eUTC.setMinutes(eUTC.getUTCMinutes()-eUTC.getTimezoneOffset());
+    
+    progress.value = 0;
+    id('progress_bar').style.display = "block";
+    id('csv_button').style.display = "none";
+    
+    startWorker();
+    w.postMessage(["open", recRangeChecked(), startDate, endDate]);
+
+}
+
+function startWorker() {
+    w = new Worker("csvWorker.js");
+    w.onmessage = function(event) {
+        if(event.data[0] == "stop")
+            stopWorker();
+        else if(event.data[0] == "progress")
+            {
+            progress.value = event.data[1];
+            if(progress.value == 100)
+                id("dl_status").innerHTML = "<a><b>Processing Records...</b></a>";
+            }
+        else if(event.data[0] == "http_request")
+            parse_vars(event.data[1]);
+        else if(event.data[0] == "timeout")
+            timeout();
+        else if(event.data[0] == "done")
+            {
+            loadComplete();
+            stopWorker();
+            }
+        };
+}
+
+function stopWorker() {
+    w.terminate();
+    w = undefined;
+}
+
+function load_once() 
+{
+    populate("data.html");
+    makeRequest(nc("data5.cgi"), null);
+}
+
+function wait_loop() {
+    if(doSend && http_request.readyState == 4)
+        {
+        doSend = false;
+        dots += ".";
+        if(dots == "....") 
+            dots = "";
+        makeRequest(nc("data5.cgi"), null);
+        setTimeout(function(){check_status(http_request, 0);}, 249);
+        }
+}
+
+function loop() {
+    if(getUpdate && doSend && http_request.readyState == 4) {
+        doSend = false;
+        makeRequest(nc("data5.cgi"), null);
+        setTimeout(function(){check_status(http_request, 0);}, 249);
+    }
+}
+
+function pad(number, length) 
+{
+    var str = number.toString();
+    while (str.length < length)
+        str = '0' + str;
+    return str;
+}
+
+function lzero(f, min, max) {
+    var num = Number(f.value);
+    var len = max.toString().length;
+    if(isNaN(num)==true)
+        f.value = min;
+    else if(num != num.toFixed(0))
+        f.value = num.toFixed(0);
+    if(num < min)
+        f.value = min;
+    if(num > max)
+        f.value = max;
+    if(f.value.toString().length < len)
+        f.value = pad(f.value, len);
+}
+
+function valid_timedate()
+{
+    // If the dates are different, the time doesn't matter
+    if(startDate.toDateString() != endDate.toDateString())
+        return true;
+    
+    // Check the time.
+    // The end time must be greater than or equal to the start time
+    buildDates();
+    if(startDate.getTime() > endDate.getTime())
+        {
+        id("upb_msg").innerHTML = "<a><b>End time must be later than the Start time.</b></a>";
+        id("upb_msg").className = "box_err";
+        getUpdate = true;
+        return false;
+        }
+
+    return true;
+}
+
+function setFields()
+{
+    var val = document.getElementsByName("recs")[0].checked;
+    
+    id("start").disabled = val;
+    id("end").disabled   = val;
+    id("sHrs").disabled  = val;
+    id("sMin").disabled  = val;
+    id("sSec").disabled  = val;
+    id("sMsc").disabled  = val;
+    id("eHrs").disabled  = val;
+    id("eMin").disabled  = val;
+    id("eSec").disabled  = val;
+    id("eMsc").disabled  = val;
+}
+
+function loadComplete()
+{
+    progress.value = 100;
+    document.getElementById('progress_bar').style.display = "none";
+    document.getElementById('csv_button').style.display = "block";
+    getUpdate = true;
+}
+
+function timeout()
+{
+    document.getElementById('progress_bar').style.display = "none";
+    document.getElementById('csv_button').style.display = "block";
+    document.getElementById("upbox").style.backgroundColor = "#fcc";
+    document.getElementById("upb_msg").innerHTML = 'Request timed out';
+    getUpdate = true;
+    loop();
+}
+
+function unload()
+{
+    if(!!window.Worker)
+        {
+        w.postMessage(["abort"]);
+        stopWorker();
+        }
+}
+
+function cancel()
+{
+    if(!!window.Worker)
+        w.postMessage(["abort"]);
+     loadComplete();
+     stopWorker();
+     getUpdate = true;
+     loop();
+}
+
+window.onload=load_once;
+window.onunload=unload;
+//-->
+</script>
+
+</head>
+<body id="tab5">
+<div id="Content"></div>
+
+<div id="mncnt" class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="message"></div>
+<h2>Trend Log</h2>
+
+<ul id="tabnav"> 
+    <li class="tab1"><a href="data.html">Instantaneous</a></li> 
+    <li class="tab2"><a href="data2.html">Demands</a></li> 
+    <li class="tab3"><a href="data3.html">Vector Diagram</a></li>
+    <li class="tab4" id="snc" style="display:none;"><a href="data4.html">Synchronizing</a></li>
+    <li class="tab5" id="trlog"><a href="data5.html">Trend Log</a></li>
+</ul>
+
+<br>
+<div id="recd"></div>
+<div id="recTbl" style="display:none;">
+
+<table cellspacing="0" border="0">
+    <tr>
+        <td class="label21" align="center">First Record</td>
+        <td class="label21" align="center">Last Record</td>
+        <td class="label20" align="center">Record Count</td>
+    </tr>
+    <tr>
+        <td><div class="tb_elem" id="first"></div></td>
+        <td><div class="tb_elem" id="last"></div></td>
+        <td><div class="tb_elem" id="nrec"></div></td>
+    </tr>
+</table><br><br>
+
+<h2>Retrieve Trend Records</h2><br>
+<div class="fbox" id="upbox">
+    <table>
+        <tr>
+            <td class="label7"><input type="radio" name="recs" onclick="setFields(); clearMsgs();" checked \></td>
+            <td class="label5">Retrieve all records</td>
+        </tr>
+        <tr>
+            <td class="label7"><input type="radio" name="recs" onclick="setFields(); clearMsgs();" \></td>
+            <td class="label5">Retrieve record range</td>
+        </tr>
+    </table><br>
+    <table width="100%">
+        <tr>
+            <td class="label8">Start</td>
+            <td class="label8">End</td>
+        </tr>
+        <tr>
+            <td class="label8"><input type="text" id="start"></td>
+            <td class="label8"><input type="text" id="end"></td>
+        </tr>
+    </table>
+    <table class="time" width="100%">
+        <tr>
+            <td width="9%"><input type="text" class="label24" id="sHrs" name="sHrs" maxlength="2" onchange="lzero(this, 0, 23);"><b>:</b></td>
+            <td width="9%"><input type="text" class="label24" id="sMin" name="sMin" maxlength="2" onchange="lzero(this, 0, 59);"><b>:</b></td>
+            <td width="9%"><input type="text" class="label24" id="sSec" name="sSec" maxlength="2" onchange="lzero(this, 0, 59);"><b>.</b></td>
+            <td width="12%"><input type="text" class="label25" id="sMsc" name="sMsc" maxlength="3" onchange="lzero(this, 0, 999);"></td>
+            <td width="11%">&nbsp;</td>
+            <td width="9%"><input type="text" class="label24" id="eHrs" name="eHrs" maxlength="2" onchange="lzero(this, 0, 23);"><b>:</b></td>
+            <td width="9%"><input type="text" class="label24" id="eMin" name="eMin" maxlength="2" onchange="lzero(this, 0, 59);"><b>:</b></td>
+            <td width="9%"><input type="text" class="label24" id="eSec" name="eSec" maxlength="2" onchange="lzero(this, 0, 59);"><b>.</b></td>
+            <td width="12%"><input type="text" class="label25" id="eMsc" name="eMsc" maxlength="3" onchange="lzero(this, 0, 999);"></td>
+            <td width="11%">&nbsp;</td>
+        </tr>
+    </table><br>
+    
+    <div id="progress_bar" style="display:none"><div id="dl_status">Loading...</div><br/>
+    <progress id="progress" name="progress" value="0" max="100" style="width:150px"><img src="loader.gif"/>
+    </progress><br/><br/><input class="submit" type="button" value="Cancel" onclick="cancel();" />
+    </div>
+    <p id="upb_msg" align="center"></p>
+    <div id="csv_button">
+    <input class="submit" type="submit" value="Download CSV" onclick="buildCSV();" />
+    </div>
+</div>
+</div>
+
+</div>
+<div class="pagebox"><div id="footer"></div></div>
+</body></html>

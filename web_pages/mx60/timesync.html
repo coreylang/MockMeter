@@ -1,0 +1,262 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Time Sync - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+<script>
+//<!--
+var set_arr = [ ["ntp1", "ipaddr"],
+				["ntp2", "ipaddr"],
+				["poll", "text"] ];
+var POLL_MIN;
+var POLL_MAX;
+var first_load = true;
+var polling = false;
+
+function parse_vars(data) {
+	var parsed = data.split( "\n" );
+	var d = new Date();
+	var k=0;
+	var acel = document.activeElement;
+
+	check_pending(parsed[k++]);
+
+	if(first_load)
+	{
+		id("ntp1").innerHTML = '<input type="text" name="ntp1" size="16" maxlength="15" value="'+parsed[k++]+'"onKeyPress="return checkKey(event)" onblur="zero_ip(this)"/>';
+		id("ntp2").innerHTML = '<input type="text" name="ntp2" size="16" maxlength="15" value="'+parsed[k++]+'"onKeyPress="return checkKey(event)" onblur="zero_ip(this)"/>';
+		id("poll").innerHTML = '<input type="text" name="poll" size="16" maxlength="5" value="'+parsed[k++]+'"onKeyPress="return checkKey(event)"/>';
+	}
+	else
+		k += 3;
+
+	if(parsed[k++]=="1")
+		{id("logout").style.display = 'block';}
+	var src = parsed[k].slice(1+parsed[k].lastIndexOf(' ', parsed[k].lastIndexOf(' ')-1),parsed[k].lastIndexOf(' '));
+	if(parsed[k].match(/\bsync/g) != null)
+		id("sync_msg").innerHTML = "<b class='sync'>" + src + " sync\'d<b>";
+	else if(parsed[k].match(/\bslew/g) != null)
+		id("sync_msg").innerHTML = "<b class='slew'>" + src + " slewing<b>";
+	else if(parsed[k].match(/\bhold/g) != null)
+		id("sync_msg").innerHTML = "<b class='slew'>" + src + " in holdover<b>";
+	else
+		id("sync_msg").innerHTML = "<b class='unsync'>unsync\'d " + src + "<b>";
+	id("mtime").innerHTML = parsed[k++].slice(0,19);
+	
+	POLL_MIN = parsed[k++];
+	POLL_MAX = parsed[k];
+
+	polling = false;
+	if(first_load)
+		loop();
+}
+
+function load_once() {
+	populate("settings.html");
+	makeRequest(nc("sntp.cgi"), null);
+}
+
+function loop() {
+	first_load = false;
+	var tval = id("mtime").innerHTML;
+	var sec = Number(tval.slice(17,19));
+		
+	if( polling )
+		setTimeout('makeRequest(nc("sntp.cgi"), null); loop();', 5000);
+	else
+	{
+		if(sec > 58) {
+			makeRequest(nc("sntp.cgi"), null);
+			id("sync_msg").innerHTML = "";
+			id("mtime").innerHTML = "Polling...";
+			polling = true;
+		}
+		else {
+			sec++;
+			if(sec.toString().length < 2)
+				sec = "0" + sec.toString();
+			id("mtime").innerHTML = tval.slice(0,17) + sec;
+		}
+		setTimeout("loop()", 1000);
+	}
+}
+
+function pc_sync() {
+	var d = new Date();
+	id("usr_t").value =
+	            + d.getFullYear() + "/" 
+	            + (d.getMonth()+1) + "/" 
+				+ d.getDate() + " "
+				+ d.getHours() + ":"
+				+ d.getMinutes() + ":"
+				+ d.getSeconds() + "."
+                + d.getMilliseconds();
+}
+
+function validate(f) {
+	var invalid = false;
+	var NAME = 0;
+	var TYPE = 1;
+	var msg;
+
+	if(f.id == "msync_form") {
+		var tstr = id("usr_t").value;
+		var start = 0;
+		var end = tstr.indexOf('/');
+		var year = Number(tstr.slice(start,end));
+		start = end + 1;
+		end = tstr.indexOf('/',start);
+		var month = Number(tstr.slice(start,end));
+		start = end + 1;
+		end = tstr.indexOf(' ',start);
+		var day = Number(tstr.slice(start,end));
+		start = end + 1;
+		end = tstr.indexOf(':',start);
+		var hh = Number(tstr.slice(start,end));
+		start = end + 1;
+		end = tstr.indexOf(':',start);
+		var mm = Number(tstr.slice(start,end));
+		start = end + 1;
+		var ss = Number(tstr.slice(start));
+		id("err_box").className = "";
+		id("msg_box").innerHTML = "";
+		
+		if(!isNaN(year) && year < 100 && year > 0)
+			year += 2000;
+		if(year < 1970 || year > 2099 || isNaN(year))
+			msg = "year";
+		else if(month < 1 || month > 12 || isNaN(month))
+			msg = "month";
+		else if(day < 1 || day > 31 || isNaN(day))
+			msg = "day";
+		else if(hh < 0 || hh > 23 || isNaN(hh))
+			msg = "hour";
+		else if(mm < 0 || mm > 59 || isNaN(mm))
+			msg = "minute";
+		else if(ss < 0 || ss > 59 || isNaN(ss) )
+			msg = "second";
+		
+		if(msg != null)
+		{
+			id("err_box").className = "error";
+			id("msg_box").innerHTML = '<b><a class="err_msg">Invalid '+msg+'<\/a><\/b>';
+			alert("Please correct the red highlighted fields and resubmit.");
+			return false;
+		}
+		
+		id("err_box").className = "success_msg";
+		return true;
+	}
+	
+	for(var i=0; i<f.elements.length; i++) {
+		var k = f.elements[i];
+		for(var j=0;j<3;j++) {
+			if(k.name==set_arr[j][NAME]) {
+				if(set_arr[j][TYPE] == "ipaddr") {
+					if(validate_ip(k.value)) {
+						id(set_arr[j][NAME]).className = "error";
+						invalid = true;
+					}
+					else
+						id(set_arr[j][NAME]).className = "success_msg";
+				}
+				else if(set_arr[j][TYPE] == "text") {
+					var ref = id(set_arr[j][NAME]);
+					if((k.value == "0") 
+					 || ((Number(k.value) >= Number(POLL_MIN)) 
+					 && (Number(k.value) <= Number(POLL_MAX))))
+					    {
+						ref.innerHTML = '<input type="text" name="'
+						+set_arr[j][NAME]+'" size="16" maxlength="5" value="'+k.value
+						+'"\/>';
+						ref.className = "success_msg";
+						}
+					else {
+						ref.innerHTML = '<input type="text" name="'
+						+set_arr[j][NAME]+'" size="16" maxlength="5" value="'+k.value
+						+'"\/><b><a class="err_msg">Value must be within the range of '
+						+POLL_MIN+' to '+POLL_MAX+'<\/a><\/b>';
+						ref.className = "error";
+						invalid = true;
+					}
+				}
+			}
+		}
+	}
+
+	if(invalid==false)
+		return true;
+		
+	alert("Please correct the red highlighted fields and resubmit.");
+	return false;
+}
+
+window.onload=load_once;
+//-->
+</script>
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="trail"><a href="settings.html">Settings</a> / Time Sync</div>
+<div id="message"></div>
+<h2>Device Time Settings</h2>
+<br>
+<table cellspacing="0" border="0">
+<tr>
+	<td class="label2">Device Time</td>
+	<td class="tb_elem"><div id="mtime" style="height: 18px; width: 135px;"></div></td>
+	<td>&nbsp;<a id="sync_msg"></a></td>
+</tr>
+</table><br>
+
+<h3>Manual Time Set</h3>
+<div class="fbox" style="width:402px;">
+<div style="text-align:left;">Set Device to PC Time</div>
+<div class="fbox">
+<form action="http:timesync.cgi" method="POST" name="msync_form" id="msync_form" onSubmit="return validate(this);">
+<input class="sbtn" type="submit" name="pcsync" value="Set to PC Time" onclick="pc_sync()" />
+</div><br>
+<div style="text-align:left;">Set Device to User-defined Time</div>
+<div class="fbox">
+<br>
+<div id="err_box">
+<input type="text" name="usr_t" id="usr_t" size="20" maxlength="24" onKeyPress="return checkKey(event)" />
+&nbsp;<input class="sbtn" type="submit" name="mansync" value="Set Time"/><br>
+<a>24-hr Time format: [YY]YY/MM/DD hh:mm:ss</a>
+<div id="msg_box"></div><br></div></div>
+</form></div><br><br>
+
+<h3>SNTP Time Synchronization</h3>
+<div class="fbox" style="text-align:left;">
+<form action="http:sntp_submit.cgi" method="POST" name="sntp_form" id="sntp_form" onSubmit="return validate(this);" >
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label4">External SNTP Server 1</td>
+		<td class="form"><div id="ntp1"></div></td>
+	</tr>
+	<tr>
+		<td class="label4">External SNTP Server 2</td>
+		<td class="form"><div id="ntp2"></div></td>
+	</tr>
+	<tr>
+		<td class="label4">Poll Rate</td>
+		<td class="form"><div id="poll"></div></td>
+		<td class="label2">&nbsp;seconds</td>
+	</tr>
+</table>
+<a style="color:#999; font:10px">Note: Poll rate of 0 disables NTP client.</a><br><br>
+<input class="submit" type="submit" name="Submit" value="Apply"/><br>
+</form>
+<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return get_resp()">
+<input type="hidden" name="dflt" id="dflt" value="sntp"/>
+<input type="submit" name="restore" value="Restore Defaults" /></form>
+</div>
+</div>
+<div class="pagebox"><div id="footer"></div></div>
+</body></html>

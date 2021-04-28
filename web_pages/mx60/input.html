@@ -1,0 +1,706 @@
+<!DOCTYPE HTML SYSTEM>
+
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Input - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+<script>
+//<!--
+var valid_value = new Array(54);
+//											txtbox	chars	valid	valid
+//				name	type		 value	len		mxlen	min_idx	max_idx		
+var set_arr = [	["inp", "dropdown",		,	,		,		,		],
+				["ctp", "text",			,	6,		6,		,		],
+				["cts", "dropdown",		,	,		,		,		],
+				["vtp", "text",			,	6,		6,		,		],
+				["vts", "dropdown",		,	,		,		,		],
+				["v2p", "text",			,	6,		6,		,		],
+				["v2s", "dropdown",		,	,		,		,		],
+				["amp", "text",			,	4,		4,		4,		5],
+				["vlt", "text",			,	4,		4,		6,		7],
+				["pwr", "text",			,	4,		4,		8,		9],
+				["tda", "text",			,	6,		6,		10,		11],
+				["tdb", "text",			,	6,		6,		10,		11],
+				["tdc", "text",			,	6,		6,		10,		11],
+				["tdr", "text",			,	6,		6,		10,		11],
+				["ict", "checkbox",		,	,		,		,		  ],
+				["wcu", "text",			,	12,		12,		12,		13],
+				["wfe", "text",			,	12,		12,		12,		13],
+				["vcu", "text",			,	12,		12,		12,		13],
+				["vfe", "text",			,	12,		12,		12,		13],
+				["sys", "text",			,	12,		12,		12,		13],
+				["dbc", "text",			,	5,		5,		14,		15],
+				["kyzmode", "dropdown",,	5,		5,		16,		17],				
+				["kwpp", "text",		,	10,		10,		18,		19],
+				["kyzbo1", "dropdown",  ,   10,		10,		20,		21],
+				["kyzbo2","dropdown",   ,   10,		10,		22,		23],
+				["kyzbo3","dropdown",   ,   10,		10,		24,		25],
+				["kyzbo4","dropdown",   ,   10,		10,		26,		27],
+				["vap1val","dropdown",   ,   4,      4,      20,     21], //deprecated
+				["pl", "text",          ,   4,      4,      22,     23],
+				["pi", "text",          ,   4,      4,      24,     25],
+				["VgcptAh", "text",		,	6,		6,		26,		27],
+				["VgcptBh", "text",		,	6,		6,		26,		27],
+				["VgcptCh", "text",		,	6,		6,		26,		27],
+				["IgcptAh", "text",		,	6,		6,		26,		27],
+				["IgcptAl", "text",		,	6,		6,		26,		27],
+				["IpcptAh", "text",		,	6,		9,		28,		29],
+				["IpcptAl", "text",		,	6,		9,		28,		29],
+				["IgcptBh", "text",		,	6,		6,		26,		27],
+				["IgcptBl", "text",		,	6,		6,		26,		27],
+				["IpcptBh", "text",		,	6,		9,		28,		29],
+				["IpcptBl", "text",		,	6,		9,		28,		29],
+				["IgcptCh", "text",		,	6,		6,		26,		27],
+				["IgcptCl", "text",		,	6,		6,		26,		27],
+				["IpcptCh", "text",		,	6,		9,		28,		29],
+				["IpcptCl", "text",		,	6,		9,		28,		29]
+			  ];
+
+//                              B	A	P	A	V	P
+//                              A	D	P	M	L	T
+//				 sec name	    S	V	X	P	T	S
+var mset_tab = [ ["inp_cfg",    1,	1,	1,	0,	1,	1 ],
+                 ["vtr",        1,	1,	1,	0,	1,	0 ],
+                 ["ctr",        1,	1,	1,	1,	0,	0 ],
+                 ["vb2",        0,	0,	1,	0,	0,	0 ],
+                 ["ampdi",      1,	1,	1,	1,	0,	1 ],
+                 ["vai",        0,	1,	1,	0,	1,	1 ],
+                 ["pai",        0,	1,	1,	0,	0,	1 ],
+                 ["tddd",       0,	1,	1,	0,	0,	0 ],
+                 ["lcmp",       0,	1,	1,	0,	0,	0 ],
+                 ["pldi",       0,	0,	0,	0,	0,	1 ],
+                 ["pidi",       0,	0,	0,	0,	0,	1 ],
+                 ["vtr_pt",     0,	0,	0,	0,	0,	1 ],
+                 ["ct_pt",      0,	0,	0,	0,	0,	1 ]
+               ];
+						
+
+var available_outputs = 0;
+var is_pole_type = 0;
+
+function parse_vars(data) {
+	var parsed = data.split( "\n" );
+	var k = 0;
+
+	check_pending(parsed[k++]);
+	if(parsed[k++]=="1") {id("logout").style.display = 'block';}
+	
+	var mset = Number(parsed[k++]) + 1;
+	var eser = Number(parsed[k++]);
+	is_pole_type = Number(parsed[k++]);
+
+	if(is_pole_type) {
+		// Add I and V ratio secondary values of 10
+		var vts = id("vts");
+		var cts = id("cts");
+		var option = new Option("10", "4");
+		vts.add(option, vts[1]);
+		option = new Option("10","2");
+		cts.add(option, cts[2]);
+	}
+	
+	for(var i=0;i<set_arr.length;i++) {
+		var f = id(set_arr[i][0]);
+		set_arr[i][2] = parsed[k];
+		if(set_arr[i][1] == "dropdown") {
+			f.value = parsed[k];
+		}
+		else if(set_arr[i][1] == "text") {
+			f.innerHTML = '<input type="text" name="'+set_arr[i][0]+'" size="'+set_arr[i][3]+'" maxlength="'+set_arr[i][4]+'" value="'+set_arr[i][2]+'" onKeyPress="return checkKey(event)"/>';
+			f.className = "";
+		}
+		else if(set_arr[i][1] == "checkbox") {
+			f.innerHTML = '<input type="checkbox" name="'+set_arr[i][0]+'" '+((set_arr[i][2]>0)?"checked":" ")+'/>';
+		}
+		k++;
+	}
+	
+// ============================================
+// CGI_SEND_NUM(cfg_get_input_max_outputs());
+	available_outputs = parsed[k++];
+
+
+// ============================================
+	for(i=0;i<valid_value.length;i++) {
+		valid_value[i] = parsed[k++];
+	}	
+
+
+// ============================================
+// CGI_SEND_NUM(get_meas_set()); Measurement Set
+// mset is for  measurment set
+// ============================================
+	for(i=0; i<mset_tab.length; i++) {
+		if(mset_tab[i][mset] == 1) {
+			id(mset_tab[i][0]).style.display = 'block';
+		}
+	}
+	
+// ============================================
+// int cgi_input(HTTPD_SESSION_STRUCT *session)
+// CGI_SEND_NUM(has_serial_port()); Meter has a serial port?
+// ============================================
+	if(eser == 1) {
+		id("biin").style.display = 'block';
+	}
+
+// ===============================================
+// int cgi_input(HTTPD_SESSION_STRUCT *session)
+// CGI_SEND_NUM(read_ps_pca_id());
+// CGI_SEND_NUM(get_meas_set());    MS_POLETOP
+// ===============================================
+	if(is_pole_type) {
+		id("pfc").style.display = 'block';
+		
+		// If a pole top meter, its a M661, no 2nd bus voltage, no kyz
+		//id("dispkyz").style.display = 'none';
+		id("vb2").style.display = 'none';
+		id("vtr_pt_e").style.display = 'block';
+		id("itr_pt_e").style.display = 'block';
+		
+		id("ctp").getElementsByTagName("input")[0].disabled = true;
+		id("cts").disabled = true;
+	} else {
+		id("pfc").style.display = 'none';
+		id("vtr_pt_e").style.display = 'none';
+		id("itr_pt_e").style.display = 'none';
+	}
+
+	var kyz1=id('kyzbo1');
+	var kyz2=id('kyzbo2');
+	var kyz3=id('kyzbo3');
+	var kyz4=id('kyzbo4');
+	
+	if(available_outputs == '0') {
+	    available_outputs = '1';            //Preserve disable
+	    
+		id("dispkyz").style.display = 'none';
+	} else {
+		id("dispkyz").style.display = 'block';
+	}
+
+    for (i=available_outputs;i<9; i++) {
+        kyz1.remove(available_outputs);
+        kyz2.remove(available_outputs);
+        kyz3.remove(available_outputs);
+        kyz4.remove(available_outputs);
+    }
+	
+	kyz_params();
+}
+
+function validate(f) {
+    var invalid = false;
+	
+	for(var i=0; i<f.elements.length; i++) {
+		var k = f.elements[i];
+		if(k.name=="ctp") {
+			k.disabled = false;
+			var ctp_var = k;
+			continue;
+		}
+		else if(k.name=="vtp") {
+			var vtp_var = k;
+			continue;
+		}
+		else if(k.name=="v2p") {
+			var v2p_var = k;
+			continue;
+		}
+		else if(k.name=="cts") {
+			k.disabled = false;
+			var cts_var = k;
+			continue;
+		}
+		else if(k.name=="vts") {
+			var vts_var = k;
+			continue;
+		}
+		else if(k.name=="v2s") {
+			var v2s_var = k;
+			continue;
+		}
+		else if(k.name=="vap1val") { // deprecated
+			var vap1val_var = k;
+			continue;
+		}
+		
+		for(var j=5; j<set_arr.length; j++) {
+			if(k.name == set_arr[j][0]) {
+				var g = id(set_arr[j][0]);
+				if(set_arr[j][1] == "text") {
+					var min_idx = set_arr[j][5]; var max_idx = set_arr[j][6];
+					if(k.value >= Number(valid_value[min_idx]) && k.value <= Number(valid_value[max_idx])) {
+						g.innerHTML = '<input type="text" name="'+set_arr[j][0]+'" size="'+set_arr[j][3]+'" maxlength="'+set_arr[j][4]+'" value="'+k.value+'"\/>';
+						g.className = "success_msg";
+						continue;
+					}
+					else {
+						g.innerHTML = '<input type="text" name="'+set_arr[j][0]+'" size="'+set_arr[j][3]+'" maxlength="'+set_arr[j][4]+'" value="'+k.value+'"\/><b><a class="err_msg">Value must be within the range of '+valid_value[min_idx]+' to '+valid_value[max_idx]+'<\/a><\/b>';
+						g.className = "error";
+						invalid = true;
+						continue;
+					}
+				}
+			}
+		}
+	}
+
+	var num = cts_var.value;
+	if( Number(ctp_var.value)/Number(cts_var.options[num].text) >= Number(valid_value[0]) && Number(ctp_var.value)/Number(cts_var.options[num].text) <= Number(valid_value[1]) ) {
+		id("ctp").innerHTML = '<input type="text" name="ctp" size="6" maxlength="6" value="'+ctp_var.value+'"/>';
+		id("ctp").className = "success_msg";
+	}
+	else {
+		id("ctp").innerHTML = '<b><input type="text" name="ctp" size="6" maxlength="6" value="'+ctp_var.value+'"/><a class="err_msg">CT Ratio must be within the range of '+valid_value[0]+' to '+valid_value[1]+'<\/a><\/b>';
+		id("ctp").className = "error";
+		invalid = true;
+	}
+
+	num = vts_var.selectedIndex;
+	if(Number(vtp_var.value)/Number(vts_var.options[num].text) >= Number(valid_value[2]) && Number(vtp_var.value)/Number(vts_var.options[num].text) <= Number(valid_value[3]) ) {
+		id("vtp").innerHTML = '<input type="text" name="vtp" size="6" maxlength="6" value="'+vtp_var.value+'"/>';
+		id("vtp").className = "success_msg";
+	}
+	else {
+		id("vtp").innerHTML = '<b><input type="text" name="vtp" size="6" maxlength="6" value="'+vtp_var.value+'"\/><a class="err_msg">VT Ratio must be within the range of '+valid_value[2]+' to '+valid_value[3]+'<\/a><\/b>';
+		id("vtp").className = "error";
+		invalid = true;
+	}
+	
+	num = v2s_var.value;
+	if(Number(v2p_var.value)/Number(v2s_var.options[num].text) >= Number(valid_value[2]) && Number(v2p_var.value)/Number(v2s_var.options[num].text) <= Number(valid_value[3]) ) {
+		id("v2p").innerHTML = '<input type="text" name="v2p" size="6" maxlength="6" value="'+v2p_var.value+'"/>';
+		id("v2p").className = "success_msg";
+	}
+	else {
+		id("v2p").innerHTML = '<b><input type="text" name="v2p" size="6" maxlength="6" value="'+v2p_var.value+'"\/><a class="err_msg">VT Ratio must be within the range of '+valid_value[2]+' to '+valid_value[3]+'<\/a><\/b>';
+		id("v2p").className = "error";
+		invalid = true;
+	}
+    
+ 	if(check_outputs()==true)
+		id("outp_tab").className = "success_msg";
+	else
+	{
+		id("outp_tab").className = "error";
+		invalid = true;
+	}
+
+    if(invalid) {
+		alert("Please correct the red highlighted fields and resubmit.");
+		return false;
+    }
+	else {
+        return true;
+    }
+}
+
+
+function kyz_params() {
+    var idx = id("kyzmode").value;
+    
+    if(id("kyzmode")[idx].text == "Disable") {
+		document.getElementsByName("kwpp")[0].disabled = true;
+		document.getElementsByName("kyzbo1")[0].disabled = true;
+		document.getElementsByName("kyzbo2")[0].disabled = true;
+		document.getElementsByName("kyzbo3")[0].disabled = true;
+		document.getElementsByName("kyzbo4")[0].disabled = true;		
+    }
+    else {
+		document.getElementsByName("kwpp")[0].disabled = false;
+		document.getElementsByName("kyzbo1")[0].disabled = false;
+		document.getElementsByName("kyzbo2")[0].disabled = false;
+		document.getElementsByName("kyzbo3")[0].disabled = false;
+		document.getElementsByName("kyzbo4")[0].disabled = false;
+    }
+}
+
+
+
+function check_outputs() {
+    var outArray = [];
+    var N_SELECTS = 4;
+    var n_outputs = available_outputs - 1;
+    var msg = "&nbsp; Warning: outputs cannot be duplicated";
+    var no_dups = true;
+    
+    for (var h=0;h<N_SELECTS;h++) {
+        outArray[h] = id('kyzbo'+(h+1)).value;
+        id('warn'+(h+1)).innerHTML = "";
+    }
+
+    for (i=0;i<N_SELECTS;i++) {
+        for(var j=0; j<n_outputs; j++) {
+            if(i == j || outArray[j]=="0")
+                continue;
+            if(outArray[i] == outArray[j])
+            {
+                id("warn"+(i+1)).innerHTML = msg;
+                id("warn"+(i+1)).className = "reset_msg";
+                id("warn"+(j+1)).innerHTML = msg;
+                id("warn"+(j+1)).className = "reset_msg";
+                no_dups = false;
+            }
+        }
+    }
+    return no_dups;
+}
+
+
+function load_once() {
+	populate("settings.html");
+	makeRequest(nc("input.cgi"), null);
+}
+
+window.onload=load_once;
+//-->
+</script>
+	
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="trail"><a href="settings.html">Settings</a> / Input</div>
+<div id="message"></div>
+<form action="http:input_submit.cgi" method="POST" name="myform" id="myform" onSubmit="return validate(this);" >
+
+<h2>Device Input Configuration</h2><br>
+<div id="inp_cfg" style="display:none;">
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label4">Input Configuration</td>
+		<td class="form">
+		  <select name="inp" id="inp">
+			  <option value='0'>2 Element</option>
+			  <option value='1'>2.5 Element A</option>
+			  <option value='2'>2.5 Element B</option>
+			  <option value='3'>2.5 Element C</option>
+			  <option value='4'>3 Element</option>
+		  </select>
+		</td>
+	</tr>
+</table>
+</div>
+
+<div id="vtr" style="display:none;">
+<h3 class='topheader'>VT Ratio</h3>
+</div>
+<div id="vtr_pt" style="display:none;">
+<h3 class='topheader'>Transformer Tap Ratio</h3>
+</div>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label4">Primary</td>
+		<td class="form"><div id="vtp"></div></td>
+	</tr>
+    <tr>
+        <td class="label4">Secondary</td>
+        <td class="form">
+            <select name="vts" id="vts">
+                <option value='0'>1</option>
+                <option value='1'>110</option>
+                <option value='2'>115</option>
+                <option value='3'>120</option>
+            </select>
+        </td>
+    </tr>
+</table>
+<div id="vtr_pt_e" style="display:none;">
+<h3 class='topheader'>Voltage Sensor Correction</h3>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label4">Phase Voltage A</td>
+		<td class="form"><div id="VgcptAh"></div></td>
+	</tr>
+	<tr>
+		<td class="label4">Phase Voltage B</td>
+		<td class="form"><div id="VgcptBh"></div></td>
+	</tr>
+	<tr>
+		<td class="label4">Phase Voltage C</td>
+		<td class="form"><div id="VgcptCh"></div></td>
+	</tr>
+</table>
+</div>
+<div id="vb2" style="display:none;">
+<h3 class='topheader'>VT Ratio Bus 2</h3>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label4">Primary</td>
+		<td class="form"><div id="v2p"></div></td>
+	</tr>
+    <tr>
+        <td class="label4">Secondary</td>
+        <td class="form">
+            <select name="v2s" id="v2s">
+                <option value='0'>1</option>
+                <option value='1'>110</option>
+                <option value='2'>115</option>
+                <option value='3'>120</option>
+            </select>		
+        </td>
+    </tr>
+</table>
+</div>
+
+<div id="ctr" style="display:none;">
+<h3 class='topheader'>CT Ratio</h3>
+</div>
+<div id="ct_pt" style="display:none;">
+<h3 class='topheader'>Current Sensor Ratio</h3>
+</div>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label4">Primary</td>
+		<td class="form"><div id="ctp"></div></td>
+	</tr>
+	<tr>
+		<td class="label4">Secondary</td>
+		<td class="form">
+            <select name="cts" id="cts">
+				<option value='0'>1</option>
+				<option value='1'>5</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label4">Invert current polarity</td>
+		<td class="form"><div id="ict"></div></td>
+	</tr>
+</table>
+<div id="itr_pt_e" style="display:none;">
+<h3 class='topheader'>Current Sensor Correction</h3>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label4"></td>
+		<td class="form" style="font-size:small;color:#6b8dd2;">Gain-H</td>
+		<td class="form" style="font-size:small;color:#6b8dd2;">Gain-L</td>
+		<td class="form" style="font-size:small;color:#6b8dd2;">Phase-H</td>
+		<td class="form" style="font-size:small;color:#6b8dd2;">Phase-L</td>
+	</tr>
+	<tr>
+		<td class="label4">Phase Current A</td>
+		<td class="form"><div id="IgcptAh"></div></td>
+		<td class="form"><div id="IgcptAl"></div></td>
+		<td class="form"><div id="IpcptAh"></div></td>
+		<td class="form"><div id="IpcptAl"></div></td>
+	</tr>
+	<tr>
+		<td class="label4">Phase Current B</td>
+		<td class="form"><div id="IgcptBh"></div></td>
+		<td class="form"><div id="IgcptBl"></div></td>
+		<td class="form"><div id="IpcptBh"></div></td>
+		<td class="form"><div id="IpcptBl"></div></td>
+	</tr>
+	<tr>
+		<td class="label4">Phase Current C</td>
+		<td class="form"><div id="IgcptCh"></div></td>
+		<td class="form"><div id="IgcptCl"></div></td>
+		<td class="form"><div id="IpcptCh"></div></td>
+		<td class="form"><div id="IpcptCl"></div></td>
+	</tr>
+</table>
+</div>
+<h3 class='topheader'>Demand Intervals</h3>
+<table cellspacing="0" border="0">
+	<tr id="ampdi" style="display:none;">
+		<td class="label4">Amp Demand Interval</td>
+		<td class="form"><div id="amp"></div></td>
+		<td class="label">seconds</td>
+	</tr>
+	<tr id="vai" style="display:none;">
+		<td class="label4">Volt Average Interval</td>
+		<td class="form"><div id="vlt"></div></td>
+		<td class="label">seconds</td>
+	</tr>
+	<tr id="pai" style="display:none;">
+		<td class="label4">Power Average Interval</td>
+		<td class="form"><div id="pwr"></div></td>
+		<td class="label">seconds</td>
+	</tr>
+</table>
+
+<div id="tddd" style="display:none;">
+<h3 class='topheader'>TDD Denominator</h3>
+<table cellspacing="0" border="0">
+	<tr><td class="label4">Phase A</td>
+		<td class="form"><div id="tda"></div></td>
+	</tr>
+	<tr><td class="label4">Phase B</td>
+		<td class="form"><div id="tdb"></div></td>
+	</tr>
+	<tr><td class="label4">Phase C</td>
+		<td class="form"><div id="tdc"></div></td>
+	</tr>
+	<tr><td class="label4">Residual</td>
+		<td class="form"><div id="tdr"></div></td>
+	</tr>
+</table>
+</div>
+
+<div id="lcmp" style="display:none;">
+<h3 class='topheader'>Loss Compensation</h3>
+<table cellspacing="0" border="0">
+	<tr><td class="label17"><u>&nbsp;&nbsp;(Copper Watt Loss)&nbsp;&nbsp;</u><br>(Test Current)<sup>2</sup></td>
+		<td class="label">&nbsp;</td>
+		<td class="form"><div id="wcu"></div></td>
+	</tr>
+	<tr><td class="label17"><u>&nbsp;&nbsp;(Iron Watt Loss)&nbsp;&nbsp;</u><br>(Rated Voltage)<sup>2</sup></td>
+		<td class="label">&nbsp;</td>
+		<td class="form"><div id="wfe"></div></td>
+	</tr>
+	<tr><td class="label17"><u>&nbsp;&nbsp;(Copper Var Loss)&nbsp;&nbsp;</u><br>(Test Current)<sup>2</sup></td>
+		<td class="label">&nbsp;</td>
+		<td class="form"><div id="vcu"></div></td>
+	</tr>
+	<tr><td class="label17"><u>&nbsp;&nbsp;(Iron Var Loss)&nbsp;&nbsp;</u><br>(Rated Voltage)<sup>4</sup></td>
+		<td class="label">&nbsp;</td>
+		<td class="form"><div id="vfe"></div></td>
+	</tr>
+	<tr><td class="label17">System Loss</td>
+		<td class="label">&nbsp;</td>
+		<td class="form"><div id="sys"></div></td>
+	</tr>
+</table>
+</div>
+
+<div id="biin" style="display:none;">
+<h3 class='topheader'>Binary Inputs</h3>
+<table cellspacing="0" border="0">
+	<tr><td class="label4">Debounce</td>
+		<td class="form"><div id="dbc"></div></td>
+		<td class="label">milliseconds</td>
+	</tr>
+</table>
+</div>
+
+<div id="dispkyz" style="display:none;">
+<h3 class='topheader'>KYZ Energy Counter</h3>
+<table cellspacing="0" border="0">
+	<tr><td class="label4">Enable/Disable</td>
+		<td class="form">
+		    <select name="kyzmode" id="kyzmode" onchange="kyz_params()">
+			    <option value='0'>Disable</option>
+			    <option value='1'>Enable</option>	
+	        </select>		
+		</td>
+	</tr>	
+	<tr><td class="label4">Energy per Pulse</td>
+		<td class="form"><div id="kwpp"></div></td>
+		<td class="label">kWh/kVARh</td>
+	</tr>
+</table>
+<table cellspacing="0" border="0" id="outp_tab">
+	<tr><td class="label4">+kWh Output</td>
+        <td class="form">
+        <select name="kyzbo1" id="kyzbo1" onchange="check_outputs();">
+ 		        <option value='0'>Disable</option> 
+                <option value='1'>OUT1</option>
+			    <option value='2'>OUT2</option>
+			    <option value='3'>OUT3</option>
+			    <option value='4'>OUT4</option>
+			    <option value='5'>OUT5</option>
+			    <option value='6'>OUT6</option>
+			    <option value='7'>OUT7</option>
+			    <option value='8'>OUT8</option>               
+	        </select>		
+		</td>
+        <td id="warn1"></td>
+	</tr>
+	<tr><td class="label4">-kWh Output</td>
+		<td class="form">
+        <select name="kyzbo2" id="kyzbo2" onchange="check_outputs();">
+ 		        <option value='0'>Disable</option>
+                <option value='1'>OUT1</option>
+			    <option value='2'>OUT2</option>
+			    <option value='3'>OUT3</option>
+			    <option value='4'>OUT4</option>
+			    <option value='5'>OUT5</option>
+			    <option value='6'>OUT6</option>
+			    <option value='7'>OUT7</option>
+			    <option value='8'>OUT8</option>               
+	        </select>		
+		</td>
+        <td id="warn2"></td>
+	</tr>
+	<tr><td class="label4">+kVARh Output</td>
+		<td class="form">
+        <select name="kyzbo3" id="kyzbo3" onchange="check_outputs();">
+ 		        <option value='0'>Disable</option>
+                <option value='1'>OUT1</option>
+			    <option value='2'>OUT2</option>
+			    <option value='3'>OUT3</option>
+			    <option value='4'>OUT4</option>
+			    <option value='5'>OUT5</option>
+			    <option value='6'>OUT6</option>
+			    <option value='7'>OUT7</option>
+			    <option value='8'>OUT8</option>               
+	        </select>		
+		</td>
+        <td id="warn3"></td>
+	</tr>
+	<tr><td class="label4">-kVARh Output</td>
+		<td class="form">
+        <select name="kyzbo4" id="kyzbo4" onchange="check_outputs();">
+ 		        <option value='0'>Disable</option>
+                <option value='1'>OUT1</option>
+			    <option value='2'>OUT2</option>
+			    <option value='3'>OUT3</option>
+			    <option value='4'>OUT4</option>
+			    <option value='5'>OUT5</option>
+			    <option value='6'>OUT6</option>
+			    <option value='7'>OUT7</option>
+			    <option value='8'>OUT8</option>               
+	        </select>		
+		</td>
+        <td id="warn4"></td>
+	</tr>		
+</table>
+</div>
+<div id="ptsensor" style="display:none;">
+<h3 class='topheader'>Pole Top Sensor Parameters</h3>
+<table cellspacing="0" border="0">
+	<td class="label4">Voltage Sensor Ratio</td>
+	<td class="form">
+		<select name="vap1val" id="vap1val">
+			<option value='1'>1400:1</option>
+			<option value='2'>2200:1</option>
+			<option value='3'>3300:1</option>
+		</select>
+	</td>
+</table>
+</div>
+<div id="pfc" style="display:none;">
+<h3 class='topheader'>Over-Current Monitoring</h3>
+<table cellspacing="0" border="0">
+	<tr id="pldi" style="display:none;">
+		<td class="label4">Pick Up Threshold</td>
+		<td class="form"><div id="pl"></div></td>
+		<td class="label">amps</td>
+	</tr>
+	<tr id="pidi" style="display:none;">
+		<td class="label4">Definite Time Duration</td>
+		<td class="form"><div id="pi"></div></td>
+		<td class="label">cycles</td>
+	</tr>
+</table>
+</div>
+<br>
+<p><input class="submit" type="submit" name="Submit" value="Apply"/><br></p>
+</form>
+<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return get_resp()">
+<input type="hidden" name="dflt" id="dflt" value="Input"/>
+<input type="submit" name="restore" value="Restore Defaults" /></form>
+
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>
+

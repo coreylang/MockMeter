@@ -1,0 +1,247 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Data - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="stylesheet" type="text/css" href="css_tab.css">
+	<script src="request.js"></script>
+	<script src="data.js"></script>
+	<script src="content.js"></script>
+	<link rel="icon" href="favicon.ico">
+<script>
+//<!--
+var doSend = true;
+var mset;
+var first_load = true;
+var mname = 0;
+var unit = 1;
+//									B	A	P	A	V	P
+//									A	D	P	M	L	T
+//						 sec name	S	V	X	P	T	S
+var		mset_tab =	[	["amps",	1,	1,	1,	1,	0,	1 ],
+						["volts",	0,	1,	1,	0,	1,	1 ],
+						["tot_pwr",	0,	1,	1,	0,	0,	1 ],
+						["snc",		0,	0,	1,	0,	0,	0 ]	];
+
+var		name_tab =	[	["i_d_a",	""],
+						["i_d_b",	""],
+						["i_d_c",	""],
+						["i_mx_a",  ""],
+						["i_mx_b",	""],
+	                    ["i_mx_c",	""],
+                        ["i_unit_a", "Amps"],
+                        ["i_unit_b", "Amps"],
+	                    ["i_unit_c", "Amps"],
+	                    ["v_d_a",	""],
+	                    ["v_d_b",	""],
+	                    ["v_d_c",	""],
+	                    ["v_mx_a",	""],
+	                    ["v_mx_b",	""],
+	                    ["v_mx_c",	""],
+	                    ["v_mn_a",	""],
+	                    ["v_mn_b",	""],
+	                    ["v_mn_c",	""],
+	                    ["v_unit_a", "Volts"],
+	                    ["v_unit_b", "Volts"],
+	                    ["v_unit_c", "Volts"],
+	                    ["w_mx",	""],
+						["w_dm",	""],
+	                    ["w_mn",	""],
+	                    ["var_mx",	""],
+						["var_dm",	""],
+	                    ["var_mn",	""],
+	                    ["va_mx",	""],
+						["va_dm",	""],
+	                    ["va_mn",	""],
+	                    ["w_unit",	"Watts"],
+	                    ["var_unit", "VARs"],
+						["va_unit",	"VAs"] ];
+
+function parse_vars(data) {
+	var i=0,j=0;
+	var parsed = data.split( "\n" );
+	var pending_changes = 	parsed[j++];
+	mset = Number(parsed[j++]) + 1;
+	var elem = parsed[j++];
+
+	while(i<name_tab.length) {
+		if(name_tab[i][unit] != "") {
+			while(name_tab[i][unit] != "") {
+				id(name_tab[i][mname]).innerHTML = "&nbsp;" + parsed[j] + name_tab[i][unit];	
+				if(name_tab[++i] == null)
+					break;
+			}
+			++j;
+		}
+		else
+			id(name_tab[i][mname]).innerHTML = parsed[j++] + name_tab[i++][unit];
+	}
+	
+	hb_new = parsed[j++];
+	var hasTrending = parsed[j];
+
+    msg_reset_if_pending(pending_changes);
+	
+	if(first_load == false)
+		return;
+		
+	first_load = false;
+	var rows = id("vlt_tab").getElementsByTagName('tr');
+
+	for(var i=0; i<mset_tab.length; i++) {
+		if(mset_tab[i][mset] == 1)
+			id(mset_tab[i][0]).style.display = '';
+	}
+	
+	if(elem == "0") { // if in 2-Element mode...
+		rows[1].getElementsByTagName('td')[0].innerHTML = "A-B";
+		rows[2].getElementsByTagName('td')[0].innerHTML = "B-C";
+		rows[3].getElementsByTagName('td')[0].innerHTML = "C-A";
+	}
+
+	if(hasTrending == "1")
+		id("trlog").style.display = '';
+
+	doSend = true;
+
+}
+	
+function loop() {
+
+	if(doSend) {
+		doSend = false;
+		makeRequest(nc("data2.cgi"), null);
+	}
+	setTimeout(function(){check_status(http_request, 0);}, 249);
+	checkConnection();
+	setTimeout("loop()", 1000);
+}
+
+function load_once() {
+	populate("data.html");
+	loop();
+
+}
+
+window.onload=load_once;
+window.onunload=abort;
+//-->
+</script>
+
+</head>
+<body id="tab2">
+<div id="Content"></div>
+
+<div id="mncnt" class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="message"></div>
+<div id="LostCon" class="fbox" style="visibility:hidden;background-color:#fcc;"><a><b>Connection Lost!</b></a></div>
+<h2>Live Data View</h2>
+
+<ul id="tabnav"> 
+	<li class="tab1"><a href="data.html">Instantaneous</a></li>
+	<li class="tab2"><a href="data2.html">Demands</a></li>
+	<li class="tab3"><a href="data3.html">Vector Diagram</a></li>
+	<li class="tab4" id="snc" style="display:none;"><a href="data4.html">Synchronizing</a></li>
+	<li class="tab5" id="trlog" style="display:none;"><a href="data5.html">Trend Log</a></li>
+</ul>
+
+<div id="amps" style="display:none;">
+<h3>Amps</h3>
+<div class="fbox">
+<table id="amp_tab" cellspacing="0" border="0">
+	<tr>
+		<td class="tb_label"></td>
+		<td class="tb_header"><div align="center">Maximum</div></td>
+		<td class="tb_header"><div align="center">Present Demand</div></td>
+	</tr>
+	<tr>
+		<td class="tb_label"><div align="left">Phase A</div></td>
+		<td class="tb_elem"><div id="i_mx_a"></div></td>
+		<td class="tb_elem"><div id="i_d_a"></div></td>
+		<td class="tb_label"><div id="i_unit_a"></div></td>
+	</tr>
+	<tr>
+		<td class="tb_label"><div align="left">Phase B</div></td>
+		<td class="tb_elem"><div id="i_mx_b"></div></td>
+		<td class="tb_elem"><div id="i_d_b"></div></td>
+		<td class="tb_label"><div id="i_unit_b"></div></td>
+	<tr>
+		<td class="tb_label"><div align="left">Phase C</div></td>
+		<td class="tb_elem"><div id="i_mx_c"></div></td>
+		<td class="tb_elem"><div id="i_d_c"></div></td>
+		<td class="tb_label"><div id="i_unit_c"></div></td>
+	</tr>
+</table>
+</div></div>
+
+<div id="volts" style="display:none;">
+<h3>Volts</h3>
+<div class="fbox">
+<table id="vlt_tab" cellspacing="0" border="0">
+	<tr>
+		<td class="tb_label"></td>
+		<td class="tb_header"><div align="center">Maximum</div></td>
+		<td class="tb_header"><div align="center">Present Demand</div></td>
+		<td class="tb_header"><div align="center">Minimum</div></td>
+	</tr>
+	<tr>
+		<td class="tb_label"><div align="left">Phase A</div></td>
+		<td class="tb_elem"><div id="v_mx_a"></div></td>
+		<td class="tb_elem"><div id="v_d_a"></div></td>
+		<td class="tb_elem"><div id="v_mn_a"></div></td>
+		<td class="tb_label"><div id="v_unit_a"></div></td>
+	</tr>
+	<tr>
+		<td class="tb_label"><div align="left">Phase B</div></td>
+		<td class="tb_elem"><div id="v_mx_b"></div></td>
+		<td class="tb_elem"><div id="v_d_b"></div></td>
+		<td class="tb_elem"><div id="v_mn_b"></div></td>
+		<td class="tb_label"><div id="v_unit_b"></div></td>
+	<tr>
+		<td class="tb_label"><div align="left">Phase C</div></td>
+		<td class="tb_elem"><div id="v_mx_c"></div></td>
+		<td class="tb_elem"><div id="v_d_c"></div></td>
+		<td class="tb_elem"><div id="v_mn_c"></div></td>
+		<td class="tb_label"><div id="v_unit_c"></div></td>
+	</tr>
+</table>
+</div></div>
+
+<div id="tot_pwr" style="display:none;">
+<h3>Total Power</h3>
+<div class="fbox">
+<table id="pwr_tab" cellspacing="0" border="0">
+	<tr>
+		<td class="tb_label"></td>
+		<td class="tb_header"><div align="center">Maximum</div></td>
+		<td class="tb_header"><div align="center">Present Demand</div></td>
+		<td class="tb_header"><div align="center">Minimum</div></td>
+	</tr>
+	<tr>
+		<td class="tb_label"><div align="left">Watts</div></td>
+		<td class="tb_elem"><div id="w_mx"></div></td>
+		<td class="tb_elem"><div id="w_dm"></div></td>
+		<td class="tb_elem"><div id="w_mn"></div></td>
+		<td class="tb_label"><div id="w_unit"></div></td>
+	</tr>
+	<tr>
+		<td class="tb_label"><div align="left">VARs</div></td>
+		<td class="tb_elem"><div id="var_mx"></div></td>
+		<td class="tb_elem"><div id="var_dm"></div></td>
+		<td class="tb_elem"><div id="var_mn"></div></td>
+		<td class="tb_label"><div id="var_unit"></div></td>
+	<tr>
+		<td class="tb_label"><div align="left">VAs</div></td>
+		<td class="tb_elem"><div id="va_mx"></div></td>
+		<td class="tb_elem"><div id="va_dm"></div></td>
+		<td class="tb_elem"><div id="va_mn"></div></td>
+		<td class="tb_label"><div id="va_unit"></div></td>
+	</tr>
+</table>
+</div></div>
+
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body></html>

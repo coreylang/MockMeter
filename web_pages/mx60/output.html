@@ -1,0 +1,231 @@
+<!DOCTYPE HTML SYSTEM>
+
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Analog Output - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+<script>
+//<!--
+var n_outs = 3;
+var n_cols = 3;
+var z_min, z_max;
+var f_min, f_max;
+var NONE;
+id=function(id) {return document.getElementById(id)};
+
+function parse_vars(data) {
+	var parsed = data.split( "\n" );
+	var j=0;
+	var pending_changes = parsed[j++];
+	if(parsed[j++]=="1") {id("logout").style.display = 'block';}
+	var port_type = parsed[j++];
+	var meas = new Array(n_outs);
+	var o = new Array(n_outs);
+	var t_list;
+	for(var i=0;i<n_cols;i++) {
+		meas[i] = new Array(n_cols);
+	}
+
+	for(i=0;i<n_outs;i++) {
+		var k = i+1;
+		o[i] = id("out"+k);
+		o[i].options.length = 0;
+		for(var m=0;m<n_cols;m++) {
+			meas[i][m] = parsed[j++];
+		}
+	}
+	
+	z_min = Number(parsed[j++]);
+	z_max = Number(parsed[j++]);
+	f_min = Number(parsed[j++]);
+	f_max = Number(parsed[j++]);
+
+	var is_set = [false,false,false];
+	NONE = parsed[j].split(":")[0];
+	
+	while( parsed[j] ) {
+		t_list = parsed[j++].split(":");
+		for(i=0;i<n_outs;i++) {
+			o[i].options[o[i].options.length] = new Option(t_list[1], t_list[0]);
+			if(t_list[0] == meas[i][0]) {
+				o[i].value = meas[i][0];
+				is_set[i] = true;
+			}
+		}
+	}
+	
+	if(port_type == 2) {
+		id("zr_lbl").innerHTML = "4 mA";
+		id("fs_lbl").innerHTML = "20 mA";
+	}
+	else {
+		id("zr_lbl").innerHTML = "0 mA";
+		id("fs_lbl").innerHTML = "1 mA";
+	}
+	
+	for(i=0;i<n_outs;i++) {
+		var j = i+1;
+		if(is_set[i] == false) {
+			id("r"+j).className = "error";
+			id("errmsg"+j).innerHTML = "<b>The stored measurement type is not in the list. Please select from the list.<\/b>";
+		}
+		id("zr_o"+j).innerHTML = '<input type="text" name="zr'+j+'" id="zr'+j+'" size="7" maxlength="7" value="'+meas[i][1]+'" onKeyPress="return checkKey(event)"/>';
+		id("fs_o"+j).innerHTML = '<input type="text" name="fs'+j+'" id="fs'+j+'" size="7" maxlength="7" value="'+meas[i][2]+'" onKeyPress="return checkKey(event)"/>';
+		check_none(j);
+	}
+
+    msg_reset_if_pending(pending_changes);
+}
+
+function check_none(menu_num)
+{
+	var zero = id("zr"+menu_num);
+	var fscl = id("fs"+menu_num);
+	
+	if(id("out"+menu_num).value == NONE) {	
+		if(zero.value < z_min || zero.value > z_max || isNaN(zero.value)) {
+			zero.value = "0.0000";
+		}
+		
+		if(fscl.value < f_min || fscl.value > f_max || isNaN(fscl.value)) {
+			fscl.value = "1.0000";
+		}
+		
+		zero.disabled = true;
+		fscl.disabled = true;
+	}
+	else {
+		zero.disabled = false;
+		fscl.disabled = false;
+	}
+}
+
+function validate(form) {
+	var z_val = new Array(n_outs);
+	var f_val = new Array(n_outs);
+	var err_msg, err_typ;
+	var valid = true;
+	
+    for(var i=0; i<form.elements.length; i++) {
+		for(var j=0;j<n_outs;j++) {
+			var k=j+1;
+			if(form.elements[i].name==("zr"+k)) {
+				z_val[j] = form.elements[i].value;
+			}
+			else if(form.elements[i].name==("fs"+k)) {
+				f_val[j] = form.elements[i].value;
+			}
+		}
+	}
+
+	for(i=0;i<n_outs;i++) {
+		var j = i+1;
+		var r = id("r"+j);
+		var e = id("errmsg"+j);
+		err_msg = "";
+		if(z_val[i] < z_min || z_val[i] > z_max || isNaN(z_val[i])) {
+			err_msg = "Zero value must be in the range<br>of -10,000 to 10,000. ";
+			err_typ = "error";
+		} else if(f_val[i] < f_min || f_val[i] > f_max || isNaN(f_val[i])) {
+			err_msg += "Full-scale value must be in the<br>range of -10,000 to 10,000.";
+			err_typ = "error";
+		} else if( Number(f_val[i]) == Number(z_val[i]) ) {
+			err_msg += "Zero value cannot equal full-scale value.";
+			err_typ = "error";
+		} else {
+			err_typ = "success_msg";
+			e.innerHTML = "";
+			r.className = err_typ;
+		}
+
+		if(err_typ == "error") {
+			e.innerHTML = "<b>"+err_msg+"<\/b>";
+			r.className = err_typ;
+			valid = false;
+		}
+	}
+
+    if(valid) {
+		return true;
+    }
+	else {
+		alert("Please correct the red highlighted fields and resubmit.");
+		return false;
+    }
+}
+
+function load_once() {
+	populate("settings.html");
+	makeRequest(nc("output.cgi"), null);
+}
+
+window.onload=load_once;
+//-->
+</script>
+	
+</head>
+<body>
+<div id="Content"></div>
+<div class="pagebox" id="content">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="trail"><a href="settings.html">Settings</a> / Analog Output</div>
+<div id="message"></div>
+<form action="http:output_submit.cgi" method="POST" name="myform" id="myform" onSubmit="return validate(this);" >
+
+<h2>Device Analog Output Configuration</h2><br>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label7">&nbsp;</td>
+		<td class="tb_labelw">Measurement</td>
+		<td class="label7">&nbsp;</td>
+		<td class="label6" id="zr_lbl"></td>
+		<td class="label6" id="fs_lbl"></td>
+		<td class="label6">Terminal</td>
+	</tr>
+	<tr id="r1">
+		<td class="label7">1.</td>
+		<td class="label4"><select name="out1" id="out1" onchange="check_none('1');"></select></td>
+		<td>&nbsp;</td>
+		<td class="form"><div id="zr_o1"></div></td>
+		<td class="form"><div id="fs_o1"></div></td>
+		<td class="label6">15</td>
+		<td id="errmsg1" class="errormsg"></td>
+	</tr>
+	<tr id="r2">
+		<td class="label7">2.</td>
+		<td class="label4"><select name="out2" id="out2" onchange="check_none('2');"></select></td>
+		<td>&nbsp;</td>
+		<td class="form"><div id="zr_o2"></div></td>
+		<td class="form"><div id="fs_o2"></div></td>
+		<td class="label6">16</td>
+		<td id="errmsg2" class="errormsg"></td>
+	</tr>
+	<tr id="r3">
+		<td class="label7">3.</td>
+		<td class="label4"><select name="out3" id="out3" onchange="check_none('3');"></select></td>
+		<td>&nbsp;</td>
+		<td class="form"><div id="zr_o3"></div></td>
+		<td class="form"><div id="fs_o3"></div></td>
+		<td class="label6">17</td>
+		<td id="errmsg3" class="errormsg"></td>
+	</tr>
+</table>
+<table cellspacing="0" border="0"><tr>
+<td class="label7">&nbsp;</td>
+<td class="elem" style="color:#999;">Enter values in Secondary units.</td>
+</tr></table>
+
+<p><input class="submit" type="submit" name="Submit" value="Apply"/><br></p>
+</form>
+<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return get_resp()">
+<input type="hidden" name="dflt" id="dflt" value="Output"/>
+<input type="submit" name="restore" value="Restore Defaults" /></form>
+
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>

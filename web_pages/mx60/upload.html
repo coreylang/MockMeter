@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head> 
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Firmware Upload - Bitronics Web Server</title> 
+    <link rel="stylesheet" type="text/css" href="site.css">
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="request.js"></script>
+    <script src="load.js"></script>
+    <script src="content.js"></script>
+<script>
+window.onload=load_once;
+
+function parse_vars(data) {
+    var pending = data.split("\n")[0];
+    msg_reset_if_pending(pending);
+    if(data.split("\n")[5]=="1")
+        id("logout").style.display = 'block';
+}
+
+function load_once() {
+    populate("settings.html");
+    get_pending();
+    setupProgress();
+}
+
+function do_fw_upload () {
+    uploadFile("fw_upload.cgi");
+    }
+
+</script>
+
+</head>
+<body>
+
+<div id="Content"></div>
+<div id="mncnt" class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="trail"><a href="settings.html">Settings</a> / Firmware Upload</div>
+<div id="message"></div>
+<br><h2>Update Device Firmware</h2><br>
+<h3>Save to Device</h3>
+<div>Select a firmware image file.</div>
+  <div id="upbox" class="fbox">
+    <form id="upload" method="post" enctype="multipart/form-data"
+        action="fw_upload.cgi" target="upload_target" >
+       <div id="f1_upload_process">Loading...
+         <br>
+           <progress id="progress" value="0" max="100"
+             style="width:150px"><img src="loader.gif" alt="loading"/>
+           </progress>
+         <br>
+       </div>
+       <p id="upb_msg" align="center"></p>
+       <div id="f1_upload_form" align="center">
+          <br>
+          <label>File:<input type="file" name="myfile" id="myfile"
+              accept=".bin" size="30" max="2080768" />
+          </label>
+          <label><input id="jbtn" type="button" class="sbtn"
+              style="visibility:hidden"
+              value="Upload" onclick="auth_check(do_fw_upload);" />
+          </label>
+       </div>
+    </form>
+  </div>
+  <iframe id="upload_target" name="upload_target"
+    style="width:0;height:0;border:0px solid #fff;">
+  </iframe>
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>     

@@ -1,0 +1,206 @@
+<!DOCTYPE HTML SYSTEM>
+<html>
+<head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>IEC61850 Settings - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="shortcut icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="load.js"></script>
+	<script src="content.js"></script>
+<script>
+var KA_MIN;
+var KA_MAX;
+var DTYPE_ICD;
+var DTYPE_CID;
+
+function load_once() {
+	populate("settings.html");
+	makeRequest(nc("iec61850.cgi"), null);
+	setupProgress();
+}
+
+function parse_vars(data) {
+	var parsed = data.split("\n");
+    var pending = parsed[0];
+
+	if(parsed[1]=="1")
+		id("logout").style.display = 'block';
+    msg_reset_if_pending (pending);
+	document.getElementsByName("iena")[parsed[2]].checked = true;
+	id("tka").innerHTML = '<input type="text" name="tka" size="6" maxlength="4" value="'+parsed[3]+'"/>';
+	DTYPE_ICD = parsed[4];
+//  if(DTYPE != "px2") DTYPE = "m60";
+	id("icd").href = DTYPE_ICD+"_ed10.icd";
+    DTYPE_CID = parsed[5];
+	id("cdl").href = "/c/"+DTYPE_CID+".cid";
+	KA_MIN = parsed[6];
+	KA_MAX = parsed[7];
+	id('myfile').max = parsed[8];
+}
+
+function validate(f) {
+	var invalid = false;
+	var set_arr = [["tka", KA_MIN, KA_MAX]];
+	var NAME=0, MIN=1, MAX=2;
+
+	for(var i=0; i<f.elements.length; i++) {
+		var k = f.elements[i];
+		for(var j=0;j<set_arr.length;j++) {
+			if(k.name==set_arr[j][NAME]) {
+				if( isNaN(k.value)
+				 || Number(k.value) < set_arr[j][MIN] 
+				 || Number(k.value) > set_arr[j][MAX] ) {
+					id(set_arr[j][NAME]).innerHTML = 
+                        '<input type="text" name="'+set_arr[j][NAME]
+                       +'" size="6" maxlength="4" value="'+k.value
+                       +'"\/> <b><a class="err_msg">'
+                       +'Value must be within the range of '
+                       +set_arr[j][MIN]+' to '+set_arr[j][MAX]+'<\/a><\/b>';				 
+					id(set_arr[j][NAME]).className = "error";
+					invalid = true;
+				}
+				else {
+					id(set_arr[j][NAME]).innerHTML = 
+                       '<input type="text" name="'+set_arr[j][NAME]
+                      +'" size="6" maxlength="4" value="'+k.value+'"\/>';
+					id(set_arr[j][NAME]).className = "success_msg";
+				}
+			}
+		}
+	}
+
+	if(invalid==true) {
+		alert("Please correct the red highlighted fields and resubmit.");
+		return false;
+	} else {
+		return true;
+	}
+}
+
+function start_cid_xfer()
+{
+	if(id('myfile').value == "")
+		return false;
+	id('upb_msg').innerHTML = '';
+	id("done").style.visibility = "hidden";
+}
+
+function set_icd(ed)
+{
+	id("icd").href = DTYPE_ICD+"_ed"+ed+"0.icd";
+}
+
+
+// do_cid_upload runs after successful auth_check
+function do_cid_upload() {
+    start_cid_xfer();
+    uploadFile('cid_upload.cgi');
+    }
+
+
+// onload for primary window object only; skip for iframes
+if (window.parent == self) {
+	window.onload=load_once;
+	}
+
+</script>
+
+</head>
+<body>
+
+<div id="Content"></div>
+
+<div id="mncnt" class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="trail"><a href="settings.html">Settings</a> / IEC61850 Settings</div>
+<div id="message"></div>
+<br><h2>IEC61850 Device Configuration</h2>
+
+<h3>IEC61850 Settings</h3>
+<div class="fbox"><br>
+<form action="iec61850_submit.cgi" method="POST" name="myform" id="myform" onSubmit="return validate(this);">
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label8">61850 Enabled</td>
+		<td class="form"><input type="radio" name="iena" value="ena"/></td>
+	</tr>
+	<tr>
+		<td class="label8">61850 Disabled</td>
+		<td class="form"><input type="radio" name="iena" value="dis"/></td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr>
+		<td class="label8">TCP Keepalive</td>
+		<td class="form"><div id="tka"></div></td>
+		<td class="label">seconds</td>
+	</tr>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr>	
+	<tr>
+		<td><input class="submit" type="submit" name="SaveSettings" value="Apply"/></td>
+	</tr>
+</table>
+</form>
+<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return get_resp()">
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label8"><input type="hidden" name="dflt" id="dflt" value="IEC61850"/></td>
+	</tr>
+	<tr>
+		<td class="label8"><input type="submit" name="restore" value="Restore Defaults" /></td>
+	</tr>
+</table>
+</form>
+</div>
+
+<h3>Save Configuration to Computer</h3>
+Store 61850 configuration files to computer.
+<div class="fbox" style="text-align:left">
+<br>
+<a id="icd" href="#">&nbsp;ICD - IED Capability Description (template) file</a>&nbsp;
+<select name="edn" id="edn" onchange="set_icd(this.value);">
+  <option value='1'>Ed. 1</option>
+  <option value='2'>Ed. 2</option>
+</select>
+<br><br>
+<a id="cdl" href="#">&nbsp;CID - Configured IED Description (configuration) file</a><br><br>
+</div>
+
+<h3>Save CID file to Device</h3>
+<div class="fbox">
+	<div id="f1_upload_process"><br>Loading CID...<br>
+		 <progress id="progress" name="progress" value="0" max="100" style="width:150px"><img src="loader.gif" width="160" height="19"/></progress>&nbsp;<img src="check.png" id="done" style="visibility:hidden;"/>
+		 <br><br>
+	
+		<div id="write_process" style="visibility:hidden;">
+		<form method="POST" action="http:write_flash.cgi" target="targ" id="write2flash" onsubmit="var ret; if(ret = confirm('Changes will be stored to flash. Continue?') == true){startWrite();} return ret;">
+		Writing to flash...<br/><img src="loader.gif" width="175" height="19"/>
+		<iframe id="targ" name="targ" src="#targ" style="width:0;height:0;border:0px solid #fff;"></iframe>
+		</form>
+		</div>	
+	</div>
+	<div id="f1_upload_form">
+		<br>
+		<div style="text-align:left">Upload custom CID file</div>
+		<form id="upbox" class="sub_box" method="post" enctype="multipart/form-data" target="upload_target">
+			<div id="upb_msg"></div>
+			<br>
+			File:<input type="file" name="myfile" id="myfile" accept=".cid" size="30" />
+			<input id="jbtn" type="button" class="sbtn" style="visibility:hidden;" value="Use Selected File" onclick="auth_check(do_cid_upload);" />
+			<input id="sbtn" type="submit" class="sbtn" style="visibility:hidden;" value="Use Selected File" onclick="start_cid_xfer(); startUpload();"/>
+		</form>
+		<br><br>
+	</div>
+</div>
+
+<iframe id="upload_target" name="upload_target" src="#upload_target" style="width:0;height:0;border:0px solid #fff;"></iframe>
+<iframe id="tgt" name="tgt" src="#tgt" style="width:0;height:0;border:0px solid #fff;"></iframe>
+
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>		
+

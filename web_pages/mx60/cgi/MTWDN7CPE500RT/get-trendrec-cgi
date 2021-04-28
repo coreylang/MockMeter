@@ -1,0 +1,241 @@
+{"Header":{"pending":"0","mset":"2","elem":"4","auth":"0","samp":"60.014080","build":"2.57.0","memsize":"67108864"},"Validation":{"rate_min":"1","rate_max":"43200"},"MeasList":[{"measIdxName":"RMS_Vp","measDescr":"RMS Volts Aux"}
+,{"measIdxName":"RMS_Va","measDescr":"RMS Volts A 1"}
+,{"measIdxName":"RMS_Vb","measDescr":"RMS Volts B 1"}
+,{"measIdxName":"RMS_Vc","measDescr":"RMS Volts C 1"}
+,{"measIdxName":"RMS_Ia","measDescr":"RMS Amps A 1"}
+,{"measIdxName":"RMS_Ib","measDescr":"RMS Amps B 1"}
+,{"measIdxName":"RMS_Ic","measDescr":"RMS Amps C 1"}
+,{"measIdxName":"RMS_Ir","measDescr":"RMS Amps Residual 1"}
+,{"measIdxName":"RMS_Vab","measDescr":"RMS Volts AB 1"}
+,{"measIdxName":"RMS_Vbc","measDescr":"RMS Volts BC 1"}
+,{"measIdxName":"RMS_Vca","measDescr":"RMS Volts CA 1"}
+,{"measIdxName":"Watt_Pa","measDescr":"RMS Watts A 1"}
+,{"measIdxName":"Watt_Pb","measDescr":"RMS Watts B 1"}
+,{"measIdxName":"Watt_Pc","measDescr":"RMS Watts C 1"}
+,{"measIdxName":"Watt_Pt","measDescr":"RMS Watts Total 1"}
+,{"measIdxName":"Var_Pa","measDescr":"RMS VARs A 1"}
+,{"measIdxName":"Var_Pb","measDescr":"RMS VARs B 1"}
+,{"measIdxName":"Var_Pc","measDescr":"RMS VARs C 1"}
+,{"measIdxName":"Var_Pt","measDescr":"RMS VARs Total 1"}
+,{"measIdxName":"VA_Pa","measDescr":"RMS VAs A 1"}
+,{"measIdxName":"VA_Pb","measDescr":"RMS VAs B 1"}
+,{"measIdxName":"VA_Pc","measDescr":"RMS VAs C 1"}
+,{"measIdxName":"VA_Pt","measDescr":"RMS VAs Tot. Geom 1"}
+,{"measIdxName":"PF_Pa","measDescr":"Power Factor A 1"}
+,{"measIdxName":"PF_Pb","measDescr":"Power Factor B 1"}
+,{"measIdxName":"PF_Pc","measDescr":"Power Factor C 1"}
+,{"measIdxName":"PF_Pt","measDescr":"Power Factor Tot. Geom 1"}
+,{"measIdxName":"FND_Va","measDescr":"Fund. Volts A 1"}
+,{"measIdxName":"FND_Vb","measDescr":"Fund. Volts B 1"}
+,{"measIdxName":"FND_Vc","measDescr":"Fund. Volts C 1"}
+,{"measIdxName":"FND_Ia","measDescr":"Fund. Amps A 1"}
+,{"measIdxName":"FND_Ib","measDescr":"Fund. Amps B 1"}
+,{"measIdxName":"FND_Ic","measDescr":"Fund. Amps C 1"}
+,{"measIdxName":"FND_Ir","measDescr":"Fund. Amps Residual 1"}
+,{"measIdxName":"FND_Vab","measDescr":"Fund. Volts AB 1"}
+,{"measIdxName":"FND_Vbc","measDescr":"Fund. Volts BC 1"}
+,{"measIdxName":"FND_Vca","measDescr":"Fund. Volts CA 1"}
+,{"measIdxName":"SysFreq","measDescr":"System Frequency"}
+,{"measIdxName":"DPF_Pa","measDescr":"Displ. Power Factor A 1"}
+,{"measIdxName":"DPF_Pb","measDescr":"Displ. Power Factor B 1"}
+,{"measIdxName":"DPF_Pc","measDescr":"Displ. Power Factor C 1"}
+,{"measIdxName":"DPF_Pt","measDescr":"Displ. Power Factor Total 1"}
+,{"measIdxName":"THD_Va","measDescr":"THD Volts A 1"}
+,{"measIdxName":"THD_Vb","measDescr":"THD Volts B 1"}
+,{"measIdxName":"THD_Vc","measDescr":"THD Volts C 1"}
+,{"measIdxName":"THD_Ia","measDescr":"TDD Amps A 1"}
+,{"measIdxName":"THD_Ib","measDescr":"TDD Amps B 1"}
+,{"measIdxName":"THD_Ic","measDescr":"TDD Amps C 1"}
+,{"measIdxName":"THD_Ir","measDescr":"TDD Amps Residual 1"}
+,{"measIdxName":"THD_Vab","measDescr":"THD Volts AB 1"}
+,{"measIdxName":"THD_Vbc","measDescr":"THD Volts BC 1"}
+,{"measIdxName":"THD_Vca","measDescr":"THD Volts CA 1"}
+,{"measIdxName":"KF_Ia","measDescr":"K-factor Amps A 1"}
+,{"measIdxName":"KF_Ib","measDescr":"K-factor Amps B 1"}
+,{"measIdxName":"KF_Ic","measDescr":"K-factor Amps C 1"}
+,{"measIdxName":"KF_Ir","measDescr":"K-factor Amps Residual 1"}
+,{"measIdxName":"NET_WHRS","measDescr":"kWatt-Hours Net 1"}
+,{"measIdxName":"POS_WHRS","measDescr":"kWatt-Hours Normal 1"}
+,{"measIdxName":"NEG_WHRS","measDescr":"kWatt-Hours Reverse 1"}
+,{"measIdxName":"POS_VHRS","measDescr":"kVAR-Hours Lag 1"}
+,{"measIdxName":"NEG_VHRS","measDescr":"kVAR-Hours Lead 1"}
+,{"measIdxName":"VAHRS","measDescr":"kVA-Hours 1"}
+,{"measIdxName":"RMS_Ia_DM","measDescr":"Demand RMS Amps A 1"}
+,{"measIdxName":"RMS_Ib_DM","measDescr":"Demand RMS Amps B 1"}
+,{"measIdxName":"RMS_Ic_DM","measDescr":"Demand RMS Amps C 1"}
+,{"measIdxName":"RMS_Ir_DM","measDescr":"Demand RMS Amps Residual 1"}
+,{"measIdxName":"FND_Ia_DM","measDescr":"Demand Fund. Amps A 1"}
+,{"measIdxName":"FND_Ib_DM","measDescr":"Demand Fund. Amps B 1"}
+,{"measIdxName":"FND_Ic_DM","measDescr":"Demand Fund. Amps C 1"}
+,{"measIdxName":"FND_Ir_DM","measDescr":"Demand Fund. Amps Residual 1"}
+,{"measIdxName":"RMS_Va_DM","measDescr":"Demand RMS Volts A 1"}
+,{"measIdxName":"RMS_Vb_DM","measDescr":"Demand RMS Volts B 1"}
+,{"measIdxName":"RMS_Vc_DM","measDescr":"Demand RMS Volts C 1"}
+,{"measIdxName":"RMS_Vab_DM","measDescr":"Demand RMS Volts AB 1"}
+,{"measIdxName":"RMS_Vbc_DM","measDescr":"Demand RMS Volts BC 1"}
+,{"measIdxName":"RMS_Vca_DM","measDescr":"Demand RMS Volts CA 1"}
+,{"measIdxName":"Watt_Pa_DM","measDescr":"Demand RMS Watts A 1"}
+,{"measIdxName":"Watt_Pb_DM","measDescr":"Demand RMS Watts B 1"}
+,{"measIdxName":"Watt_Pc_DM","measDescr":"Demand RMS Watts C 1"}
+,{"measIdxName":"Watt_Pt_DM","measDescr":"Demand RMS Watts Total 1"}
+,{"measIdxName":"Var_Pa_DM","measDescr":"Demand RMS VARs A 1"}
+,{"measIdxName":"Var_Pb_DM","measDescr":"Demand RMS VARs B 1"}
+,{"measIdxName":"Var_Pc_DM","measDescr":"Demand RMS VARs C 1"}
+,{"measIdxName":"Var_Pt_DM","measDescr":"Demand RMS VARs Total 1"}
+,{"measIdxName":"VA_Pa_DM","measDescr":"Demand RMS VAs A 1"}
+,{"measIdxName":"VA_Pb_DM","measDescr":"Demand RMS VAs B 1"}
+,{"measIdxName":"VA_Pc_DM","measDescr":"Demand RMS VAs C 1"}
+,{"measIdxName":"VA_Pt_DM","measDescr":"Demand RMS VAs Total 1"}
+,{"measIdxName":"RMS_Ia_MX","measDescr":"Max Demand RMS Amps A 1"}
+,{"measIdxName":"RMS_Ib_MX","measDescr":"Max Demand RMS Amps B 1"}
+,{"measIdxName":"RMS_Ic_MX","measDescr":"Max Demand RMS Amps C 1"}
+,{"measIdxName":"RMS_Ir_MX","measDescr":"Max Demand RMS Amps Residual 1"}
+,{"measIdxName":"FND_Ia_MX","measDescr":"Max Demand Fund. Amps A 1"}
+,{"measIdxName":"FND_Ib_MX","measDescr":"Max Demand Fund. Amps B 1"}
+,{"measIdxName":"FND_Ic_MX","measDescr":"Max Demand Fund. Amps C 1"}
+,{"measIdxName":"FND_Ir_MX","measDescr":"Max Demand Fund. Amps Residual 1"}
+,{"measIdxName":"RMS_Va_MX","measDescr":"Max Demand RMS Volts A 1"}
+,{"measIdxName":"RMS_Vb_MX","measDescr":"Max Demand RMS Volts B 1"}
+,{"measIdxName":"RMS_Vc_MX","measDescr":"Max Demand RMS Volts C 1"}
+,{"measIdxName":"RMS_Vab_MX","measDescr":"Max Demand RMS Volts AB 1"}
+,{"measIdxName":"RMS_Vbc_MX","measDescr":"Max Demand RMS Volts BC 1"}
+,{"measIdxName":"RMS_Vca_MX","measDescr":"Max Demand RMS Volts CA 1"}
+,{"measIdxName":"Watt_Pa_MX","measDescr":"Max Demand RMS Watts A 1"}
+,{"measIdxName":"Watt_Pb_MX","measDescr":"Max Demand RMS Watts B 1"}
+,{"measIdxName":"Watt_Pc_MX","measDescr":"Max Demand RMS Watts C 1"}
+,{"measIdxName":"Watt_Pt_MX","measDescr":"Max Demand RMS Watts Total 1"}
+,{"measIdxName":"Var_Pa_MX","measDescr":"Max Demand RMS VARs A 1"}
+,{"measIdxName":"Var_Pb_MX","measDescr":"Max Demand RMS VARs B 1"}
+,{"measIdxName":"Var_Pc_MX","measDescr":"Max Demand RMS VARs C 1"}
+,{"measIdxName":"Var_Pt_MX","measDescr":"Max Demand RMS VARs Total 1"}
+,{"measIdxName":"VA_Pa_MX","measDescr":"Max Demand RMS VAs A 1"}
+,{"measIdxName":"VA_Pb_MX","measDescr":"Max Demand RMS VAs B 1"}
+,{"measIdxName":"VA_Pc_MX","measDescr":"Max Demand RMS VAs C 1"}
+,{"measIdxName":"VA_Pt_MX","measDescr":"Max Demand RMS VAs Total 1"}
+,{"measIdxName":"RMS_Va_MN","measDescr":"Min Demand RMS Volts A 1"}
+,{"measIdxName":"RMS_Vb_MN","measDescr":"Min Demand RMS Volts B 1"}
+,{"measIdxName":"RMS_Vc_MN","measDescr":"Min Demand RMS Volts C 1"}
+,{"measIdxName":"RMS_Vab_MN","measDescr":"Min Demand RMS Volts AB 1"}
+,{"measIdxName":"RMS_Vbc_MN","measDescr":"Min Demand RMS Volts BC 1"}
+,{"measIdxName":"RMS_Vca_MN","measDescr":"Min Demand RMS Volts CA 1"}
+,{"measIdxName":"Watt_Pa_MN","measDescr":"Min Demand RMS Watts A 1"}
+,{"measIdxName":"Watt_Pb_MN","measDescr":"Min Demand RMS Watts B 1"}
+,{"measIdxName":"Watt_Pc_MN","measDescr":"Min Demand RMS Watts C 1"}
+,{"measIdxName":"Watt_Pt_MN","measDescr":"Min Demand RMS Watts Total 1"}
+,{"measIdxName":"Var_Pa_MN","measDescr":"Min Demand RMS VARs A 1"}
+,{"measIdxName":"Var_Pb_MN","measDescr":"Min Demand RMS VARs B 1"}
+,{"measIdxName":"Var_Pc_MN","measDescr":"Min Demand RMS VARs C 1"}
+,{"measIdxName":"Var_Pt_MN","measDescr":"Min Demand RMS VARs Total 1"}
+,{"measIdxName":"VA_Pa_MN","measDescr":"Min Demand RMS VAs A 1"}
+,{"measIdxName":"VA_Pb_MN","measDescr":"Min Demand RMS VAs B 1"}
+,{"measIdxName":"VA_Pc_MN","measDescr":"Min Demand RMS VAs C 1"}
+,{"measIdxName":"VA_Pt_MN","measDescr":"Min Demand RMS VAs Total 1"}
+,{"measIdxName":"Phi_Va","measDescr":"Phase Angle Volts A 1"}
+,{"measIdxName":"Phi_Vb","measDescr":"Phase Angle Volts B 1"}
+,{"measIdxName":"Phi_Vc","measDescr":"Phase Angle Volts C 1"}
+,{"measIdxName":"Phi_Ia","measDescr":"Phase Angle Amps A 1"}
+,{"measIdxName":"Phi_Ib","measDescr":"Phase Angle Amps B 1"}
+,{"measIdxName":"Phi_Ic","measDescr":"Phase Angle Amps C 1"}
+,{"measIdxName":"Phi_Vab","measDescr":"Phase Angle Volts AB 1"}
+,{"measIdxName":"Phi_Vbc","measDescr":"Phase Angle Volts BC 1"}
+,{"measIdxName":"Phi_Vca","measDescr":"Phase Angle Volts CA 1"}
+,{"measIdxName":"Watt_Pt_UNC","measDescr":"Uncompensated RMS Watts Total 1"}
+,{"measIdxName":"Var_Pt_UNC","measDescr":"Uncompensated RMS VARs Total 1"}
+,{"measIdxName":"RMS_Va2","measDescr":"RMS Volts A 2"}
+,{"measIdxName":"RMS_Vb2","measDescr":"RMS Volts B 2"}
+,{"measIdxName":"RMS_Vc2","measDescr":"RMS Volts C 2"}
+,{"measIdxName":"Freq_Va","measDescr":"Frequency Volts A 1"}
+,{"measIdxName":"Freq_Vb","measDescr":"Frequency Volts B 1"}
+,{"measIdxName":"Freq_Vc","measDescr":"Frequency Volts C 1"}
+,{"measIdxName":"Freq_Va2","measDescr":"Frequency Volts A 2"}
+,{"measIdxName":"Freq_Vb2","measDescr":"Frequency Volts B 2"}
+,{"measIdxName":"Freq_Vc2","measDescr":"Frequency Volts C 2"}
+,{"measIdxName":"dPhi_Va12","measDescr":"Phase Angle Volts A 1-2"}
+,{"measIdxName":"dPhi_Vb12","measDescr":"Phase Angle Volts B 1-2"}
+,{"measIdxName":"dPhi_Vc12","measDescr":"Phase Angle Volts C 1-2"}
+,{"measIdxName":"Slip_Va12","measDescr":"Slip Freq. Volts A 1-2"}
+,{"measIdxName":"Slip_Vb12","measDescr":"Slip Freq. Volts B 1-2"}
+,{"measIdxName":"Slip_Vc12","measDescr":"Slip Freq. Volts C 1-2"}
+,{"measIdxName":"METER_TEMP","measDescr":"Temperature"}
+,{"measIdxName":"RMS_Va2b2","measDescr":"RMS Volts AB 2"}
+,{"measIdxName":"RMS_Vb2c2","measDescr":"RMS Volts BC 2"}
+,{"measIdxName":"RMS_Vc2a2","measDescr":"RMS Volts CA 2"}
+,{"measIdxName":"SQM0_V1","measDescr":"Zero Sequence Magnitude Volts 1"}
+,{"measIdxName":"SQM1_V1","measDescr":"Positive Sequence Magnitude Volts 1"}
+,{"measIdxName":"SQM2_V1","measDescr":"Negative Sequence Magnitude Volts 1"}
+,{"measIdxName":"SQM0_V2","measDescr":"Zero Sequence Magnitude Volts 2"}
+,{"measIdxName":"SQM1_V2","measDescr":"Positive Sequence Magnitude Volts 2"}
+,{"measIdxName":"SQM2_V2","measDescr":"Negative Sequence Magnitude Volts 2"}
+,{"measIdxName":"SQM0_I1","measDescr":"Zero Sequence Magnitude Amps 1"}
+,{"measIdxName":"SQM1_I1","measDescr":"Positive Sequence Magnitude Amps 1"}
+,{"measIdxName":"SQM2_I1","measDescr":"Negative Sequence Magnitude Amps 1"}
+,{"measIdxName":"SQA0_V1","measDescr":"Zero Sequence Angle Volts 1"}
+,{"measIdxName":"SQA1_V1","measDescr":"Positive Sequence Angle Volts 1"}
+,{"measIdxName":"SQA2_V1","measDescr":"Negative Sequence Angle Volts 1"}
+,{"measIdxName":"SQA0_V2","measDescr":"Zero Sequence Angle Volts 2"}
+,{"measIdxName":"SQA1_V2","measDescr":"Positive Sequence Angle Volts 2"}
+,{"measIdxName":"SQA2_V2","measDescr":"Negative Sequence Angle Volts 2"}
+,{"measIdxName":"SQA0_I1","measDescr":"Zero Sequence Angle Amps 1"}
+,{"measIdxName":"SQA1_I1","measDescr":"Positive Sequence Angle Amps 1"}
+,{"measIdxName":"SQA2_I1","measDescr":"Negative Sequence Angle Amps 1"}
+,{"measIdxName":"U0_V1","measDescr":"Unbalance Volts U0 1"}
+,{"measIdxName":"UU_V1","measDescr":"Unbalance Volts Uu 1"}
+,{"measIdxName":"U0_V2","measDescr":"Unbalance Volts U0 2"}
+,{"measIdxName":"UU_V2","measDescr":"Unbalance Volts Uu 2"}
+,{"measIdxName":"U0_I1","measDescr":"Unbalance Amps U0 1"}
+,{"measIdxName":"UU_I1","measDescr":"Unbalance Amps Uu 1"}
+,{"measIdxName":"AVG_V1","measDescr":"Average Volts 1"}
+,{"measIdxName":"AVG_V2","measDescr":"Average Volts 2"}
+,{"measIdxName":"AVG_I1","measDescr":"Average Amps 1"}
+,{"measIdxName":"FND_Va2","measDescr":"Fund. Volts A 2"}
+,{"measIdxName":"FND_Vb2","measDescr":"Fund. Volts B 2"}
+,{"measIdxName":"FND_Vc2","measDescr":"Fund. Volts C 2"}
+,{"measIdxName":"FND_Va2b2","measDescr":"Fund. Volts AB 2"}
+,{"measIdxName":"FND_Vb2c2","measDescr":"Fund. Volts BC 2"}
+,{"measIdxName":"FND_Vc2a2","measDescr":"Fund. Volts CA 2"}
+,{"measIdxName":"THD_Va2","measDescr":"THD Volts A 2"}
+,{"measIdxName":"THD_Vb2","measDescr":"THD Volts B 2"}
+,{"measIdxName":"THD_Vc2","measDescr":"THD Volts C 2"}
+,{"measIdxName":"THD_Va2b2","measDescr":"THD Volts AB 2"}
+,{"measIdxName":"THD_Vb2c2","measDescr":"THD Volts BC 2"}
+,{"measIdxName":"THD_Vc2a2","measDescr":"THD Volts CA 2"}
+,{"measIdxName":"RMS_Va2_DM","measDescr":"Demand RMS Volts A 2"}
+,{"measIdxName":"RMS_Vb2_DM","measDescr":"Demand RMS Volts B 2"}
+,{"measIdxName":"RMS_Vc2_DM","measDescr":"Demand RMS Volts C 2"}
+,{"measIdxName":"RMS_Va2b2_DM","measDescr":"Demand RMS Volts AB 2"}
+,{"measIdxName":"RMS_Vb2c2_DM","measDescr":"Demand RMS Volts BC 2"}
+,{"measIdxName":"RMS_Vc2a2_DM","measDescr":"Demand RMS Volts CA 2"}
+,{"measIdxName":"RMS_Va2_MX","measDescr":"Max Demand RMS Volts A 2"}
+,{"measIdxName":"RMS_Vb2_MX","measDescr":"Max Demand RMS Volts B 2"}
+,{"measIdxName":"RMS_Vc2_MX","measDescr":"Max Demand RMS Volts C 2"}
+,{"measIdxName":"RMS_Va2b2_MX","measDescr":"Max Demand RMS Volts AB 2"}
+,{"measIdxName":"RMS_Vb2c2_MX","measDescr":"Max Demand RMS Volts BC 2"}
+,{"measIdxName":"RMS_Vc2a2_MX","measDescr":"Max Demand RMS Volts CA 2"}
+,{"measIdxName":"RMS_Va2_MN","measDescr":"Min Demand RMS Volts A 2"}
+,{"measIdxName":"RMS_Vb2_MN","measDescr":"Min Demand RMS Volts B 2"}
+,{"measIdxName":"RMS_Vc2_MN","measDescr":"Min Demand RMS Volts C 2"}
+,{"measIdxName":"RMS_Va2b2_MN","measDescr":"Min Demand RMS Volts AB 2"}
+,{"measIdxName":"RMS_Vb2c2_MN","measDescr":"Min Demand RMS Volts BC 2"}
+,{"measIdxName":"RMS_Vc2a2_MN","measDescr":"Min Demand RMS Volts CA 2"}
+,{"measIdxName":"AVG_V1_LL","measDescr":"Average Phs-Phs Volt 1"}
+,{"measIdxName":"AVG_V2_LL","measDescr":"Average Phs-Phs Volt 2"}
+],  "TR":{
+  "Enable": false,
+  "RateType": "SecondsPerEntry",
+  "Rate": 10,
+  "MeasType": "Min/Max/Avg",
+  "Meas": [
+    "RMS_Vp",
+    "RMS_Va",
+    "RMS_Vb",
+    "RMS_Vc",
+    "RMS_Ia",
+    "RMS_Ib",
+    "RMS_Ic",
+    "RMS_Ir",
+    "Watt_Pt",
+    "Var_Pt",
+    "VA_Pt",
+    "SysFreq"
+  ]
+}}

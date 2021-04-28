@@ -1,0 +1,195 @@
+<!DOCTYPE HTML>
+<html>
+<head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>EtherNet/IP Settings - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="shortcut icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="load.js"></script>
+	<script src="content.js"></script>
+<script>
+window.onload=load_once;
+var TO_MIN;
+var TO_MAX;
+var QOS_MIN;
+var QOS_MAX;
+
+function load_once() {
+	populate("settings.html");
+	makeRequest(nc("etherip.cgi"), null);
+}
+
+function parse_vars(data) {
+	var parsed = data.split("\n");
+    var pending = parsed[0];
+
+	if(parsed[1]=="1")
+		id("logout").style.display = 'block';
+		
+	document.getElementsByName("eena")[parsed[2]].checked = true;
+	id("eito").innerHTML = '<input type="text" name="eito" size="6" maxlength="4" value="'+parsed[3]+'"/>';
+	
+	TO_MIN = parsed[4];
+	TO_MAX = parsed[5];	
+
+	function qos_inner(name, value) {
+        return '<input type="text" name="'
+        + name + '" size="6" maxlength="4" value="'
+        + value + '" onKeyPress="return checkKey(event)"/>';
+        };
+
+    id("qospe").innerHTML = qos_inner("qospe", parsed[ 6]);
+    id("qospg").innerHTML = qos_inner("qospg", parsed[ 7]);
+    id("qosur").innerHTML = qos_inner("qosur", parsed[ 8]);
+    id("qossc").innerHTML = qos_inner("qossc", parsed[ 9]);
+    id("qoshi").innerHTML = qos_inner("qoshi", parsed[10]);
+    id("qoslo").innerHTML = qos_inner("qoslo", parsed[11]);
+	id("qosex").innerHTML = qos_inner("qosex", parsed[12]);
+	
+	QOS_MIN = parsed[13];
+	QOS_MAX = parsed[14];
+
+    msg_reset_if_pending (pending);
+	
+}
+
+function validate(f) {
+	var invalid = false;
+	var set_arr = [
+		["eito", TO_MIN, TO_MAX],
+		["qospe", QOS_MIN, QOS_MAX],
+		["qospg", QOS_MIN, QOS_MAX],
+		["qosur", QOS_MIN, QOS_MAX],
+		["qossc", QOS_MIN, QOS_MAX],
+		["qoshi", QOS_MIN, QOS_MAX],
+		["qoslo", QOS_MIN, QOS_MAX],
+		["qosex", QOS_MIN, QOS_MAX]
+	];
+	var NAME=0, MIN=1, MAX=2;
+
+	for(var i=0; i<f.elements.length; i++) {
+		var k = f.elements[i];
+		for(var j=0;j<set_arr.length;j++) {
+			if(k.name==set_arr[j][NAME]) {
+				if( isNaN(k.value)
+				 || Number(k.value) < set_arr[j][MIN] 
+				 || Number(k.value) > set_arr[j][MAX] ) {
+					id(set_arr[j][NAME]).innerHTML = '<input type="text" name="'+set_arr[j][NAME]+'" size="6" maxlength="4" value="'+k.value+'"\/><b><a class="err_msg">Value must be within the range of '+set_arr[j][MIN]+' to '+set_arr[j][MAX]+'<\/a><\/b>';				 
+					id(set_arr[j][NAME]).className = "error";
+					invalid = true;
+				}
+				else {
+					id(set_arr[j][NAME]).innerHTML = '<input type="text" name="'+set_arr[j][NAME]+'" size="6" maxlength="4" value="'+k.value+'"\/>';
+					id(set_arr[j][NAME]).className = "success_msg";
+				}
+			}
+		}
+	}
+
+	if(invalid==true) {
+		alert("Please correct the red highlighted fields and resubmit.");
+		return false;
+	}
+	else 
+        return true;
+}
+
+
+</script>
+
+</head>
+<body>
+
+<div id="Content"></div>
+
+<div id="mncnt" class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="trail"><a href="settings.html">Settings</a> / EtherNet/IP Settings</div>
+<div id="message"></div>
+<form action="etherip_submit.cgi" method="POST" name="myform" id="myform" onSubmit="return validate(this);">
+
+<br><h2>EtherNet/IP Device Configuration</h2>
+
+<h3>EtherNet/IP Settings</h3>
+<table cellspacing="0">
+	<tr>
+		<td class="label15">EtherNet/IP Enabled</td>
+		<td class="form"><input type="radio" name="eena" value="ena"/></td>
+	</tr>
+	<tr>
+		<td class="label15">EtherNet/IP Disabled</td>
+		<td class="form"><input type="radio" name="eena" value="dis"/></td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr>
+		<td class="label15">Encapsulation Inactivity Timeout</td>
+		<td class="form"><div id="eito"></div></td>
+		<td class="label">seconds</td>
+	</tr>
+</table>
+<table cellspacing="0">
+	<tr><td class="label12"><a style="color:#999;">Note: A value of 0 disables inactivity timeout.</a></td></tr>
+</table>
+<h3>QoS Object Settings</h3>
+<table cellspacing="0">
+	<tr>
+		<td class="label15">DSCP PTP Event</td>
+		<td class="form"><div id="qospe"></div></td>
+	</tr>
+	<tr>
+		<td class="label15">DSCP PTP General</td>
+		<td class="form"><div id="qospg"></div></td>
+	</tr>
+	<tr>
+		<td class="label15">DSCP Urgent</td>
+		<td class="form"><div id="qosur"></div></td>
+	</tr>
+	<tr>
+		<td class="label15">DSCP Scheduled</td>
+		<td class="form"><div id="qossc"></div></td>
+	</tr>
+	<tr>
+		<td class="label15">DSCP High</td>
+		<td class="form"><div id="qoshi"></div></td>
+	</tr>
+	<tr>
+		<td class="label15">DSCP Low</td>
+		<td class="form"><div id="qoslo"></div></td>
+	</tr>
+	<tr>
+		<td class="label15">DSCP Explicit</td>
+		<td class="form"><div id="qosex"></div></td>
+	</tr>
+</table>
+
+<table cellspacing="0">
+	<tr><td>&nbsp;</td></tr>
+	<tr><td><input class="submit" type="submit" name="SaveSettings" value="Apply"/></td></tr>
+</table>
+</form>
+<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return get_resp()">
+<table cellspacing="0">
+	<tr>
+		<td class="label8"><input type="hidden" name="dflt" id="dflt" value="EtherNetIP"/></td>
+	</tr>
+	<tr>
+		<td class="label8"><input type="submit" name="restore" value="Restore Defaults" /></td>
+	</tr>
+</table>
+</form>
+
+<!--h3>Save Configuration to Computer</h3>
+Download Electronic Data Sheet (EDS) to computer.
+<div class="fbox" style="text-align:left">
+<br>
+<a id="eds" href="#">&nbsp;EDS - Electronic Data Sheet file</a>&nbsp;
+<br><br>
+</div-->
+
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>		
+

@@ -1,0 +1,72 @@
+<!DOCTYPE HTML SYSTEM>
+<html>
+  <head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Preloading Bitronics Web Protocol page</title> 
+    <script>
+    // seq_load - load each file in _seq_list sequentially, reusing socket
+    var _seq_list = [];
+    var _seq_idx;
+    var _seq_next;
+
+    function seq_load ()
+        {
+        if (window.XMLHttpRequest === undefined)
+            return;
+
+        if (_seq_list.length <= _seq_idx)
+            _seq_next ();
+        else
+            {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function ()
+                {
+                if (this.readyState == 4 && this.status == 200)
+                    setTimeout(seq_load, 0);
+                }
+            xhr.open("GET", _seq_list[_seq_idx], true); // async file fetch
+            xhr.send(null);
+            //console.log ("fetching %s", _seq_list[_seq_idx]);
+            ++_seq_idx;
+            }
+        }
+
+
+    function do_seq_load ()
+        {
+        _seq_idx = 0;
+
+        _seq_next = function () {
+            location.replace("protocol1.html");
+            };
+
+        _seq_list = [
+            "header_logo.png",
+            "site.css",
+            "favicon.ico",
+            "tuc.js",
+            "protocol.js",
+            "request.js",
+            "cregs.js",
+            "dnpCatalog.js",
+            "dnpBilf.js",
+            "mbCat16.js",
+            "mbBilf16.js",
+            "load.js",
+            "catalogNames.js",
+            "calcTypeNamesOptimal.js",
+            "calcTypeNamesPrimary.js",
+            "content.js",
+            "loader.gif"
+            ];
+
+        seq_load ();
+        }
+
+    window.onload = do_seq_load;
+
+    </script>
+  </head>
+  <body>
+  </body>
+</html>

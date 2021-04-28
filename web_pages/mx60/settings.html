@@ -1,0 +1,93 @@
+<!DOCTYPE HTML SYSTEM>
+<html><head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Settings - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+<script>
+//<!--
+function parse_vars(data) {
+	function show(f) {id(f).style.display="block";}
+	var parsed = data.split( "\n" );
+	var pending_changes = parsed[0];
+	var mtype = parsed[1];
+	var serial = parsed[2];
+	var prot = parsed[3];
+	var disp_type = parsed[4];
+	if(parsed[5]=="1")
+		show("logout");
+	if(parsed[6]=="0") {
+		id("pl1").style.display="inline";
+		id("pl2").style.display="inline";
+	}
+	var has61850 = parsed[7];
+	var hasEIP = parsed[8];
+	var hasTrending = parsed[9];
+
+	check_pending(pending_changes);
+
+// =========================================================
+// HOST_ID_POLE_TOP = 16
+// CGI_SEND_NUM(has_serial_port()); Meter has a serial port?
+// =========================================================
+	if(serial == 1 || serial == 6 || serial == 16)
+		show("srl");
+	else if(serial == 2 || serial == 3)
+		show("out");
+		
+// ====================================
+// serial == 16 for serial on 60 series
+// ====================================
+	if(prot == 1 || serial == 1 || serial == 16)
+		show("prt");
+
+	if(disp_type > 0)
+		show("sen");
+	// mtype defined in mc2_mdl.h enum type ENUM_MEAS_SET
+	if(disp_type > 0 && ((mtype < 3) || (mtype == 5))) 
+		show("csc");
+	if(has61850 == "1")
+		show("iec");
+	if(hasEIP == "1")
+		show("eip");
+	if(hasTrending == "1")
+		show("tr");
+
+}
+
+function load_once() {
+	populate("settings.html");
+	get_pending();
+}
+
+window.onload=load_once;
+//-->
+</script>
+</head>
+<body>
+<div id="Content"></div>
+
+<div class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="message"></div>
+<h2>Device Settings</h2><br>
+<a href="identity.html">Identity</a><br>
+<a href="input.html">Input</a><br>
+<div id="out" style="display:none;"><a href="output.html">Output</a><br/></div>
+<a href="network.html">Network</a><br>
+<div id="srl" style="display:none;"><a href="serport.html">Serial Port</a><br></div>
+<div id="prt" style="display:none;"><a href="protocol.html">Protocol</a><br></div>
+<div id="iec" style="display:none;"><a href="iec61850.html">IEC61850</a><br></div>
+<div id="eip" style="display:none;"><a href="ethernetip.html">Ethernet/IP</a><br></div>
+<a href="timesync.html">Time Sync</a><br>
+<div id="tr"  style="display:none;"><a href="trendrec.html">Trend Recorder</a><br></div>
+<div id="sen" style="display:none;"><a href="scrnena.html">Screen Enable</a><br></div>
+<div id="csc" style="display:none;"><a href="cscreens.html">Custom Screens</a><br></div>
+<a href="config.html">Load/Store Settings</a><br>
+<a href="auth.html">Security</a><div id="pl1" style="display:none;">&nbsp;<img src="padlock.gif"></div><br>
+<a href="upload.html">Firmware Upload</a><div id="pl2" style="display:none;">&nbsp;<img src="padlock.gif"></div><br>
+</div>
+<div class="pagebox"><div id="footer"></div></div>
+</body></html>
