@@ -139,18 +139,18 @@ function parse_vars(data)
         d0.setUTCMilliseconds(cfg.metaData.firstRec.msec);
         d1.setUTCSeconds(cfg.metaData.lastRec.time);
         d1.setUTCMilliseconds(cfg.metaData.lastRec.msec);
-        d0loc = new Date(d0); d0loc.setMinutes(d0loc.getUTCMinutes()+d0loc.getTimezoneOffset());
-        d1loc = new Date(d1); d1loc.setMinutes(d1loc.getUTCMinutes()+d1loc.getTimezoneOffset());
-        id("first").innerHTML = d0.toUTCString();
-        id("last").innerHTML = d1.toUTCString();
+        id("first_utc").innerHTML = d0.toUTCString();
+        id("last_utc").innerHTML = d1.toUTCString();
+        id("first_loc").innerHTML = d0.toString().split('(')[0];
+        id("last_loc").innerHTML = d1.toString().split('(')[0];
         id("nrec").innerHTML = cfg.metaData.nRec;
         id("recTbl").style.display = 'block';
         
         if(startPicker == undefined)
             startPicker = new Pikaday({
                 field: document.getElementById('start'),
-                minDate: d0loc,
-                maxDate: d1loc,
+                minDate: d0,
+                maxDate: d1,
                 onSelect: function() {
                     startDate = this.getDate();
                     updateStartDate();
@@ -159,8 +159,8 @@ function parse_vars(data)
         if(endPicker == undefined)
             endPicker = new Pikaday({
                 field: document.getElementById('end'),
-                minDate: d0loc,
-                maxDate: d1loc,
+                minDate: d0,
+                maxDate: d1,
                 onSelect: function() {
                     endDate = this.getDate();
                     updateEndDate();
@@ -169,17 +169,17 @@ function parse_vars(data)
         
         if(!recRangeChecked())
             {
-            _startDate = new Date(d0loc.getTime());
-            _endDate = new Date(d1loc.getTime());
+            _startDate = new Date(d0.getTime());
+            _endDate = new Date(d1.getTime());
             
-            id("sHrs").value = d0.getUTCHours();   lzero(id("sHrs"),0,23);
-            id("sMin").value = d0.getUTCMinutes(); lzero(id("sMin"),0,59);
-            id("sSec").value = d0.getUTCSeconds(); lzero(id("sSec"),0,59);
-            id("sMsc").value = d0.getUTCMilliseconds(); lzero(id("sMsc"),0,999);
-            id("eHrs").value = d1.getUTCHours();   lzero(id("eHrs"),0,23);
-            id("eMin").value = d1.getUTCMinutes(); lzero(id("eMin"),0,59);
-            id("eSec").value = d1.getUTCSeconds(); lzero(id("eSec"),0,59);
-            id("eMsc").value = d1.getUTCMilliseconds(); lzero(id("eMsc"),0,999);
+            id("sHrs").value = d0.getHours();   lzero(id("sHrs"),0,23);
+            id("sMin").value = d0.getMinutes(); lzero(id("sMin"),0,59);
+            id("sSec").value = d0.getSeconds(); lzero(id("sSec"),0,59);
+            id("sMsc").value = d0.getMilliseconds(); lzero(id("sMsc"),0,999);
+            id("eHrs").value = d1.getHours();   lzero(id("eHrs"),0,23);
+            id("eMin").value = d1.getMinutes(); lzero(id("eMin"),0,59);
+            id("eSec").value = d1.getSeconds(); lzero(id("eSec"),0,59);
+            id("eMsc").value = d1.getMilliseconds(); lzero(id("eMsc"),0,999);
             setFields();
             
             startDate = _startDate;
@@ -203,14 +203,15 @@ function parse_vars(data)
             {
             d0 = new Date(0);
             d0.setUTCSeconds(cfg.Records[i].seconds, cfg.Records[i].ms);
-            csvText += d0.getUTCMonth()+1 + "/" + 
-                       d0.getUTCDate() + "/" + 
-                       d0.getUTCFullYear() + ",";
-            csvText += d0.getUTCHours() + ":" + 
-                       pad(d0.getUTCMinutes(), 2) + ":" + 
-                       pad(d0.getUTCSeconds(), 2) + "." + 
-                       pad(d0.getUTCMilliseconds(), 3) + ",";
-            csvText += "0,";  // d0.getTimezoneOffset()/60 +
+            csvText += d0.getMonth()+1 + "/" + 
+                       d0.getDate() + "/" + 
+                       d0.getFullYear() + ",";
+            csvText += d0.getHours() + ":" + 
+                       pad(d0.getMinutes(), 2) + ":" + 
+                       pad(d0.getSeconds(), 2) + "." + 
+                       pad(d0.getMilliseconds(), 3) + ",";
+            // csvText += "0,";
+            csvText += d0.getTimezoneOffset()/60 + ",";
             for(var j=0; j<cfg.Records[i].Measurements.length - 1; ++j)
                 csvText += cfg.Records[i].Measurements[j] + ",";
             csvText += cfg.Records[i].Measurements[j] + "\r\n";
@@ -251,17 +252,21 @@ function parse_vars(data)
 }
 
 function buildDates()
-{
-    startDate.setUTCHours(id("sHrs").value);
-    startDate.setUTCMinutes(id("sMin").value);
-    startDate.setUTCSeconds(id("sSec").value);
-    startDate.setUTCMilliseconds(id("sMsc").value);
-    endDate.setUTCHours(id("eHrs").value);       
-    endDate.setUTCMinutes(id("eMin").value);     
-    endDate.setUTCSeconds(id("eSec").value);     
-    endDate.setUTCMilliseconds(id("eMsc").value);
+{   // pikaday has returned a date with local tz
+    startDate.setHours(
+        hoursValue  =id("sHrs").value,
+        minutesValue=id("sMin").value,
+        secondsValue=id("sSec").value,
+        msValue     =id("sMsc").value
+    );
+    endDate.setHours(
+        hoursValue  =id("eHrs").value,
+        minutesValue=id("eMin").value,
+        secondsValue=id("eSec").value,
+        msValue     =id("eMsc").value
+    );
+    return
 }
-
 
 function buildCSV()
 {
@@ -274,12 +279,6 @@ function buildCSV()
     buildDates();
     _startDate = startDate;
     _endDate = endDate;
-
-    var sUTC = new Date(startDate.getTime());
-    var eUTC = new Date(endDate.getTime());
-    
-    sUTC.setMinutes(sUTC.getUTCMinutes()-sUTC.getTimezoneOffset());
-    eUTC.setMinutes(eUTC.getUTCMinutes()-eUTC.getTimezoneOffset());
     
     progress.value = 0;
     id('progress_bar').style.display = "block";
@@ -473,8 +472,13 @@ window.onunload=unload;
         <td class="label20" align="center">Record Count</td>
     </tr>
     <tr>
-        <td><div class="tb_elem" id="first"></div></td>
-        <td><div class="tb_elem" id="last"></div></td>
+        <td><div class="tb_elem" id="first_utc"></div></td>
+        <td><div class="tb_elem" id="last_utc"></div></td>
+        <!-- <td><div class="tb_elem" id="nrec"></div></td> -->
+    </tr>
+    <tr>
+        <td><div class="tb_elem" id="first_loc"></div></td>
+        <td><div class="tb_elem" id="last_loc"></div></td>
         <td><div class="tb_elem" id="nrec"></div></td>
     </tr>
 </table><br><br>
