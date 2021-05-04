@@ -72,6 +72,7 @@ function loop() {
 			makeRequest(nc("sntp.cgi"), null);
 			id("sync_msg").innerHTML = "";
 			id("mtime").innerHTML = "Polling...";
+			id("mtime_loc").innerHTML = "Polling...";
 			polling = true;
 		}
 		else {
@@ -79,6 +80,8 @@ function loop() {
 			if(sec.toString().length < 2)
 				sec = "0" + sec.toString();
 			id("mtime").innerHTML = tval.slice(0,17) + sec;
+			var dt = new Date(id("mtime").innerHTML + "+0000");
+			id("mtime_loc").innerHTML = dt.toString();
 		}
 		setTimeout("loop()", 1000);
 	}
@@ -138,6 +141,10 @@ function validate(f) {
 			msg = "minute";
 		else if(ss < 0 || ss > 59 || isNaN(ss) )
 			msg = "second";
+		
+		var dt = new Date(year, month-1, day, hh, mm, 0, ss*1000)
+		var utc  = `${dt.getUTCFullYear()}/${dt.getUTCMonth()+1}/${dt.getUTCDate()} ${dt.getUTCHours()}:${dt.getUTCMinutes()}:${dt.getUTCSeconds()}.${dt.getUTCMilliseconds()}`
+		id("usr_t").value = utc
 		
 		if(msg != null)
 		{
@@ -213,7 +220,10 @@ window.onload=load_once;
 	<td class="tb_elem"><div id="mtime" style="height: 18px; width: 135px;"></div></td>
 	<td>&nbsp;<a id="sync_msg"></a></td>
 </tr>
-</table><br>
+<tr>
+	<td class="label2"></td>
+	<td class="tb_elem" colspan="2"><div id="mtime_loc" style="height: 18px; "></div></td>
+</tr></table><br>
 
 <h3>Manual Time Set</h3>
 <div class="fbox" style="width:402px;">
