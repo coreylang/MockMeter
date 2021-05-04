@@ -233,7 +233,17 @@ class StaticsApp(object):
             print(f'start: {start} -> {szBeg.isoformat()}')
             print(f'  end: { end } -> {szEnd.isoformat()}')
             print('='*20)
+        return self._fetch_cgi_resource({'data':kwargs})
 
+    @cherrypy.expose
+    @cherrypy.tools.allow(methods=['POST'])
+    def timesync_cgi(self, *args, usr_t=None, **kwargs):
+        # only capturing time then passing thru
+        from datetime import datetime
+        print('='*20)
+        dt = datetime.strptime(usr_t, "%Y/%m/%d %H:%M:%S.%f")
+        print(f'time set: {usr_t} -> {dt}')
+        print('='*20)
         return self._fetch_cgi_resource({'data':kwargs})
 
 # Custom dispatcher for precompressed (gz) static files

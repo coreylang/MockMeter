@@ -1,0 +1,2 @@
+<h3>SNTP Settings response</h3>
+<script> setTimeout(function() {window.location="timesync.html"; }, 0);</script>
