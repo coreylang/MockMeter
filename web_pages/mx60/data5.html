@@ -211,7 +211,7 @@ function parse_vars(data)
                        pad(d0.getSeconds(), 2) + "." + 
                        pad(d0.getMilliseconds(), 3) + ",";
             // csvText += "0,";
-            csvText += d0.getTimezoneOffset()/60 + ",";
+            csvText += -d0.getTimezoneOffset()/60 + ",";
             for(var j=0; j<cfg.Records[i].Measurements.length - 1; ++j)
                 csvText += cfg.Records[i].Measurements[j] + ",";
             csvText += cfg.Records[i].Measurements[j] + "\r\n";
