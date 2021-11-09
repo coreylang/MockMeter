@@ -39,7 +39,7 @@ var set_arr = [	["inp", "dropdown",		,	,		,		,		],
 				["kyzbo2","dropdown",   ,   10,		10,		22,		23],
 				["kyzbo3","dropdown",   ,   10,		10,		24,		25],
 				["kyzbo4","dropdown",   ,   10,		10,		26,		27],
-				["vap1val","dropdown",   ,   4,      4,      20,     21], //deprecated
+				["vap1val","dropdown",  ,   4,      6,      20,     21], //deprecated
 				["pl", "text",          ,   4,      4,      22,     23],
 				["pi", "text",          ,   4,      4,      24,     25],
 				["VgcptAh", "text",		,	6,		6,		26,		27],
@@ -414,20 +414,30 @@ window.onload=load_once;
 <div id="vtr_pt_e" style="display:none;">
 <table cellspacing="0" border="0">
 	<h3 class='topheader'>Voltage Sensor Ratio</h3>
-	<td class="label4">Ratio</td>
+	<tr>
+	<td class="label4">Primary</td>
 	<td class="form">
 		<select name="vap1val" id="vap1val">
-			<option value='1'>1400:1</option>
-			<option value='2'>2200:1</option>
-			<option value='3'>3300:1</option>
-			<option value='4'>10000:1</option>
-			<option value='5'>60:1</option>
-			<option value='6'>120:1</option>
-			<option value='7'>166:1</option>
-			<option value='8'>200:1</option>
-			<option value='9'>480:1</option>
+			<option value='1'>1400</option>
+			<option value='2'>2200</option>
+			<option value='3'>3300</option>
+			<option value='4'>10000</option>
+			<option value='5'>60</option>
+			<option value='6'>120</option>
+			<option value='7'>166</option>
+			<option value='8'>200</option>
+			<option value='9'>480</option>
 		</select>
 	</td>
+	</tr>
+	<tr>
+		<td class="label4">Secondary</td>
+		<td>
+            <select disabled="true">
+				<option value='1'>1</option>
+			</select>
+		</td>
+	</tr>
 </table>
 <h3 class='topheader'>Voltage Sensor Correction</h3>
 <table cellspacing="0" border="0">
