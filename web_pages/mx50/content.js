@@ -13,7 +13,7 @@ pg.hdr = '<div id="Header"><div id="Left"><img src="header_logo.png"></div><div 
 		'<div id="logout" style="display:none; text-align:right" ><a href="/logout.cgi">Log Out</a></div>' +
 	'</div>';
 
-pg.ftr = 'Copyright &copy; 2017 Bitronics, LLC. All rights reserved.';
+pg.ftr = 'Copyright &copy; 2022 Bitronics, LLC. All rights reserved.';
 
 pg.contact = '<h2>Bitronics, LLC</h2>' +
 	'<br>' +
@@ -21,9 +21,8 @@ pg.contact = '<h2>Bitronics, LLC</h2>' +
 	'Bethlehem, PA 18017<br>' +
 	'USA<br>' +
 	'+1.610.997.5100<br>' +
-	'<a href="mailto:bitronics@novatechweb.com">bitronics@novatechweb.com</a><br>' +
 	'<br>' +
-	'<a href="http://www.novatechweb.com/bitronics" target="_blank">http://www.novatechweb.com/bitronics</a>';
+	'<a href="http://www.novatechautomation.com/products/bitronics-power-measurement" target="_blank">http://www.novatechautomation.com/products/bitronics-power-measurement</a>';
 
 
 function populate(actv)

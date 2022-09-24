@@ -67,51 +67,51 @@ window.onload=load_once;
 
 <div id="mncnt" class="pagebox">
 <noscript><a class="noscript">This page requires Javascript.</a></noscript>
-<div id="trail"><a href="settings.html">Settings</a> / Password Security</div>
+<div id="trail"><a href="settings.html">Settings</a> / Security</div>
 <div id="message"></div>
 
-<br>
-<h2>Change Password</h2><br>
+<br><h2>Device Security</h2>
+<h3>Set/Change Device Password</h3>
 <div class="fbox"><br>
 <table cellspacing="0" border="0">
 	<tr>
-		<td class="tb_labelw">New Password</td>
-		<td class="form"><input type="password" id="npw" size="32" maxlength="20"></td>
+		<td class="label4">New Password</td>
+		<td class="form"><input type="text" id="npw" size="32" maxlength="20"></td>
 	</tr>
 	<tr>
-		<td class="tb_labelw">Retype New Password</td>
-		<td class="form"><input type="password" id="rpw" size="32" maxlength="20"></td>
+		<td class="label4">Retype New Password</td>
+		<td class="form"><input type="text" id="rpw" size="32" maxlength="20"></td>
 	</tr>
 </table><br>
-<form action="http:change_pw.cgi" method="POST" name="aform" id="aform" onsubmit="return get_input();">
+<form action="change_pw.cgi" method="POST" name="aform" id="aform" onsubmit="return get_input();">
 <input type="hidden" name="np" id="np" />
 <input type="hidden" name="n0" id="n0" />
 <table cellspacing="0" border="0">
 	<tr>
-		<td class="tb_labelw"><input type="submit" name="SaveSettings" value="Change Password" /></td>
+		<td class="label4"><input type="submit" name="SaveSettings" value="Change Password" /></td>
 	</tr>
 </table>
 <a style="color:#999;">Note: Submit a blank password to disable password protection.</a>
 </form></div><br>
-<form action="http:fp_lock.cgi" method="POST" name="myform" id="myform">
-<h2>Front Panel Configuration Lock</h2><br>
+<form action="fp_lock.cgi" method="POST" name="myform" id="myform">
+<h3>Front Panel Configuration Lock</h3>
 <div class="fbox"><br>
 <table cellspacing="0" border="0">
 	<tr>
-		<td class="tb_labelw">Unlocked</td>
+		<td class="label2">Unlocked</td>
 		<td class="form"><input type="radio" name="fpl" value="unlock"></td>
 	</tr>
 	<tr>
-		<td class="tb_labelw">Lock Menu & Resets</td>
+		<td class="label2">Lock Menu & Resets</td>
 		<td class="form"><input type="radio" name="fpl" value="lock1"></td>
-	</tr>	
+	</tr>
 	<tr>
-		<td class="tb_labelw">Lock Menu only</td>
+		<td class="label2">Lock Menu only</td>
 		<td class="form"><input type="radio" name="fpl" value="lock2"></td>
 	</tr>
 	<tr><td>&nbsp;</td></tr>
 	<tr>
-		<td class="tb_labelw"><input type="submit" name="SaveSettings" value="Apply" /></td>
+		<td class="label2"><input type="submit" name="SaveSettings" value="Apply" /></td>
 	</tr>
 </table>
 </form></div>

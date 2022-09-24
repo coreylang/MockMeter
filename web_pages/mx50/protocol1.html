@@ -1,5 +1,6 @@
-<!DOCTYPE HTML SYSTEM>
-<html><head> 
+<!DOCTYPE HTML>
+<html lang="en">
+<head> 
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<title>Protocol - Bitronics Web Server</title> 
 	<link rel="stylesheet" type="text/css" href="site.css">
@@ -31,7 +32,19 @@
             sendRequest("protocol", 0);
         }
 
-    window.onload = load_once;  // equiv to setTimeout(load_once, 0);
+    function do_serCollectionSubmit () {
+        //console.log("do_serCollectionSubmit");
+        serialize ();
+        startUpload ();
+        id('back_btn').value='< BACK';
+        id('myform').submit();
+        }
+
+    // onload for primary window object only; skip for iframe(s)
+    if (window.parent == self) {
+        // page reload kills any setTimeout();
+        window.onload = load_once;
+        }
     </script>
 </head>
 <body>
@@ -41,10 +54,10 @@
 <div id="trail"><a href="settings.html">Settings</a> / Protocol</div>
 <div id="message"></div>
 
-<div id="modbus" style="display:none;">
-<form action="http:mod_submit.cgi" method="POST" name="mform" id="mform" onSubmit="return validate(this);" >
-<h2>Protocol Configuration</h2><br>
-<table cellspacing="0" border="0">
+<div id="modbus" style="display:none">
+<form action="mod_submit.cgi" method="POST" name="mform" id="mform" onSubmit="return validate(this);" >
+<h2>Device Protocol Configuration</h2><br>
+<table>
 	<tr>
 		<td class="label4">Protocol</td>
 		<td class="label"><input type="radio" name="mprt" onClick="sendRequest('modbus',0);"/></td>
@@ -57,7 +70,7 @@
 	</tr>
 </table>
 <h3>Modbus Protocol Scaling</h3>
-<table cellspacing="0" border="0">
+<table>
 	<tr>
 		<td class="label4">Scaling</td>
 		<td class="label"><input type="radio" name="mscl" id="mscl" value="off" onClick="en_scl('m', true)"/></td>
@@ -69,7 +82,7 @@
 		<td class="label4">Primary Units</td>
 	</tr>
 </table>
-<table cellspacing="0" border="0" id="mscale">
+<table>
 	<tr>
 		<td class="label5">Amps per count</td>
 		<td class="form">
@@ -86,7 +99,7 @@
 	<tr>
 		<td class="label5">Volts per count</td>
 		<td class="form">
-		  <select name="mvsc" id="mvsc"style="width: 85px;">
+		  <select name="mvsc" id="mvsc" style="width: 85px;">
 			  <option value='-2'>0.010</option>
 			  <option value='-1'>0.100</option>
 			  <option value='0'>1.000</option>
@@ -115,7 +128,7 @@
 	</tr>
 </table>
 <h3>Modbus Session</h3>
-<table cellspacing="0" border="0">
+<table>
 	<tr>
 		<td class="label5">Session</td>
 		<td class="form">
@@ -127,11 +140,13 @@
 	<tr>
 		<td class="label5">Type</td>
 		<td class="form">
-		  <select name="mtyp" id="mtyp" onchange="ena_form(this.value, document.getElementById('mform'))"></select>
+		  <select name="mtyp" id="mtyp"
+            onchange="ena_form(this.value, 'mform')">
+          </select>
 		</td>
 	</tr>
 </table>
-<table cellspacing="0" border="0">
+<table>
 	<tr>
 		<td class="label5">Slave Address</td>
 		<td class="form"><div id="msla"></div></td>
@@ -159,7 +174,7 @@
 	</tr>
 </table>
 <div id="tcp">
-<table cellspacing="0" border="0">
+<table>
 	<tr>
 		<td><h3>TCP/IP</h3></td>
 	</tr>
@@ -174,16 +189,16 @@
 </table>
 </div>
 <div id="serial">
-<table cellspacing="0" border="0">
+<table>
 	<tr>
 		<td><h3>Serial</h3></td>
 	</tr>
-	<tr id="ict_row" style="display:none;">
+	<tr id="ict_row" style="display:none">
 		<td class="label5">Inter-Character Timeout</td>
 		<td class="form"><div id="mict"></div></td>
 		<td class="label">milliseconds</td>
 	</tr>	
-	<tbody id="dlm_blk" style="display:none;">
+	<tbody id="dlm_blk" style="display:none">
 	<tr>
 		<td class="label5">Delimiter 1</td>
 		<td class="form"><div id="mdl1"></div></td>
@@ -196,7 +211,7 @@
 </table>
 </div>
 <h3>Legacy Adaptation</h3>
-<table cellspacing="0" border="0">
+<table>
 	<tr>
 		<td class="label5">Max Holding Regs to Read</td>
 		<td class="form"><div id="mmhr"></div></td>
@@ -208,15 +223,16 @@
 </table><br>
 <input class="submit" type="submit" name="msubmit" id="msubmit" value="Apply"/>
 </form>
-<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onclick="rstor();" onsubmit="return confirm(sesnMsg)">
-<input type="hidden" name="dflt" id="dflt" value="Modbus"/>
+<form action="restore.cgi" method="POST" name="dflts" id="mod_dflts" onclick="rstor();" onsubmit="return confirm(sesnMsg)">
+<input type="hidden" name="dflt" value="Modbus"/>
 <input type="hidden" name="ses" id="rmses" />
 <input type="submit" name="mrestore" value="Restore Session Defaults" /></form>
 </div>
-<div id="dnp" style="display:none;">
-<form action="http:dnp_submit.cgi" method="POST" name="dform" id="dform" onSubmit="return validate(this);" >
-<h2>Protocol Configuration</h2><br>
-<table cellspacing="0" border="0">
+<div id="dnp" style="display:none">
+<form action="dnp_submit.cgi" method="POST" name="dform" id="dform"
+    <meta charset="utf-8 /> onSubmit="return validate(this);" >
+<h2>Device Protocol Configuration</h2><br>
+<table>
 	<tr>
 		<td class="label4">Protocol</td>
 		<td class="label"><input type="radio" name="dprt" onClick="sendRequest('modbus',0)"/></td>
@@ -229,7 +245,7 @@
 	</tr>
 </table>
 <h3>DNP3 Protocol Scaling</h3>
-<table cellspacing="0" border="0">
+<table>
 	<tr>
 		<td class="label4">Scaling</td>
 		<td class="label"><input type="radio" name="dscl" id="dscl" value="off" onClick="en_scl('d', true)"/></td>
@@ -241,7 +257,7 @@
 		<td class="label4">Primary Units</td>
 	</tr>
 </table>
-<table cellspacing="0" border="0" id="dscale">
+<table id="dscale">
 	<tr>
 		<td class="label5">Amps per count</td>
 		<td class="form">
@@ -287,7 +303,7 @@
 	</tr>
 </table>
 <h3>DNP Session</h3>
-<table cellspacing="0" border="0">
+<table>
 	<tr>
 		<td class="label5">Session</td>
 		<td class="form">
@@ -298,11 +314,13 @@
 		<td><input type="button" id="pl_btn" value="Edit Points List" onclick="show_plist();"></td>
 	</tr>
 </table>
-<table cellspacing="0" border="0">
+<table>
 	<tr>
 		<td class="label5">Type</td>
 		<td class="form">
-		  <select name="dtyp" id="dtyp" onchange="ena_form(this.value, document.getElementById('dform'))"></select>
+		  <select name="dtyp" id="dtyp"
+            onchange="ena_form(this.value, 'dform')">
+          </select>
 		</td>
 	</tr>
 	<tr>
@@ -318,7 +336,7 @@
 		<td class="form"><div id="tgr"></div></td>
 	</tr>	
 </table>
-<div id="tcpip"><table cellspacing="0" border="0">
+<div id="tcpip"><table>
 	<tr>
 		<td class="label5">Master IP Address</td>
 		<td class="form"><div id="mIP"></div></td>
@@ -328,12 +346,12 @@
 		<td class="form"><div id="mPt"></div></td>
 	</tr>
 </table></div><br>
-<table id="elbat" cellspacing="0" border="0">
+<table id="elbat">
 <tr><td><input class="submit" type="submit" name="dsubmit" value="Apply"/></td>
 <td class="reset_btn"><input type="button" name="adv_btn" id="adv_btn" value="Advanced" onclick="javascript:hide_adv();"></td>
 </tr></table>
 <div id="d_adv">
-<table cellspacing="0" border="0">
+<table>
 	<tr>
 		<td class="label5">Tag Register 1</td>
 		<td class="form"><div id="tg1"></div></td>
@@ -469,7 +487,7 @@
 		<td class="label">seconds</td>
 	</tr>
 	</table>
-	<table cellspacing="0" border="0">
+	<table>
 	<tr>
 		<td><h3>Default Variations</h3></td>
 	</tr>
@@ -568,7 +586,7 @@
 		</td>
 	</tr>
 	</table>
-	<table cellspacing="0" border="0">
+	<table>
 	<tr>
 		<td><h3>Transmit/Receive</h3></td>
 	</tr>
@@ -624,7 +642,7 @@
 	</tr>
 </table>
 <div id="tcpip_adv">
-<table cellspacing="0" border="0">
+<table>
 	<tr>
 		<td><h3>TCP/IP and UDP</h3></td>
 	</tr>
@@ -658,13 +676,13 @@
 <input class="submit" type="submit" name="dsubmit" value="Apply"/>
 </div>
 </form>
-<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onclick="rstor();" onsubmit="return confirm(sesnMsg)">
-<input type="hidden" name="dflt" id="dflt" value="DNP"/>
+<form action="restore.cgi" method="POST" name="dflts" id="dnp_dflts" onclick="rstor();" onsubmit="return confirm(sesnMsg)">
+<input type="hidden" name="dflt" value="DNP"/>
 <input type="hidden" name="ses" id="rdses" />
 <input type="submit" name="drestore" value="Restore Session Defaults" /></form>
 </div>
 
-<div id="regedit" style="display:none;">
+<div id="regedit" style="display:none">
 <div id="pointslist">
 <h2>DNP Points List Configuration</h2><br>
 <h3>DNP Type</h3>
@@ -673,7 +691,7 @@
 <div id="regset">
 <h2>Modbus Register Configuration</h2><br>
 </div>
-<div id="order" style="display:none;">
+<div id="order" style="display:none">
 <table border="1" cellpadding="10" cellspacing="0" size="auto">
 <tr>
 	<td align="center">
@@ -705,14 +723,14 @@
 </tr>
 </table><br>
 
-<a class="elem" style="color:#999;">Note: Settings are saved to IED upon clicking the "Apply" button on next page.</a>
+<a class="elem" style="color:#999;">Note: Settings are saved to device upon clicking the "Apply" button on next page.</a>
 <a style="padding-left:495px;"><input type="button" name="cancl_btn" value="Cancel" onclick="(document.getElementsByName('mprt')[0].checked)?show_regset():show_plist();" />
 <input type="button" name="nxt_btn" value="Next >" onclick="go_next();"/><br></a>
 </div>
 
-<div id="finish" style="display:none;">
-<table id="header_tbl" cellspacing="0" border="0"></table>
-<table id="subheader" cellspacing="0" border="0">
+<div id="finish" style="display:none">
+<table id="header_tbl"></table>
+<table id="subheader">
 	<tr>
 		<td class="label6">&nbsp;</td>
 		<td class="label6" id="ena_filr">&nbsp;</td>
@@ -726,19 +744,28 @@
 		<td class="label11">&nbsp;</td>
 	</tr>
 </table>
-<div id="tblDiv" style="height:300px; overflow:auto;"><table id="tbl_content" cellspacing="0" border="0"></table></div>
+<div id="tblDiv" style="height:300px; overflow:auto;">
+    <table id="tbl_content"></table>
+</div>
 
 <p><input type="button" name="edit_btn" id="edit_btn" value="Edit List" onclick="edit_regs();"/></p>
-<form enctype="multipart/form-data" method="POST" name="myform" id="myform"
- target="upload_target">
-<textarea id="serCollection" name="serCollection" style="display:none"></textarea>
-<iframe id="upload_target" name="upload_target" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe>
+<form action="serCollection.cgi" method="POST" name="myform" id="myform"
+    enctype="multipart/form-data" target="upload_target">
+<textarea id="serCollection" name="serCollection" style="display:none"> </textarea>
+<iframe name="upload_target" style="display:none" src="#"
+    <meta charset="UTF-8"> >
+</iframe>
 <div id="upbox" class="fbox">
-	<a id="f1_upload_process">Loading...<br/><img src="loader.gif"/><br/></a>
+	<a id="f1_upload_process">Loading...
+        <br>
+        <img src="loader.gif" alt="loading">
+        <br>
+    </a>
+	<p id="upb_msg" align="center"></p>
 	<a id="f1_upload_form"></a>
-	<div align="left"><input type="button" name="back_btn" id="back_btn" value="Cancel" onclick="hideList();"/>
-	  <input type="submit" class="submit" id="serCollectionSubmit" value="Apply" 
-	    onclick="serialize(); startUpload(); document.getElementById('back_btn').value='< Back';" />
+	<div align="left">
+      <input type="button" id="back_btn" value="Cancel" onclick="hideList();"/>
+	  <input type="button" id="serCollectionSubmit" value="Apply" onclick="auth_check(do_serCollectionSubmit);" />
 	  <input type="button" id="tucNext"  value="Next >" onclick="hideList();" style="visibility:hidden"/>
 	</div>
 </div>
@@ -749,5 +776,6 @@
 </div> <!-- end pagebox -->
 
 <div class="pagebox"><div id="footer"></div></div>
-</body></html>
+</body>
+</html>
 

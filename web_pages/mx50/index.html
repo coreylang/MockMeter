@@ -1,34 +1,66 @@
 <!DOCTYPE HTML SYSTEM>
-<html><head> 
+<html>
+  <head> 
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<title>Preloading Bitronics Web Index page</title> 
     <script>
-    function syncLoad(url) {
+    // seq_load - load each file in _seq_list sequentially, reusing socket
+    var _seq_list = [];
+    var _seq_idx;
+    var _seq_next;
+
+    function seq_load ()
+        {
         if (window.XMLHttpRequest === undefined)
             return;
 
-        // synchronous load to serialize server access
-        var request = new XMLHttpRequest();
-        request.open("Get", url, false);    // sync file fetch
-        request.send(null);
+        if (_seq_list.length <= _seq_idx)
+            _seq_next ();
+        else
+            {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function ()
+                {
+                if (this.readyState == 4 && this.status == 200)
+                    setTimeout(seq_load, 0);
+                }
+            xhr.open("GET", _seq_list[_seq_idx], true); // async file fetch
+            xhr.send(null);
+            //console.log ("fetching %s", _seq_list[_seq_idx]);
+            ++_seq_idx;
+            }
         }
 
-    window.onload = function() {
-        syncLoad("header_logo.png");
-        syncLoad("site.css");
-        syncLoad("favicon.ico");
-        syncLoad("request.js");
-        syncLoad("header_bg.png");
-        syncLoad("tab.png");
-        syncLoad("tabg.png");
-        syncLoad("loader.gif");
-        syncLoad("md5.js");
-		syncLoad("content.js");
-        syncLoad("padlock.gif");
 
+    function do_seq_load ()
+        {
+        _seq_idx = 0;
+
+        _seq_next = function () {
         location.replace("index1.html");
+            };
+
+        _seq_list = [
+            "header_logo.png",
+            "site.css",
+            "favicon.ico",
+            "request.js",
+            "header_bg.png",
+            "tab.png",
+            "tabg.png",
+            "loader.gif",
+            "md5.js",
+            "content.js",
+            "padlock.gif"
+            ];
+
+        seq_load ();
         }
+
+    window.onload = do_seq_load;
+
     </script>
-</head>
-<body>
-</body></html>
+  </head>
+  <body>
+  </body>
+</html>

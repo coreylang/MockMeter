@@ -580,7 +580,12 @@ function build_summary() {
                 addCell(s, "form");
 
             // Measurement name string
-            addCell('<input type="hidden" name="m'+i+'" value="' + olist[i].dbIdx + '"/>' + get_name(olist[i].dbIdx) + get_suffix(olist[i].calcType, olist[i].dbIdx), "label12");
+            addCell('<input type="hidden" '
+                  + 'name="m'+i+'" '
+                  + 'value="' + olist[i].dbIdx + '"/>'
+                  + get_name(olist[i].dbIdx)
+                  + get_suffix(olist[i].calcType, olist[i].dbIdx),
+                  "label12");
 
             if(isCNT && olist[i].dbIdx != NEWO_RESERVED) {
                 newRow = tbl.insertRow(tbl.rows.length);

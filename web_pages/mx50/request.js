@@ -14,7 +14,6 @@ function makeRequest(url, parameters) {
 	if (window.XMLHttpRequest) { // Mozilla, Safari,...
 		http_request = new XMLHttpRequest();
 		if (http_request.overrideMimeType) {
-			http_request.overrideMimeType('text/html');
 		}
 	} else if (window.ActiveXObject) { // IE
 		try {

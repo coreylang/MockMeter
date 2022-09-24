@@ -839,17 +839,3 @@ function setClass0(session, bilf_class0) {
         }
     }
 // c0.js file end ------------------------------------------------------
-
-function firmware_json_from(user_json) {
-    // convert each item in modbusmaps and dnpmaps
-    obj = JSON.parse(user_json)
-    var convertedmaps = []
-    for (var map of obj.modbusmaps)
-        convertedmaps.push(serCollection(map))
-    obj.modbusmaps = convertedmaps
-    convertedmaps = []
-    for (var map of obj.dnpmaps)
-        convertedmaps.push(serCollection(map))
-    obj.dnpmaps = convertedmaps
-    return JSON.stringify(obj)
-}

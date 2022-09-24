@@ -34,7 +34,8 @@ function parse_vars(data) {
 		id("logout").style.display = 'block';
 		
 	id("printNice").style.display = 'block';
-	id("printNice").innerHTML = "<a font-size:90%; style='color:#999'>build "+parsed[j++]+"</a>";	
+	id("printNice").innerHTML = "<a font-size:90%; style='color:#999'>build "
+      +parsed[j++]+"</a>";	
 }
 
 function load_once() {
@@ -59,15 +60,15 @@ window.onload=load_once;
 <br>
 <table cellspacing="0" border="0">
 	<tr>
-		<td class="label4">IED Name</td>
+		<td class="label4">Device Name</td>
 		<td class="elem"><div id="uname"></div></td>
 	</tr>
 	<tr>
-		<td class="label4">IED Model</td>
+		<td class="label4">Device Model</td>
 		<td class="elem"><div id="model"></div></td>
 	</tr>
 	<tr>
-		<td class="label4">IED Type</td>
+		<td class="label4">Device Type</td>
 		<td class="elem"><div id="type"></div></td>
 	</tr>
 	<tr>

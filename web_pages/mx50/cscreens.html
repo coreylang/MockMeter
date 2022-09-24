@@ -7,6 +7,7 @@
 	<link rel="icon" href="favicon.ico">
 	<script src="request.js"></script>
 	<script src="content.js"></script>
+    <script src="load.js"></script>
 <script>
 //<!--
 var row_index = 0;
@@ -306,12 +307,19 @@ function insertAtCursor(chr) {
 	box.focus();
 }
 
+function do_submit() {
+    id("myform").submit();
+    }
+
 function load_once() {
 	populate("settings.html");
 	makeRequest(nc("cscreens.cgi"), null);
 }
 
-window.onload=load_once;
+// onload for primary window only; skip for iframes
+if (window.parent == self)
+    window.onload=load_once;
+
 //-->
 </script>
 	
@@ -363,11 +371,11 @@ window.onload=load_once;
 </table>
 <br><br><input type="button" name="cncl_btn" value="Cancel" onclick="cancel();"/>
 <input type="button" name="nxt_btn" value="Next >" onclick="goto_list();"/><br>
-<a class="elem" style="color:#999;">Note: Settings are saved to IED upon clicking the "Apply" button on next page.</a>
+<a class="elem" style="color:#999;">Note: Settings are saved to device upon clicking the "Apply" button on next page.</a>
 </div>
 
 <div id="summary" style="display:none;">
-<form action="http:cscreens_submit.cgi" method="POST" name="myform" id="myform">
+<form action="cscreens_submit.cgi" method="POST" id="myform">
 <table id="scrn_tab" cellspacing="0" border="0" >
 	<tr>
 		<td class="label7">&nbsp;</td>
@@ -381,11 +389,13 @@ window.onload=load_once;
 </table>
 <input type="button" onClick="move('up')" value="&#923;" />
 <input type="button" onClick="move('down')" value="V" /><br><br>
-<input type="button" id="edit_btn" name="edit_btn" value="Edit" onclick="edit_row();"/>
-<input type="button" id="add_btn" name="add_btn" value="Add" onclick="add_row();"/>
-<input type="button" id="del_btn" name="del_btn" value="Delete" onclick="del_row();"/>
+<input type="button" id="edit_btn" value="Edit" onclick="edit_row();"/>
+<input type="button" id="add_btn" value="Add" onclick="add_row();"/>
+<input type="button" id="del_btn" value="Delete" onclick="del_row();"/>
 
-<p><input class="submit" type="submit" name="Submit" value="Apply"/><br></p>
+<p>
+<input type="button" id="apply" value="Apply" onclick="auth_check(do_submit);"/>
+<br></p>
 </form>
 </div>
 

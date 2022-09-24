@@ -1,0 +1,78 @@
+<!DOCTYPE HTML SYSTEM>
+<html>
+<head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Password Reset - Bitronics Web Server</title> 
+	<link rel="stylesheet" type="text/css" href="site.css">
+	<link rel="shortcut icon" href="favicon.ico">
+	<script src="request.js"></script>
+	<script src="content.js"></script>
+<script>
+//<!--
+function parse_vars(data) {
+	var str = data.substr(0,4);
+	for(var i=4; i<data.length-1; i+=4)
+		str += ("-" + data.substr(i,4));
+	id("gid").innerHTML = str.toUpperCase();
+} 
+
+function get_pw() {
+	while( id("pcd").value.indexOf("-") != -1 )
+		id("pcd").value = id("pcd").value.replace("-","");
+	id("tpw").value = id("pcd").value;
+}
+
+function load_once() {
+	populate("settings.html");
+}
+
+window.onload=load_once;
+//-->
+</script>
+</head>
+<body>
+
+<div id="Content"></div>
+
+<div id="mncnt" class="pagebox">
+<noscript><a class="noscript">This page requires Javascript.</a></noscript>
+<div id="message"></div>
+
+<br>
+<h2>Generate Password Reset ID</h2><br>
+<div class="fbox"><br>
+<div id="gid"></div>
+<br>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label4"><input type="button" name="GenID" value="Generate ID" onclick='makeRequest(nc("gen_id.cgi"),null);' /></td>
+	</tr>
+</table><br>
+<a style="color:#999;">To reset the password, click this button and give the resulting ID to manufacturer to receive a temporary passcode. Rebooting or powering off the device will invalidate the ID.</a>
+</div><br>
+<h2>Enter Passcode</h2><br>
+<div class="fbox"><br>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label4">Passcode</td>
+	</tr>
+</table>
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label"><input type="text" id="pcd" size="52" maxlength="39"></td>
+	</tr>
+</table><br>
+<form action="http:tempPW_submit.cgi" method="POST" name="myform" id="myform" onsubmit="return get_pw();">
+<input type="hidden" name="tpw" id="tpw" />
+<table cellspacing="0" border="0">
+	<tr>
+		<td class="label2"><input type="submit" name="SendTemp" value="Apply"  /></td>
+	</tr>
+</table>
+</form></div>
+<br>
+</div>
+
+<div class="pagebox"><div id="footer"></div></div>
+</body>
+</html>		

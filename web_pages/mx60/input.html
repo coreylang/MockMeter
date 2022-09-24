@@ -60,26 +60,27 @@ var set_arr = [	["inp", "dropdown",		,	,		,		,		],
 			  ];
 
 //                              B	A	P	A	V	P
-//                              A	D	P	M	L	T
-//				 sec name	    S	V	X	P	T	S
-var mset_tab = [ ["inp_cfg",    1,	1,	1,	0,	1,	1 ],
-                 ["vtr",        1,	1,	1,	0,	1,	0 ],
-                 ["ctr",        1,	1,	1,	1,	0,	0 ],
-                 ["vb2",        0,	0,	1,	0,	0,	0 ],
-                 ["ampdi",      1,	1,	1,	1,	0,	1 ],
-                 ["vai",        0,	1,	1,	0,	1,	1 ],
-                 ["pai",        0,	1,	1,	0,	0,	1 ],
-                 ["tddd",       0,	1,	1,	0,	0,	0 ],
-                 ["lcmp",       0,	1,	1,	0,	0,	0 ],
-                 ["pldi",       0,	0,	0,	0,	0,	1 ],
-                 ["pidi",       0,	0,	0,	0,	0,	1 ],
-                 ["vtr_pt",     0,	0,	0,	0,	0,	1 ],
-                 ["ct_pt",      0,	0,	0,	0,	0,	1 ]
+//                              A	D	P	M	L	K
+//				 sec name	    S	V	X	P	T	F
+var mset_tab = [ ["inp_cfg",    1,	1,	1,	0,	1,	1 ],	// element selection
+                 ["vtr",        1,	1,	1,	0,	1,	1 ],	// normal ratio, XOR vtr_pt
+                 ["ctr",        1,	1,	1,	1,	0,	1 ],	// normal ratio, XOR ctr_pt
+                 ["vb2",        0,	0,	1,	0,	0,	0 ],	// bus 2 voltages
+                 ["ampdi",      1,	1,	1,	1,	0,	1 ],	// amp demand interval
+                 ["vai",        0,	1,	1,	0,	1,	1 ],	// volt average interval
+                 ["pai",        0,	1,	1,	0,	0,	1 ],	// power average interval
+                 ["tddd",       0,	1,	1,	0,	0,	1 ],	// tdd denom
+                 ["lcmp",       0,	1,	1,	0,	0,	1 ],	// loss compensation
+                 ["pfc",        0,	0,	0,	0,	0,	1 ],	// peak fault, over current
+                 ["pldi",       0,	0,	0,	0,	0,	1 ],	// peak fault, over current
+                 ["pidi",       0,	0,	0,	0,	0,	1 ],	// peak fault, over current
+                 ["vtr_pt",     0,	0,	0,	0,	0,	0 ],
+                 ["ctr_pt",     0,	0,	0,	0,	0,	0 ]
                ];
 						
 
 var available_outputs = 0;
-var is_pole_type = 0;
+var is_pole_top = 0;
 
 function parse_vars(data) {
 	var parsed = data.split( "\n" );
@@ -90,9 +91,9 @@ function parse_vars(data) {
 	
 	var mset = Number(parsed[k++]) + 1;
 	var eser = Number(parsed[k++]);
-	is_pole_type = Number(parsed[k++]);
+	is_pole_top = Number(parsed[k++]);
 
-	if(is_pole_type) {
+	if(is_pole_top) {
 		// Add I and V ratio secondary values of 10
 		var vts = id("vts");
 		var cts = id("cts");
@@ -152,21 +153,21 @@ function parse_vars(data) {
 // CGI_SEND_NUM(read_ps_pca_id());
 // CGI_SEND_NUM(get_meas_set());    MS_POLETOP
 // ===============================================
-	if(is_pole_type) {
-		id("pfc").style.display = 'block';
-		
-		// If a pole top meter, its a M661, no 2nd bus voltage, no kyz
-		//id("dispkyz").style.display = 'none';
-		id("vb2").style.display = 'none';
+	if(is_pole_top) {
+		// turn off transformer related features
+		id("tddd").style.display = 'none';
+		id("lcmp").style.display = 'none';
+		// show tap instead of transformer
+		id("vtr").style.display = 'none';
+		id("vtr_pt").style.display = 'block';
 		id("vtr_pt_e").style.display = 'block';
-		id("itr_pt_e").style.display = 'block';
-		
+		// show sensor instead of transformer
+		id("ctr").style.display = 'none';
+		id("ctr_pt").style.display = 'block';
+		id("ctr_pt_e").style.display = 'block';
+		// setup control
 		id("ctp").getElementsByTagName("input")[0].disabled = true;
 		id("cts").disabled = true;
-	} else {
-		id("pfc").style.display = 'none';
-		id("vtr_pt_e").style.display = 'none';
-		id("itr_pt_e").style.display = 'none';
 	}
 
 	var kyz1=id('kyzbo1');
@@ -479,7 +480,7 @@ window.onload=load_once;
 <div id="ctr" style="display:none;">
 <h3 class='topheader'>CT Ratio</h3>
 </div>
-<div id="ct_pt" style="display:none;">
+<div id="ctr_pt" style="display:none;">
 <h3 class='topheader'>Current Sensor Ratio</h3>
 </div>
 <table cellspacing="0" border="0">
@@ -501,7 +502,7 @@ window.onload=load_once;
 		<td class="form"><div id="ict"></div></td>
 	</tr>
 </table>
-<div id="itr_pt_e" style="display:none;">
+<div id="ctr_pt_e" style="display:none;">
 <h3 class='topheader'>Current Sensor Correction</h3>
 <table cellspacing="0" border="0">
 	<tr>

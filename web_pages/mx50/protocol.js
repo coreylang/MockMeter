@@ -60,18 +60,32 @@ function parse_vars(data) {
 				f.value = set_arr[i][2];
 			}
 			else if(set_arr[i][1] == "checkbox") {
-				f.innerHTML = '<input type="checkbox" name="'+set_arr[i][0]+'" '+((set_arr[i][2]>0)?"checked":" ")+' onKeyPress="return checkKey(event)"/>';
+				f.innerHTML = '<input type="checkbox" '
+                            + 'name="' +set_arr[i][0]+'" '
+                            + ((set_arr[i][2]>0) ? "checked " : " ")
+                            + 'onKeyPress="return checkKey(event)"/>';
 			}
 			else if(set_arr[i][1] == "text") {
-				f.innerHTML = '<input type="text" name="'+set_arr[i][0]+'" size="'+set_arr[i][3]+'" maxlength="'+set_arr[i][4]+'" value="'+set_arr[i][2]+'" onKeyPress="return checkKey(event)"/>';
+				f.innerHTML = '<input type="text" '
+                            + 'name="'+set_arr[i][0]+'" '
+                            + 'size="'+set_arr[i][3]+'" '
+                            + 'maxlength="'+set_arr[i][4]+'" '
+                            + 'value="'+set_arr[i][2]+'" '
+                            + 'onKeyPress="return checkKey(event)"/>';
 				f.className = "";
 			}
 			else if(set_arr[i][1] == "ipaddr") {
-				f.innerHTML = '<input type="text" name="'+set_arr[i][0]+'" size="'+set_arr[i][3]+'" maxlength="'+set_arr[i][4]+'" value="'+set_arr[i][2]+'" onKeyPress="return checkKey(event)" onblur="zero_ip(this)"/>';
+				f.innerHTML = '<input type="text" '
+                            + 'name="'+set_arr[i][0]+'" '
+                            + 'size="'+set_arr[i][3]+'" '
+                            + 'maxlength="'+set_arr[i][4]+'" '
+                            + 'value="'+set_arr[i][2]+'" '
+                            + 'onKeyPress="return checkKey(event)" '
+                            + 'onblur="zero_ip(this)"/>';
 				f.className = "";
 			}
 		}
-		ena_form(type.value, id('mform'));
+		ena_form(type.value, 'mform');
 		for(i=0;i<parsed.length;i++) {
 			valid_value[i] = parsed[set_arr.length+4+i];
 		}
@@ -178,14 +192,28 @@ function parse_vars(data) {
 				f.value = set_arr[i][2];
 			}
 			else if(set_arr[i][1] == "checkbox") {
-				f.innerHTML = '<input type="checkbox" name="'+set_arr[i][0]+'" '+((set_arr[i][2]>0)?"checked":" ")+' onKeyPress="return checkKey(event)"/>';
+				f.innerHTML = '<input type="checkbox" '
+                            + 'name="'+set_arr[i][0]+'" '
+                            + ((set_arr[i][2]>0) ? 'checked ' : '')
+                            + 'onKeyPress="return checkKey(event)"/>';
 			}
 			else if(set_arr[i][1] == "text") {
-				f.innerHTML = '<input type="text" name="'+set_arr[i][0]+'" size="'+set_arr[i][3]+'" maxlength="'+set_arr[i][4]+'" value="'+set_arr[i][2]+'" onKeyPress="return checkKey(event)"/>';
+				f.innerHTML = '<input type="text" '
+                            + 'name="'+set_arr[i][0]+'" '
+                            + 'size="'+set_arr[i][3]+'" '
+                            + 'maxlength="'+set_arr[i][4]+'" '
+                            + 'value="'+set_arr[i][2]+'" '
+                            + 'onKeyPress="return checkKey(event)"/>';
 				f.className = "";
 			}
 			else if(set_arr[i][1] == "ipaddr") {
-				f.innerHTML = '<input type="text" name="'+set_arr[i][0]+'" size="'+set_arr[i][3]+'" maxlength="'+set_arr[i][4]+'" value="'+set_arr[i][2]+'" onKeyPress="return checkKey(event)" onblur="zero_ip(this)"/>';
+				f.innerHTML = '<input type="text" '
+                            + 'name="'+set_arr[i][0]+'" '
+                            + 'size="'+set_arr[i][3]+'" '
+                            + 'maxlength="'+set_arr[i][4]+'" '
+                            + 'value="'+set_arr[i][2]+'" '
+                            + 'onKeyPress="return checkKey(event)" '
+                            + 'onblur="zero_ip(this)"/>';
 				f.className = "";
 			}
 		}
@@ -197,7 +225,7 @@ function parse_vars(data) {
 			scl_init[protocol]=false;
 		}
 		
-		ena_form(type.value, id('dform'));
+		ena_form(type.value, 'dform');
 		for(var i=0;i<valid_value.length;i++) {
 			valid_value[i] = parsed[set_arr.length+4+i];
 		}
@@ -219,7 +247,7 @@ function is_in_list(list, val) {
 
 function sendRequest(prot,sesn)
 {
-	var poststr = "&ses=" + sesn;
+	var poststr = "ses=" + sesn;
 	if(prot=="protocol") {
 		makeRequest(nc("protocol.cgi"),poststr);
 	}
@@ -248,8 +276,13 @@ function validate(f) {
 				if(k.name == set_arr[j][0]) {
 					var g = id(set_arr[j][0]);
 					if(set_arr[j][1] == "text" || set_arr[j][1] == "percent") {
-						g.innerHTML = '<input type="text" name="'+set_arr[j][0]+'" size="'+set_arr[j][3]+'" maxlength="'+set_arr[j][4]+'" value="'+k.value+'"/>';
-						var min_idx = set_arr[j][5]; var max_idx = set_arr[j][6];
+						g.innerHTML = '<input type="text" '
+                                    + 'name="'+set_arr[j][0]+'" '
+                                    + 'size="'+set_arr[j][3]+'" '
+                                    + 'maxlength="'+set_arr[j][4]+'" '
+                                    + 'value="'+k.value+'"/>';
+						var min_idx = set_arr[j][5];
+                        var max_idx = set_arr[j][6];
 						if(k.value >= Number(valid_value[min_idx]) && k.value <= Number(valid_value[max_idx])) {
 							g.className = "success_msg";
 							continue;
@@ -263,14 +296,22 @@ function validate(f) {
 							continue;
                         }
 						else {
-							g.innerHTML += '<b><a class="err_msg">Value must be within the range of '+valid_value[min_idx]+' to '+valid_value[max_idx]+'</a></b>';
+							g.innerHTML += '<b><a class="err_msg">'
+                                        + 'Value must be within the range of '
+                                        + valid_value[min_idx]
+                                        + ' to '+valid_value[max_idx]
+                                        + '</a></b>';
 							g.className = "error";
 							invalid = true;
 							continue;
 						}
 					}
 					else if(set_arr[j][1] == "ipaddr") {			
-						g.innerHTML = '<input type="text" name="'+set_arr[j][0]+'" size="'+set_arr[j][3]+'" maxlength="'+set_arr[j][4]+'" value="'+f.elements[i].value+'"/>';
+						g.innerHTML = '<input type="text" '
+                                    + 'name="'+set_arr[j][0]+ '" '
+                                    + 'size="'+set_arr[j][3]+ '" '
+                                    + 'maxlength="'+set_arr[j][4]+'" '
+                                    + 'value="'+f.elements[i].value+'"/>';
 						if(validate_ip(f.elements[i].value)) {
 							g.innerHTML += '<b><a class="err_msg">Invalid IP address.</a></b>';
 							g.className = "error";
@@ -295,8 +336,9 @@ function validate(f) {
 	}
 }
 
-function ena_form(val, f)
+function ena_form(val, fname)
 {
+    var f = id(fname);
 	var disa = false;
 	var sesn = (protocol==0)?id("mses"):id("dses");
 	var type = (protocol==0)?id("mtyp"):id("dtyp");
@@ -329,7 +371,9 @@ function ena_form(val, f)
 				if(sesn.value == i)
 					continue;
 				else if((set_arr[0][2])[i] == 1 || (set_arr[0][2])[i] == 2) {
-					if(!confirm("The maximum number of serial sessions is 1. Session "+(i+1)+" will be disabled when changes are applied.")) {
+					if(!confirm("The maximum number of serial sessions is 1. "
+                      + "Session "+(i+1)
+                      + " will be disabled when changes are applied.")) {
 						val = type.value = (set_arr[0][2])[sesn.value];
 						id("tcp").style.display = 'block';
 						id("serial").style.display = 'none';
@@ -360,7 +404,9 @@ function ena_form(val, f)
 				if(sesn.value == i)
 					continue;
 				else if((set_arr[0][2])[i] == 1) {
-					if(!confirm("The maximum number of serial sessions is 1. Session "+(i+1)+" will be disabled when changes are applied.")) {
+					if(!confirm("The maximum number of serial sessions is 1."
+                      + "Session "+(i+1)
+                      + " will be disabled when changes are applied.")) {
 						val = type.value = (set_arr[0][2])[sesn.value];
 						id("tcpip").style.display = 'block';
 						id("tcpip_adv").style.display = 'block';
@@ -393,13 +439,13 @@ function hide_adv() {
 }
 
 function vwedit() {
-	if(document.mform.mpli.value > 2 
+	if(id("mform").mpli.value > 2 
 	  || document.getElementsByName("mprt")[1].checked == true ) {
-		document.mform.ve_btn.value = "Edit Registers";
+		id("mform").ve_btn.value = "Edit Registers";
 		id("back_btn").value = "Cancel";
 	}
 	else {
-		document.mform.ve_btn.value = "View Registers";
+		id("mform").ve_btn.value = "View Registers";
 		id("back_btn").value = "< Back";
 	}
 }
@@ -423,6 +469,7 @@ function en_scl(prot, dsbl) {
 	for(var i=0; i<v.length; i++) {
 		id(prot+v[i]+'sc').disabled = dsbl;
 	}
+
 
 	if(prot=="d") {
 		for(i=0; i<set_arr.length; ++i) {

@@ -1,28 +1,36 @@
-<!DOCTYPE HTML SYSTEM>
-<html>
+<!DOCTYPE HTML>
+<html lang="en">
 <head> 
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-	<title>Load/Store Settings - Bitronics Web Server</title> 
-	<link rel="stylesheet" type="text/css" href="site.css">
-	<link rel="shortcut icon" href="favicon.ico">
-	<script src="request.js"></script>
-	<script src="load.js"></script>
-	<script src="content.js"></script>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Load/Store Settings - Bitronics Web Server</title> 
+    <link rel="stylesheet" type="text/css" href="site.css">
+    <link rel="shortcut icon" href="favicon.ico">
+    <script src="request.js"></script>
+    <script src="load.js"></script>
+    <script src="content.js"></script>
 <script>
 window.onload=load_once;
 
 function load_once() {
-	populate("settings.html");
-	get_pending();
+    populate("settings.html");
+    get_pending();
+    setupProgress();
 }
 
 function parse_vars(data) {
     var pending = data.split("\n")[0];
     msg_reset_if_pending (pending);
-	if(data.split("\n")[5]=="1")
-		id("logout").style.display = 'block';
-
+    var parsed = data.split("\n");
+    if(parsed[5]=="1")
+        id("logout").style.display = 'block';
 }
+
+function do_cfg_upload () {
+    id('myfile').name = id('setnet').checked
+      ? 'config_net' : 'config_nonet';
+    uploadFile('cfg_upload.cgi');
+}
+
 </script>
 
 </head>
@@ -35,39 +43,59 @@ function parse_vars(data) {
 <div id="trail"><a href="settings.html">Settings</a> / Load/Store Settings</div>
 <div id="message"></div>
 <br><h2>Load/Store Device Settings</h2>
-<h3>Save to IED</h3>
+<h3>Save to Device</h3>
 <div>Select a configuration file.</div>
 <div id="upbox" class="fbox">
-	<form method="post" enctype="multipart/form-data" target="upload_target" onsubmit="startUpload();" >
-		<p id="f1_upload_process">Loading...<br/><img src="loader.gif"/><br/></p>
-		<p id="f1_upload_form" align="center"><br/>
-			<label>File:<input name="config_nonet" id="myfile" type="file" size="30" /></label>
-			<label><input type="submit" class="sbtn" value="Submit" onclick="document.getElementById('myfile').name=(document.getElementById('setnet').checked)?'config_net':'config_nonet'" /></label>
-		</p>
-		<iframe id="upload_target" name="upload_target" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe>
-	</form>
-	<input type="checkbox" id="setnet" name="setnet"/><a>&nbsp;Load network settings from file</a>
+    <form id="upload" method="post" enctype="multipart/form-data"
+         action="cfg_upload.cgi" target="upload_target" >
+        <div id="f1_upload_process">Loading...
+            <br/>
+        <progress id="progress" name="progress" value="0" max="100"
+           style="width:150px"><img src="loader.gif"/> </progress>
+            <br/>
+        </div>
+    <p id="upb_msg" align="center"></p>
+        <div id="f1_upload_form" align="center">
+            <br/>
+        <label>File:<input id="myfile" type="file"
+           accept=".cfg" size="30" max="512000" /></label>
+            <label><input id="jbtn" type="button" class="sbtn"
+                style="visibility:hidden"
+                value="Upload" onclick="auth_check(do_cfg_upload);" />
+            </label>
+        </div>
+    </form>
+    <iframe id="upload_target" name="upload_target" src="#"
+        style="width:0;height:0;border:0px solid #fff;">
+    </iframe>
+    <input type="checkbox" id="setnet" />
+         <a>&nbsp;Load network settings from file</a>
 </div>
 
 <h3>Save to Computer</h3>
-Store IED configuration to computer.
+Store Device configuration to computer.
 <div class="fbox">
-<form method="GET" action="http:m650.cfg" name="form" id="form">
-<input type="submit" value="Get File"/>
-</form></div>
+  <form method="GET" action="m650.cfg" name="form" id="form">
+    <input type="submit" value="Get File"/>
+  </form>
+</div>
 
 <h3>Restore Factory Defaults</h3>
 Restore all device settings to factory defaults.
 <div class="fbox">
-<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return confirm('All settings will be restored to factory defaults and applied. Continue?')">
-<input type="hidden" name="dflt" id="dflt" value="All"/>
-<input type="submit" name="restore" value="Restore All Defaults" /><br><br>
-<input type="checkbox" name="net"/>&nbsp;Include network settings in restore</form>
+  <form action="restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return confirm('All settings will be restored to factory defaults and applied. Continue?')">
+    <input type="hidden" name="dflt" id="dflt" value="All"/>
+    <input type="submit" name="restore" value="Restore All Defaults" />
+    <br>
+    <br>
+    <input type="checkbox" name="net"/>
+       &nbsp;Include network settings in restore
+  </form>
 </div>
 
 </div>
 
 <div class="pagebox"><div id="footer"></div></div>
 </body>
-</html>		
+</html>     
 

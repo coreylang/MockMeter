@@ -13,7 +13,6 @@ function parse_vars(data) {
 	check_pending(parsed[0]);
 	var model  = parsed[2];
 	var serial = parsed[4];
-	id("reg").href = "https://www.novatechweb.com/product-registration/?serial=" + serial + "&model=" + model;
 }
 
 function load_once() {
@@ -33,10 +32,6 @@ window.onload=load_once;
 <div id="message"></div>
 <div id="contact"></div>
 
-<br>
-<h2>Product Registration</h2><br>
-<a>Please register your product by clicking on the link below.</a><br>
-<a id="reg" href="https://www.novatechweb.com/product-registration/" target="_blank">https://www.novatechweb.com/product-registration/</a>&nbsp;
 </div>
 <div class="pagebox"><div id="footer"></div></div>
 </body></html>

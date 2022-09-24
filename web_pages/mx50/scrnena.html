@@ -6,6 +6,7 @@
 	<link rel="icon" href="favicon.ico">
 	<script src="request.js"></script>
 	<script src="content.js"></script>
+	<script src="load.js"></script>
 <script>
 //<!--
 var nscrns;
@@ -105,15 +106,15 @@ function get_input() {
 	if(is_triple_display) {
 		for(i=0;i<l.length; i++) {
 			if(l[i].checked == true)
-				document.aform.lt.value = i;
+				id("lt").value = i;
 			if(r[i].checked == true)
-				document.aform.rt.value = i;
+				id("rt").value = i;
 		}	
 	}
 
 	if(validate()) {
-		document.aform.en.value = ena_val;
-		document.aform.hm.value = hm_idx;
+		id("en").value = ena_val;
+		id("hm").value = hm_idx;
 		return true;
 	}
 	else {
@@ -145,7 +146,23 @@ function load_once() {
 	makeRequest(nc("scrnena.cgi"), null);
 }
 
-window.onload=load_once;
+function do_saveSettings() {
+    if (get_input())
+        id("aform").submit();
+    }
+
+function do_dflts() {
+    if (confirm(
+     "All settings on this page will be restored to factory defaults." +
+     " Continue?"))
+        id("dflts").submit();
+     }
+
+
+// onload for primary window object only; skip for iframes
+if (window.parent == self) {
+    window.onload=load_once;
+    }
 //-->
 </script>
 	
@@ -158,7 +175,7 @@ window.onload=load_once;
 
 <div id="trail"><a href="settings.html">Settings</a> / Screen Enable</div>
 <div id="message"></div>
-<form name="myform" id="myform">
+<form id="myform">
 
 <h2>Display Screen Enable</h2>
 
@@ -167,23 +184,28 @@ window.onload=load_once;
 <tr><td class="label3">&nbsp;</td>
 <td class="label6">Enabled</td>
 <td id="rh1" class="label6" style="display:none;"></td>
-<td class="label6">Home Screen</td><td id="rh2" class="label6"></td></tr></table>
+<td class="label6">Home Screen</td>
+<td id="rh2" class="label6"></td></tr>
+</table>
 <div id="fill_in"></div><br>
-<input type="button" name="clr_btn" value="Clear All" onclick="javascript:clear_all();">
-<input type="button" name="chk_btn" value="Check All" onclick="javascript:check_all();">
+<input type="button" name="clr_btn" value="Clear All" onclick="clear_all();">
+<input type="button" name="chk_btn" value="Check All" onclick="check_all();">
 <br>
 </form>
-<form action="http:scrnena_submit.cgi" method="POST" name="aform" id="aform" onsubmit="return get_input();">
+<form action="scrnena_submit.cgi" method="POST" id="aform">
 <input type="hidden" name="en" id="en" />
 <input type="hidden" name="lt" id="lt" value="0" />
 <input type="hidden" name="hm" id="hm" />
 <input type="hidden" name="rt" id="rt" value="0" />
-<input class="submit" type="submit" name="SaveSettings" value="Apply" /><br>
+<input type="button" name="SaveSettings" value="Apply"
+  onclick="auth_check(do_saveSettings);" /><br>
 </form>
 
-<form action="http:restore.cgi" method="POST" name="dflts" id="dflts" onsubmit="return confirm('All settings on this page will be restored to factory defaults and applied. Continue?')">
+<form action="restore.cgi" method="POST" id="dflts">
 <input type="hidden" name="dflt" id="dflt" value="Screens"/>
-<input type="submit" name="restore" value="Restore Defaults" /></form>
+<input type="button" name="restore" value="Restore Defaults"
+  onclick="auth_check(do_dflts);" />
+</form>
 
 </div>
 
