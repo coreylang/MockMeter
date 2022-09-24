@@ -3,33 +3,67 @@
 ![GitHub](https://img.shields.io/github/license/bitronics-llc/MockMeter.svg)
 ![GitHub last commit](https://img.shields.io/github/last-commit/bitronics-llc/MockMeter.svg)
 
-> Simulate Mx50 embedded webserver.
+> Simulate Mx50 embedded web server.
 
-Serve the production static files, HTML and JS, at normal URLs.  Respond to CGI
-requests with premade data.  If data for a particular request is not available and
-if the IP address of a live Mx50 has been supplied, then the request will be
-forwarded to the Mx50 and it's response captured to a file.  This feature allows
-collection of responses from differently optioned Mx50's.
+The simulated webserver is compatible Mx50, Dx50, Mx60 and PPX devices as their embedded
+ implementations are largely similar.  For brevity, this document will refer to the
+ devices collectively as Mx50.
+
+Serve the production static files, HTML and JS, at normal URLs.  Respond to CGI requests
+ with pre-made data.  If data for a particular request is not available and if the
+ IP address of a live Mx50 has been supplied, then the request will be forwarded
+ to the Mx50 and it's response captured to a file.  This feature allows collection
+ of responses from differently optioned Mx50's.
+
+This utility primarily addresses two use cases:
+
+1. *UI development* - where the focus is on styling or Javascript functionality and
+ backend behavior is unimportant.  The web server allows live reload of edited files
+ without running the build process.
+2. *Firmware deployment* - execute build process consisting of minification, compression,
+ embedding, etc. for firmware.  The build process is implemented with Gulp tasks and
+ various add-ons.
 
 ## Installation
 
 ### Setup development machine first time
 
-Will probably want `npm install --global gulp-cli`
+* Install Python 3.x to use the web server.  Refer to pipfile for version requirement,
+  but likely >= 3.7
+  * (optional) Install [pipenv](https://pipenv.pypa.io/en/latest/index.html) to manage
+    virtual environments and packages, otherwise use pip and venv.
+* Install Node.js to use the Gulp build process.
+  * (optional) Install Gulp globally with `npm install --global gulp-cli`, otherwise
+    do for each project.
 
 ### Setup for each project
 
 Recommend installation into a clean Python virtual environment.  Assuming Python,
-pip, and git are installed on the system, then pip's [VCS support](https://pip.pypa.io/en/latest/reference/pip_install/#vcs-support) can be used.  This
-will insure that the required library dependencies are resolved.  Use the following
-commands in a new directory.
+ pip, and git are installed on the system, then pip's [VCS support](https://pip.pypa.io/en/latest/topics/vcs-support/)
+ can be used.  This will insure that the required library dependencies are resolved.
+ Use the following commands in a new directory.
 
-> TODO: check and revise shell commands, update directory layout
+> Note: in the following git URLs the branch 'development' is reference between `@` and `#`.
+  Change as necessary, but this is the intended starting point.
+
+To install the web server with pip and venv:
 
 ```shell
 python -m venv venv
 venv/scripts/activate
-pip install -e git+https://github.com/bitronics-llc/MockMeter#egg=mockmeter --src .
+pip install -e git+https://github.com/bitronics-llc/MockMeter@development#egg=mockmeter --src .
+```
+
+Or, to install the web server with pipenv:
+
+```shell
+pipenv install -e git+https://github.com/bitronics-llc/MockMeter@development#egg=mockmeter --extra-pip-args="--src ."
+pipenv shell
+```
+
+To install the build tools:
+
+```shell
 cd mockmeter
 npm install
 ```
@@ -37,18 +71,45 @@ npm install
 Using the '.' for the src parameter will resulting in the following disk layout.
 
 ```code
-+ NewProject
-    + venv                      "python virtual environment
-        + scripts
-        ...
-    + mockmeter
-        + mockmeter             "python based webserver"
-        + resources
-            - app.conf          "server configuration"
-            + mx50
-                + cgi           "simulated Mx50 responses"
-                + web_pages     "static files from Mx50 source"
-            ...
+.
+└── "NewProject"
+    └── mockmeter
+        ├── .git
+        ├── mockmeter <--(python web server)
+        ├── ...
+        ├── web_pages <--(common static files, becomes `srcdir`)
+        │   ├── mx50 <-- (model static files, overrides parent dir)
+        │   │   ├── input.html
+        │   │   ├── ...
+        │   │   ├── bld <-- (becomes `origindir`)
+        │   │   │   ├── destination.json
+        │   │   │   └── gulpfile.js <-- (launch file)
+        │   │   └── cgi <-- (simulated Mx50 responses)
+        │   ├── dx50
+        │   │   ├── input.html
+        │   │   ├── ...
+        │   │   ├── bld
+        │   │   │   ├── destination.json
+        │   │   │   └── gulpfile.js
+        │   │   └── cgi
+        │   ├── mx60
+        │   │   ├── input.html
+        │   │   ├── ...
+        │   │   ├── bld
+        │   │   │   ├── destination.json
+        │   │   │   └── gulpfile.js
+        │   │   └── cgi
+        │   ├── index.html
+        │   ├── site.css
+        │   └── ...
+        ├── package.json <-- (Node.js dependencies)
+        ├── pipfile <-- (Python dependencies)
+        ├── setup.py <-- (legacy setuptools script)
+        ├── gulpfile.js <-- (main build logic)
+        ├── m660.conf <-- (server configuration)
+        ├── m650.conf <-- (server configuration)
+        ├── d650.conf <-- (server configuration)
+        └── ...
 ```
 
 ## Configuration
@@ -59,7 +120,8 @@ directory.
 * `[device]/source` - provides location of static source files
 * `[device]/model` - provides location of captured CGI responses
 * `[device]/ipaddress` - provides address of live Mx50 (optional)
-* additional [webserver](https://docs.cherrypy.org/en/latest/config.html#configuration-files) configuration information
+* `[device]/devmode` - if true serves static files in situ.
+* additional [webserver](https://docs.cherrypy.dev/en/latest/config.html#configuration-files) configuration information
 
 Example `app.conf` showing the default values used if omitted:
 
@@ -73,9 +135,21 @@ model = 'M650M3P511'
 ipaddress = None
 ```
 
-The location of the `conf` file is used to resolve paths to the cgi and static
-resources.  By convention, the static files must be at `[path_to_conf]/[source]/web_pages`,
-and the cgi files at `[path_to_conf]/[source]/cgi/[model]`
+The location of the `conf` file is used to resolve paths to the cgi and static resources.
+ By convention, the static files must be at `[path_to_conf]/web_pages/[source]`,
+ and the cgi files at `[path_to_conf]/web_pages/[source]/cgi`
+
+In the conf file, setting `[device]/devmode` True will change the mock server to
+ use the unprocessed files.  This allows in place editing for convenience during
+ web development.  If False, then serve minified and compressed files as the firmware
+ server would do.
+
+For UI development, the typical configuration would include `[global]/engine.autoreload.on = True`
+ and `[device]/devmode = True`.  Then, when the HTML/JS files are edited and saved
+ the server will immediately reload them.
+
+Depending on network environment and routing needs, `[global]/server.socket_host`
+ may need to be changed from default, typically to `127.0.0.1` or `0.0.0.0`.
 
 ## Command line use
 
@@ -116,24 +190,30 @@ testing against an M650M3P511 model, then:
         source = 'Mx50'
         model = 'M650M3P511'
         ipaddress = None
+        devmode = True
         ```
 2. activate Python virtual environment
     1. skip if reusing shell from installation, otherwise
-    2. in a new shell at `NewProject`, enter `venv\scripts\activate`
+    2. in a new shell at `NewProject`, enter `venv\scripts\activate` or `pipenv shell`
 3. launch webserver
     1. at shell prompt enter `mock example.conf`
 4. modify static files
-    1. edit files at `NewProject/mockmeter/resources/Mx50/web_pages`
-    2. these will be under git source control with a remote at github
-    3. webserver does not neet to be restarted
+    1. edit shared files at `NewProject/mockmeter/web_pages`
+    2. edit model files at `NewProject/mockmeter/web_pages/Mx50`
+    3. these will be under git source control with a remote at github
+    4. web server does not need to be restarted
 5. test changes with browser
     1. point browser at `http://localhost:4249`
     2. test as necessary and ideally against other models as well
 
 #### Dynamic development with new cgi
 
-Pending
+Documentation pending
 
 #### Collection of cgi responses from additional models
 
-Pending
+Documentation pending
+
+#### Build image for firmware
+
+Documentation pending
